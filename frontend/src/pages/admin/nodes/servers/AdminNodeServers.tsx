@@ -42,7 +42,7 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
   const [sKeyPressed, setSKeyPressed] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState<PowerAction | null>(null);
   const [allActionLoading, setAllActionLoading] = useState<PowerAction | null>(null);
-  const [openModal, setOpenModal] = useState<'transfer' | null>(null);
+  const [transferScope, setTransferScope] = useState<'bulk' | 'all' | null>(null);
   const [confirmPowerAction, setConfirmPowerAction] = useState<{ action: PowerAction; scope: 'bulk' | 'all' } | null>(
     null,
   );
@@ -175,10 +175,11 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
       <AdminCan action='nodes.transfers'>
         <ServersTransferModal
           contextNode={node}
-          servers={selectedServers}
+          selector={transferScope === 'all' ? { type: 'all' } : { type: 'uuids', uuids: selectedServers.keys() }}
+          count={transferScope === 'all' ? (nodeServers?.total ?? 0) : selectedServers.size}
           clearSelected={clearSelectedServers}
-          opened={openModal === 'transfer'}
-          onClose={() => setOpenModal(null)}
+          opened={transferScope !== null}
+          onClose={() => setTransferScope(null)}
         />
       </AdminCan>
 
@@ -215,7 +216,7 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
             <AdminCan action='nodes.transfers'>
               <Button
                 color='gray'
-                onClick={() => setOpenModal('transfer')}
+                onClick={() => setTransferScope('all')}
                 disabled={allActionLoading !== null || nodeServers?.total === 0}
               >
                 {t('common.button.transfer', {})} ({nodeServers?.total})
@@ -248,7 +249,7 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
         selectedCount={selectedServers.size}
         onClear={clearSelectedServers}
         onPowerAction={(action) => setConfirmPowerAction({ action, scope: 'bulk' })}
-        onTransfer={() => setOpenModal('transfer')}
+        onTransfer={() => setTransferScope('bulk')}
         loading={bulkActionLoading}
       />
     </>
