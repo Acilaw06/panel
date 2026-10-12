@@ -65,6 +65,7 @@ export function useExtensionManagement() {
   const buildId = supervisor?.buildId ?? null;
   const buildFailed = supervisorState?.type === 'failed';
   const failureReason = supervisor?.failureReason ?? null;
+  const failedExtensions = buildFailed ? (supervisor?.failedExtensions ?? []) : [];
   const isBuilding = extensionStatus?.isBuilding ?? false;
   const phase = supervisorState ? getBuildPhase(t, supervisorState) : null;
   const pendingRestart = useMemo(() => computePendingRestart(adminExtensions), [adminExtensions]);
@@ -260,6 +261,7 @@ export function useExtensionManagement() {
     buildId,
     buildFailed,
     failureReason,
+    failedExtensions,
     isBuilding,
     phase,
     pendingRestart,

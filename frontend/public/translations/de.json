@@ -2680,7 +2680,8 @@
             },
             "buildFailed": {
               "title": "Der letzte Erweiterungs-Build ist fehlgeschlagen",
-              "content": "Diese Erweiterungen werden erst wieder erstellt, wenn sie sich ändern oder du den Build ausdrücklich erneut startest."
+              "content": "Diese Erweiterungen werden erst wieder erstellt, wenn sie sich ändern oder du den Build ausdrücklich erneut startest.",
+              "failedExtensions": "Der Build ist in {extensions} fehlgeschlagen. Aktualisiere oder entferne sie und starte den Build dann erneut."
             },
             "pendingRestart": {
               "title": "Einige Erweiterungen wurden aktiviert oder deaktiviert",
@@ -2730,6 +2731,7 @@
             "frontendMissing": "Frontend fehlt",
             "backendMissing": "Backend fehlt",
             "pendingBuild": "Build ausstehend",
+            "buildFailed": "Build fehlgeschlagen",
             "pendingRemoval": "Entfernung ausstehend",
             "pendingRestart": "Neustart ausstehend",
             "disabled": "Deaktiviert",

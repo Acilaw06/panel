@@ -73,6 +73,7 @@ export default function AdminExtensions() {
         supervisor={ext.supervisor}
         buildFailed={ext.buildFailed}
         failureReason={ext.failureReason}
+        failedExtensions={ext.failedExtensions}
         pendingRestart={ext.pendingRestart}
         isBuilding={ext.isBuilding}
         onRestart={ext.handleRestart}
@@ -83,6 +84,7 @@ export default function AdminExtensions() {
       <InstalledExtensionsGrid
         adminExtensions={ext.adminExtensions}
         extensionStatus={ext.extensionStatus}
+        failedExtensions={ext.failedExtensions}
         onRemove={ext.setRemovalExtension}
         onToggle={ext.handleToggle}
       />
@@ -93,6 +95,7 @@ export default function AdminExtensions() {
           phase={ext.phase}
           isBuilding={ext.isBuilding}
           buildFailed={ext.buildFailed}
+          failedExtensions={ext.failedExtensions}
           cancellingBuild={ext.cancellingBuild}
           onCancelBuild={ext.handleCancelBuild}
           onRebuild={ext.handleRebuild}

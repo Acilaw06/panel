@@ -2591,6 +2591,7 @@ const baseTranslations = defineTranslations({
               title: 'The last extension build failed',
               content:
                 'These extensions are not built again until they change, or until you retry the build explicitly.',
+              failedExtensions: 'The build failed in {extensions}. Update or remove them, then retry the build.',
             },
             pendingRestart: {
               title: 'Some extensions were enabled or disabled',
@@ -2641,6 +2642,7 @@ const baseTranslations = defineTranslations({
             frontendMissing: 'Frontend missing',
             backendMissing: 'Backend missing',
             pendingBuild: 'Pending build',
+            buildFailed: 'Build failed',
             pendingRemoval: 'Pending removal',
             pendingRestart: 'Pending restart',
             disabled: 'Disabled',
