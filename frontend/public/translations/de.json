@@ -2732,7 +2732,8 @@
             "pendingBuild": "Build ausstehend",
             "pendingRemoval": "Entfernung ausstehend",
             "pendingRestart": "Neustart ausstehend",
-            "disabled": "Deaktiviert"
+            "disabled": "Deaktiviert",
+            "processing": "Wird verarbeitet"
           },
           "card": {
             "version": "Version",

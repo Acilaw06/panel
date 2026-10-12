@@ -2644,6 +2644,7 @@ const baseTranslations = defineTranslations({
             pendingRemoval: 'Pending removal',
             pendingRestart: 'Pending restart',
             disabled: 'Disabled',
+            processing: 'Processing',
           },
           card: {
             version: 'Version',

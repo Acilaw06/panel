@@ -2742,7 +2742,8 @@
             "pendingBuild": "Pending build",
             "pendingRemoval": "Pending removal",
             "pendingRestart": "Pending restart",
-            "disabled": "Disabled"
+            "disabled": "Disabled",
+            "processing": "Processing"
           },
           "card": {
             "version": "Version",

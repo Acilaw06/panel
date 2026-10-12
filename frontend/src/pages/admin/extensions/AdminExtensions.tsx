@@ -9,6 +9,7 @@ import ConditionalTooltip from '@/elements/overlays/ConditionalTooltip.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import ExtensionInstallOverlay from './ExtensionInstallOverlay.tsx';
 import ExtensionStatusAlerts from './ExtensionStatusAlerts.tsx';
+import ExtensionUploadsCard from './ExtensionUploadsCard.tsx';
 import InstalledExtensionsGrid from './InstalledExtensionsGrid.tsx';
 import BuildLogsModal from './modals/BuildLogsModal.tsx';
 import LicenseModal from './modals/LicenseModal.tsx';
@@ -76,6 +77,8 @@ export default function AdminExtensions() {
         isBuilding={ext.isBuilding}
         onRestart={ext.handleRestart}
       />
+
+      <ExtensionUploadsCard uploads={ext.uploads} onCancel={ext.handleCancelUpload} />
 
       <InstalledExtensionsGrid
         adminExtensions={ext.adminExtensions}
