@@ -2432,6 +2432,8 @@ const baseTranslations = defineTranslations({
                   allowChangingLanguage: 'Allow Changing Language',
                   allowChangingLanguageDescription:
                     'If enabled, users will be able to change their language preferences.',
+                  allowChangingAvatar: 'Allow Changing Avatar',
+                  allowChangingAvatarDescription: 'If enabled, users will be able to upload and remove their avatar.',
                 },
                 routeOrder: {
                   title: 'Client Route Order',

@@ -2529,7 +2529,9 @@
                   "maxSettingsCount": "Max. synchronisierte Einstellungen",
                   "maxSettingsValueBytes": "Max. Größe synchronisierter Einstellungen (Bytes)",
                   "allowChangingLanguage": "Sprache ändern erlauben",
-                  "allowChangingLanguageDescription": "Wenn aktiviert, können Benutzer ihre Spracheinstellungen ändern."
+                  "allowChangingLanguageDescription": "Wenn aktiviert, können Benutzer ihre Spracheinstellungen ändern.",
+                  "allowChangingAvatar": "Avatar ändern erlauben",
+                  "allowChangingAvatarDescription": "Wenn aktiviert, können Benutzer ihren Avatar hochladen und entfernen."
                 },
                 "routeOrder": {
                   "title": "Client-Routenreihenfolge"

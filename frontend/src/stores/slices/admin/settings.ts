@@ -78,6 +78,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
     maxSettingsCount: 512,
     maxSettingsValueBytes: 16384,
     allowChangingLanguage: true,
+    allowChangingAvatar: true,
     routeOrder: null,
   },
   webauthn: {

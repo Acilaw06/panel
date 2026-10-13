@@ -93,6 +93,7 @@ export const publicSettingsSchema = z.object({
     maxSshKeyCount: z.number(),
 
     allowChangingLanguage: z.boolean(),
+    allowChangingAvatar: z.boolean(),
 
     routeOrder: z.array(eggConfigurationRouteItemSchema).nullable(),
   }),

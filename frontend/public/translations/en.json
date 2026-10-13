@@ -2539,7 +2539,9 @@
                   "maxSettingsCount": "Max Synced Settings",
                   "maxSettingsValueBytes": "Max Synced Setting Size (bytes)",
                   "allowChangingLanguage": "Allow Changing Language",
-                  "allowChangingLanguageDescription": "If enabled, users will be able to change their language preferences."
+                  "allowChangingLanguageDescription": "If enabled, users will be able to change their language preferences.",
+                  "allowChangingAvatar": "Allow Changing Avatar",
+                  "allowChangingAvatarDescription": "If enabled, users will be able to upload and remove their avatar."
                 },
                 "routeOrder": {
                   "title": "Client Route Order"

@@ -225,6 +225,7 @@ export const adminSettingsUserSchema = z.object({
   maxSettingsCount: z.number().min(0),
   maxSettingsValueBytes: z.number().min(0),
   allowChangingLanguage: z.boolean(),
+  allowChangingAvatar: z.boolean(),
   routeOrder: z.array(eggConfigurationRouteItemSchema).max(100).nullable(),
 });
 

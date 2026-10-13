@@ -187,6 +187,8 @@ mod put {
 
         #[garde(skip)]
         allow_changing_language: Option<bool>,
+        #[garde(skip)]
+        allow_changing_avatar: Option<bool>,
 
         #[garde(length(max = 100))]
         #[schema(max_items = 100)]
@@ -451,6 +453,9 @@ mod put {
             }
             if let Some(allow_changing_language) = user.allow_changing_language {
                 settings.user.allow_changing_language = allow_changing_language;
+            }
+            if let Some(allow_changing_avatar) = user.allow_changing_avatar {
+                settings.user.allow_changing_avatar = allow_changing_avatar;
             }
             if let Some(route_order) = user.route_order {
                 settings.user.route_order = route_order;
