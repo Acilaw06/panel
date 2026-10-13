@@ -798,6 +798,8 @@ export const eggRepositoriesTable = pgTable(
     description: text(),
     git_repository: text().notNull(),
     credentials: jsonb().default({ type: 'none' }).notNull(),
+    default_nest_uuid: uuid().references(() => nestsTable.uuid, { onDelete: 'set null' }),
+    auto_sync: boolean().default(true).notNull(),
     last_synced: timestamp(),
     created: timestamp().defaultNow().notNull(),
   },
@@ -817,6 +819,7 @@ export const eggRepositoriesEggsTable = pgTable(
     path: text().notNull(),
     readme: text(),
     exported_egg: json().notNull(),
+    hash: varchar({ length: 64 }),
     updated: timestamp().defaultNow().notNull(),
   },
   (cols) => [
@@ -862,6 +865,7 @@ export const nestEggsTable = pgTable(
       .references(() => nestsTable.uuid)
       .notNull(),
     egg_repository_egg_uuid: uuid().references(() => eggRepositoriesEggsTable.uuid, { onDelete: 'set null' }),
+    egg_repository_egg_hash: varchar({ length: 64 }),
     name: varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
     description: text(),
     author: varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),

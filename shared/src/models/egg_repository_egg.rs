@@ -2,7 +2,7 @@ use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashMap},
     sync::{Arc, LazyLock},
 };
 use utoipa::ToSchema;
@@ -15,6 +15,7 @@ pub struct EggRepositoryEgg {
 
     pub readme: Option<compact_str::CompactString>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
+    pub hash: Option<compact_str::CompactString>,
 
     pub updated: chrono::NaiveDateTime,
 
@@ -61,6 +62,10 @@ impl BaseModel for EggRepositoryEgg {
                 compact_str::format_compact!("{prefix}exported_egg"),
             ),
             (
+                "egg_repository_eggs.hash",
+                compact_str::format_compact!("{prefix}hash"),
+            ),
+            (
                 "egg_repository_eggs.updated",
                 compact_str::format_compact!("{prefix}updated"),
             ),
@@ -81,6 +86,7 @@ impl BaseModel for EggRepositoryEgg {
             exported_egg: serde_json::from_value(
                 row.try_get(compact_str::format_compact!("{prefix}exported_egg").as_str())?,
             )?,
+            hash: row.try_get(compact_str::format_compact!("{prefix}hash").as_str())?,
             updated: row.try_get(compact_str::format_compact!("{prefix}updated").as_str())?,
             extension_data: Self::map_extensions(prefix, row)?,
         })
@@ -106,11 +112,12 @@ impl EggRepositoryEgg {
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(sqlx::AssertSqlSafe(format!(
             r#"
-            INSERT INTO egg_repository_eggs (egg_repository_uuid, path, readme, exported_egg, updated)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO egg_repository_eggs (egg_repository_uuid, path, readme, exported_egg, hash, updated)
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (egg_repository_uuid, path) DO UPDATE SET
                 readme = EXCLUDED.readme,
                 exported_egg = EXCLUDED.exported_egg,
+                hash = EXCLUDED.hash,
                 updated = EXCLUDED.updated
             RETURNING {}
             "#,
@@ -120,6 +127,7 @@ impl EggRepositoryEgg {
         .bind(path.as_ref())
         .bind(readme)
         .bind(OrderedJson(exported_egg))
+        .bind(exported_egg.content_hash())
         .bind(updated)
         .fetch_one(database.write())
         .await?;
@@ -198,6 +206,90 @@ impl EggRepositoryEgg {
         })
     }
 
+    pub async fn all_with_pagination(
+        database: &crate::database::Database,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM egg_repository_eggs
+            WHERE {search}
+            ORDER BY egg_repository_eggs.exported_egg->>'name', egg_repository_eggs.path
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None),
+            search = super::search_sql(
+                1,
+                &[
+                    "egg_repository_eggs.path",
+                    "egg_repository_eggs.exported_egg->>'name'"
+                ],
+                &["egg_repository_eggs.uuid"]
+            )
+        )))
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
+            per_page,
+            page,
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
+        })
+    }
+
+    pub async fn installed_eggs_by_uuids(
+        database: &crate::database::Database,
+        uuids: &[uuid::Uuid],
+    ) -> Result<
+        HashMap<uuid::Uuid, Vec<EggRepositoryEggInstalledEgg>>,
+        crate::database::DatabaseError,
+    > {
+        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
+            r#"
+            SELECT
+                nest_eggs.uuid, nest_eggs.name, nest_eggs.egg_repository_egg_uuid,
+                nest_eggs.egg_repository_egg_hash, {}
+            FROM nest_eggs
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+            WHERE nest_eggs.egg_repository_egg_uuid = ANY($1)
+            ORDER BY nest_eggs.created
+            "#,
+            super::nest::Nest::columns_sql(Some("nest_"))
+        )))
+        .bind(uuids)
+        .fetch_all(database.read())
+        .await?;
+
+        let mut installed: HashMap<uuid::Uuid, Vec<EggRepositoryEggInstalledEgg>> = HashMap::new();
+        for row in rows {
+            installed
+                .entry(row.try_get("egg_repository_egg_uuid")?)
+                .or_default()
+                .push(EggRepositoryEggInstalledEgg {
+                    uuid: row.try_get("uuid")?,
+                    name: row.try_get("name")?,
+                    egg_repository_egg_hash: row.try_get("egg_repository_egg_hash")?,
+                    nest: super::nest::Nest::map(Some("nest_"), &row)?,
+                });
+        }
+
+        Ok(installed)
+    }
+
     pub async fn delete_unused(
         database: &crate::database::Database,
         egg_repository_uuid: uuid::Uuid,
@@ -232,8 +324,32 @@ impl EggRepositoryEgg {
                 .into_admin_api_object(state, ())
                 .await?,
             readme: self.readme,
+            hash: self
+                .hash
+                .unwrap_or_else(|| self.exported_egg.content_hash()),
             exported_egg: self.exported_egg,
             updated: self.updated.and_utc(),
+        })
+    }
+}
+
+pub struct EggRepositoryEggInstalledEgg {
+    pub uuid: uuid::Uuid,
+    pub name: compact_str::CompactString,
+    pub egg_repository_egg_hash: Option<compact_str::CompactString>,
+    pub nest: super::nest::Nest,
+}
+
+impl EggRepositoryEggInstalledEgg {
+    pub async fn into_admin_api_object(
+        self,
+        state: &crate::State,
+    ) -> Result<AdminApiEggRepositoryEggInstalledEgg, crate::database::DatabaseError> {
+        Ok(AdminApiEggRepositoryEggInstalledEgg {
+            uuid: self.uuid,
+            name: self.name,
+            egg_repository_egg_hash: self.egg_repository_egg_hash,
+            nest: self.nest.into_admin_api_object(state, ()).await?,
         })
     }
 }
@@ -255,6 +371,9 @@ impl IntoAdminApiObject for EggRepositoryEgg {
                 uuid: self.uuid,
                 path: self.path,
                 readme: self.readme,
+                hash: self
+                    .hash
+                    .unwrap_or_else(|| self.exported_egg.content_hash()),
                 exported_egg: self.exported_egg,
                 updated: self.updated.and_utc(),
             },
@@ -330,10 +449,10 @@ impl DeletableModel for EggRepositoryEgg {
         sqlx::query(
             r#"
             DELETE FROM egg_repository_eggs
-            WHERE egg_repository_eggs.path = $1
+            WHERE egg_repository_eggs.uuid = $1
             "#,
         )
-        .bind(&self.path)
+        .bind(self.uuid)
         .execute(&mut **transaction)
         .await?;
 
@@ -355,8 +474,18 @@ pub struct AdminApiEggRepositoryEgg {
 
     pub readme: Option<compact_str::CompactString>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
+    pub hash: compact_str::CompactString,
 
     pub updated: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "EggRepositoryEggInstalledEgg")]
+pub struct AdminApiEggRepositoryEggInstalledEgg {
+    pub uuid: uuid::Uuid,
+    pub name: compact_str::CompactString,
+    pub egg_repository_egg_hash: Option<compact_str::CompactString>,
+    pub nest: super::nest::AdminApiNest,
 }
 
 #[derive(ToSchema, Serialize)]
@@ -368,6 +497,7 @@ pub struct AdminApiEggEggRepositoryEgg {
 
     pub readme: Option<compact_str::CompactString>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
+    pub hash: compact_str::CompactString,
 
     pub updated: chrono::DateTime<chrono::Utc>,
 }

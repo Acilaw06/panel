@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { adminNestSchema } from '@/lib/schemas/admin/nests.ts';
 import { nullableString } from '@/lib/serialization/transformers.ts';
 
 export const adminEggRepositoryCredentialsNoneSchema = z.object({
@@ -30,6 +31,9 @@ export const adminEggRepositorySchema = z.looseObject({
   description: z.preprocess(nullableString, z.string().max(1024).nullable()),
   gitRepository: z.url({ protocol: /^(https?|ssh)$/ }),
   credentials: adminEggRepositoryCredentialsSchema,
+  defaultNest: adminNestSchema.nullable(),
+  autoSync: z.boolean(),
+  lastSynced: z.coerce.date().nullable(),
   created: z.coerce.date(),
 });
 
@@ -58,9 +62,12 @@ export const adminEggRepositoryUpdateSchema = z.lazy(() =>
       uuid: true,
       created: true,
       credentials: true,
+      defaultNest: true,
+      lastSynced: true,
     })
     .extend({
       credentials: adminEggRepositoryCredentialsUpdateSchema.optional(),
+      defaultNestUuid: z.uuid().nullable(),
     }),
 );
 
@@ -75,6 +82,7 @@ export const adminEggRepositoryEggSchema = z.looseObject({
     startupCommands: z.record(z.string(), z.string()),
     dockerImages: z.record(z.string(), z.string()),
   }),
+  hash: z.string(),
   updated: z.coerce.date(),
 });
 
@@ -83,3 +91,15 @@ export const adminEggEggRepositoryEggSchema = z.lazy(() =>
     eggRepository: z.lazy(() => adminEggRepositorySchema),
   }),
 );
+
+export const adminEggRepositoryEggInstalledEggSchema = z.object({
+  uuid: z.string(),
+  name: z.string(),
+  eggRepositoryEggHash: z.string().nullable(),
+  nest: adminNestSchema,
+});
+
+export const adminEggRepositoryCatalogEggSchema = z.object({
+  egg: adminEggEggRepositoryEggSchema,
+  installedEggs: z.array(adminEggRepositoryEggInstalledEggSchema),
+});

@@ -11,6 +11,7 @@ export const adminEggConfigScriptSchema = z.object({
 export const adminEggSchema = z.looseObject({
   uuid: z.string(),
   eggRepositoryEgg: adminEggEggRepositoryEggSchema.nullable(),
+  eggRepositoryEggHash: z.string().nullable(),
   author: z.string().min(2).max(255),
   name: z.string().min(1).max(255),
   description: z.preprocess(nullableString, z.string().max(1024).nullable()),
@@ -53,6 +54,7 @@ export const adminEggCreateSchema = z.lazy(() =>
     .omit({
       uuid: true,
       eggRepositoryEgg: true,
+      eggRepositoryEggHash: true,
       created: true,
     })
     .extend({
@@ -65,6 +67,7 @@ export const adminEggUpdateSchema = z.lazy(() =>
     .omit({
       uuid: true,
       eggRepositoryEgg: true,
+      eggRepositoryEggHash: true,
       configScript: true,
       created: true,
     })

@@ -489,6 +489,7 @@
         "mount": "Mount",
         "device": "Gerät",
         "nest": "Nest",
+        "nestCreateHint": "Keins gefunden? Erstelle ein neues Nest",
         "lines": "Zeilen",
         "databaseHost": "Datenbank-Host",
         "databaseAgentHost": "Datenbank-Agent-Host",
@@ -626,6 +627,7 @@
         "successful": "Erfolgreich",
         "failed": "Fehlgeschlagen",
         "installed": "Installiert",
+        "updateAvailable": "Update verfügbar",
         "systemBackup": "System"
       },
       "label": {
@@ -1224,15 +1226,18 @@
           "repositories": {
             "pterodactylGame": {
               "title": "Pterodactyl Game Eggs",
-              "description": "Eggs für Spiele wie Minecraft, Terraria und viele mehr."
+              "description": "Eggs für Spiele wie Minecraft, Terraria und viele mehr.",
+              "nest": "Spiele"
             },
             "pterodactylApplication": {
               "title": "Pterodactyl Application Eggs",
-              "description": "Eggs für Anwendungen wie Grafana, Meilisearch und verschiedene Datenbanken."
+              "description": "Eggs für Anwendungen wie Grafana, Meilisearch und verschiedene Datenbanken.",
+              "nest": "Anwendungen"
             },
             "pterodactylGeneral": {
               "title": "Pterodactyl Generic Eggs",
-              "description": "Eggs für generische Laufzeitumgebungen wie Node JS, Java und Rust."
+              "description": "Eggs für generische Laufzeitumgebungen wie Node JS, Java und Rust.",
+              "nest": "Allgemein"
             }
           }
         },
@@ -3662,12 +3667,20 @@
                 "badge": {
                   "serverSuspended": "Server suspendiert"
                 },
+                "empty": {
+                  "noEggs": {
+                    "title": "Noch keine Eggs installiert",
+                    "description": "Server werden aus Eggs erstellt. Installiere eins aus einem Egg-Repository, es wird direkt für diesen Server ausgewählt.",
+                    "button": "Aus Repository installieren"
+                  }
+                },
                 "form": {
                   "serverNamePlaceholder": "Mein Spieleserver",
                   "externalIdPlaceholder": "Optionaler externer Bezeichner",
                   "descriptionPlaceholder": "Serverbeschreibung",
                   "owner": "Besitzer",
                   "ownerCreateHint": "Nicht gefunden? Erstelle einen neuen Benutzer",
+                  "eggInstallHint": "Nicht gefunden? Installiere eins aus einem Repository",
                   "egg": "Egg",
                   "backupConfigurationPlaceholder": "Von Node/Standort erben",
                   "cpuLimit": "CPU-Limit (%)",
@@ -4273,6 +4286,48 @@
             }
           }
         },
+        "eggLibrary": {
+          "title": "Egg-Bibliothek",
+          "tabs": {
+            "installed": {
+              "title": "Installiert",
+              "page": {
+                "title": "Installierte Eggs",
+                "empty": {
+                  "title": "Noch keine Eggs installiert",
+                  "description": "Eggs aus Repositories oder manuell importierte Eggs erscheinen hier. Durchsuche die verfügbaren Eggs, um dein erstes zu installieren.",
+                  "button": "Verfügbare Eggs durchsuchen"
+                },
+                "toast": {
+                  "updated": "{egg} wurde aus dem Repository aktualisiert."
+                }
+              }
+            },
+            "available": {
+              "title": "Verfügbar",
+              "page": {
+                "title": "Verfügbare Eggs",
+                "empty": {
+                  "title": "Keine Eggs verfügbar",
+                  "description": "Füge ein Egg-Repository hinzu, es wird automatisch synchronisiert und die installierbaren Eggs erscheinen hier.",
+                  "button": "Zu den Egg-Repositories"
+                }
+              }
+            }
+          },
+          "card": {
+            "repository": "Repository",
+            "author": "Autor",
+            "installedIn": "Installiert in"
+          },
+          "badge": {
+            "manual": "Manuell"
+          },
+          "button": {
+            "open": "Öffnen",
+            "readme": "README"
+          }
+        },
         "eggRepositories": {
           "title": "Egg-Repositories",
           "resourceName": "Egg Repository",
@@ -4292,7 +4347,11 @@
                   "credentialType": "Art der Zugangsdaten",
                   "password": "Passwort oder Zugriffstoken",
                   "privateKey": "Privater Schlüssel",
-                  "passphrase": "Passphrase"
+                  "passphrase": "Passphrase",
+                  "defaultNest": "Standard-Nest",
+                  "defaultNestDescription": "Eggs aus diesem Repository werden in dieses Nest installiert, sofern kein anderes gewählt wird.",
+                  "autoSync": "Automatische Synchronisation",
+                  "autoSyncDescription": "Synchronisiert dieses Repository einmal täglich, damit neue und aktualisierte Eggs ohne manuelles Sync erscheinen."
                 },
                 "enum": {
                   "credentialType": {
@@ -4320,16 +4379,29 @@
                 "title": "Egg Repository Eggs",
                 "table": {
                   "columns": {
-                    "path": "Pfad"
+                    "path": "Pfad",
+                    "repository": "Repository",
+                    "installedIn": "Installiert in"
                   }
                 },
                 "toast": {
-                  "installed": "{eggs} installiert."
+                  "installed": "{eggs} installiert.",
+                  "alreadyInstalled": "Dieses Egg war bereits in {nest} installiert, das vorhandene Egg wurde verwendet."
                 },
                 "modal": {
                   "install": {
                     "title": "{eggs} installieren",
                     "button": "{eggs} installieren"
+                  },
+                  "catalog": {
+                    "title": "Egg aus Repository installieren",
+                    "searchPlaceholder": "Eggs in allen Repositories durchsuchen...",
+                    "selected": "Ausgewählt: **{egg}**",
+                    "moreResults": "{shown} von {total} Eggs angezeigt, tippe weiter, um die Auswahl einzugrenzen.",
+                    "installingInto": "Das Egg wird in **{nest}** installiert.",
+                    "noEggs": "Noch keine Eggs verfügbar. Füge unter Egg-Repositories ein Repository hinzu, es wird automatisch synchronisiert.",
+                    "button": "Installieren",
+                    "buttonSelect": "Installieren & auswählen"
                   }
                 },
                 "drawer": {
@@ -5474,14 +5546,6 @@
             "restricted": "Berechtigung für Dateiinhalte erforderlich"
           },
           "tree": {
-            "closeOtherTabs": "Andere schließen",
-            "closeTabsToRight": "Rechts davon schließen",
-            "closeSavedTabs": "Gespeicherte schließen",
-            "closeAllTabs": "Alle schließen",
-            "revealInTree": "Im Dateibaum anzeigen",
-            "revealNotFound": "{path} konnte im Dateibaum nicht gefunden werden.",
-            "selectPane": "Editorbereich auswählen",
-            "editorPane": "Editorbereich {number}",
             "empty": "Dieser Ordner ist leer",
             "loadMore": "Mehr laden",
             "retry": "Erneut versuchen",
@@ -5499,9 +5563,17 @@
             "noEditorAvailable": "Für diesen Dateityp ist kein Editor verfügbar.",
             "editorTabsLabel": "Geöffnete Dateien",
             "closeEditorTab": "{name} schließen",
+            "closeOtherTabs": "Andere schließen",
+            "closeTabsToRight": "Rechts davon schließen",
+            "closeSavedTabs": "Gespeicherte schließen",
+            "closeAllTabs": "Alle schließen",
+            "revealInTree": "Im Dateibaum anzeigen",
+            "revealNotFound": "{path} konnte im Dateibaum nicht gefunden werden.",
             "unsavedTab": "{name} hat ungespeicherte Änderungen",
             "dropToSplit": "Hier ablegen, um in einem neuen Editorbereich zu öffnen",
-            "resizeEditorPanes": "Größe der Editorbereiche ändern"
+            "resizeEditorPanes": "Größe der Editorbereiche ändern",
+            "selectPane": "Editorbereich auswählen",
+            "editorPane": "Editorbereich {number}"
           },
           "titleEditorViewing": "Betrachte {file}",
           "titleEditorPlaying": "Spiele {file} ab",
@@ -5663,6 +5735,7 @@
             "fileRenamed": "Datei wurde umbenannt.",
             "fileCouldNotBeRenamed": "Datei konnte nicht umbenannt werden.",
             "closeDestinationBeforeRename": "Schließe den Editor-Tab der Zieldatei, bevor du sie umbenennst.",
+            "closeDestinationBeforeCreate": "Schließe den Editor-Tab der Zieldatei, bevor du diese Datei erstellst.",
             "closeTabsBeforeBulkRename": "Schließe die betroffenen Editor-Tabs, bevor du überlappende Pfade umbenennst.",
             "filesRenamed": "{files} umbenannt.",
             "renameUndone": "Umbenennung rückgängig gemacht.",
@@ -5673,7 +5746,6 @@
             "permissionsRestored": "Berechtigungen wiederhergestellt.",
             "permissionsCouldNotBeRestored": "Berechtigungen konnten nicht wiederhergestellt werden.",
             "fileSaved": "Datei wurde gespeichert.",
-            "closeDestinationBeforeCreate": "Schließe den Editor-Tab der Zieldatei, bevor du diese Datei erstellst.",
             "collabSaveTimeout": "Die Datei konnte nicht gespeichert werden, der Daemon hat nicht rechtzeitig geantwortet.",
             "fileTooLargeToOpen": "Diese Datei ist zu groß, um sie im Dateimanager zu öffnen."
           },

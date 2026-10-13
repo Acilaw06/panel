@@ -66,6 +66,8 @@ const admin = {
 
   eggs: {
     all: () => ['admin', 'eggs'] as const,
+    list: (nestUuid?: string | null) =>
+      nestUuid ? (['admin', 'eggs', 'list', nestUuid] as const) : (['admin', 'eggs', 'list'] as const),
     grouped: () => ['admin', 'eggs', 'grouped'] as const,
     detail: (uuid: string) => ['admin', 'eggs', { uuid }] as const,
     servers: (eggUuid: string) => ['admin', 'eggs', eggUuid, 'servers'] as const,

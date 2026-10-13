@@ -489,6 +489,7 @@
         "mount": "Mount",
         "device": "Device",
         "nest": "Nest",
+        "nestCreateHint": "Can't find one? Create a new nest",
         "lines": "Lines",
         "databaseHost": "Database Host",
         "databaseAgentHost": "Database Agent Host",
@@ -626,6 +627,7 @@
         "successful": "Successful",
         "failed": "Failed",
         "installed": "Installed",
+        "updateAvailable": "Update Available",
         "systemBackup": "System"
       },
       "label": {
@@ -1234,15 +1236,18 @@
           "repositories": {
             "pterodactylGame": {
               "title": "Pterodactyl Game Eggs",
-              "description": "Eggs for games like Minecraft, Terraria, and a lot more."
+              "description": "Eggs for games like Minecraft, Terraria, and a lot more.",
+              "nest": "Games"
             },
             "pterodactylApplication": {
               "title": "Pterodactyl Application Eggs",
-              "description": "Eggs for applications like Grafana, Meilisearch, and various databases."
+              "description": "Eggs for applications like Grafana, Meilisearch, and various databases.",
+              "nest": "Applications"
             },
             "pterodactylGeneral": {
               "title": "Pterodactyl Generic Eggs",
-              "description": "Eggs for generic application runtimes like Node JS, Java, and Rust."
+              "description": "Eggs for generic application runtimes like Node JS, Java, and Rust.",
+              "nest": "Generic"
             }
           }
         },
@@ -3693,12 +3698,20 @@
                 "badge": {
                   "serverSuspended": "Server Suspended"
                 },
+                "empty": {
+                  "noEggs": {
+                    "title": "No eggs installed yet",
+                    "description": "Servers are created from eggs. Install one from an egg repository and it will be selected for this server right away.",
+                    "button": "Install from Repository"
+                  }
+                },
                 "form": {
                   "serverNamePlaceholder": "My Game Server",
                   "externalIdPlaceholder": "Optional external identifier",
                   "descriptionPlaceholder": "Server description",
                   "owner": "Owner",
                   "ownerCreateHint": "Can't find them? Create a new user",
+                  "eggInstallHint": "Can't find it? Install one from a repository",
                   "egg": "Egg",
                   "backupConfigurationPlaceholder": "Inherit from Node/Location",
                   "cpuLimit": "CPU Limit (%)",
@@ -4311,6 +4324,48 @@
             }
           }
         },
+        "eggLibrary": {
+          "title": "Egg Library",
+          "tabs": {
+            "installed": {
+              "title": "Installed",
+              "page": {
+                "title": "Installed Eggs",
+                "empty": {
+                  "title": "No eggs installed yet",
+                  "description": "Eggs installed from repositories or imported by hand show up here. Browse the available eggs to install your first one.",
+                  "button": "Browse Available Eggs"
+                },
+                "toast": {
+                  "updated": "{egg} updated from its repository."
+                }
+              }
+            },
+            "available": {
+              "title": "Available",
+              "page": {
+                "title": "Available Eggs",
+                "empty": {
+                  "title": "No eggs available",
+                  "description": "Add an egg repository and it is synced automatically, the eggs you can install show up here.",
+                  "button": "Go to Egg Repositories"
+                }
+              }
+            }
+          },
+          "card": {
+            "repository": "Repository",
+            "author": "Author",
+            "installedIn": "Installed in"
+          },
+          "badge": {
+            "manual": "Manual"
+          },
+          "button": {
+            "open": "Open",
+            "readme": "README"
+          }
+        },
         "eggRepositories": {
           "title": "Egg Repositories",
           "resourceName": "Egg Repository",
@@ -4330,7 +4385,11 @@
                   "credentialType": "Credential Type",
                   "password": "Password or Access Token",
                   "privateKey": "Private Key",
-                  "passphrase": "Passphrase"
+                  "passphrase": "Passphrase",
+                  "defaultNest": "Default Nest",
+                  "defaultNestDescription": "Eggs installed from this repository go into this nest unless another one is chosen.",
+                  "autoSync": "Automatic Sync",
+                  "autoSyncDescription": "Re-sync this repository once a day so new and updated eggs show up without pressing Sync."
                 },
                 "enum": {
                   "credentialType": {
@@ -4358,16 +4417,29 @@
                 "title": "Egg Repository Eggs",
                 "table": {
                   "columns": {
-                    "path": "Path"
+                    "path": "Path",
+                    "repository": "Repository",
+                    "installedIn": "Installed In"
                   }
                 },
                 "toast": {
-                  "installed": "{eggs} installed."
+                  "installed": "{eggs} installed.",
+                  "alreadyInstalled": "This egg was already installed in {nest}, the existing egg was used."
                 },
                 "modal": {
                   "install": {
                     "title": "Install {eggs}",
                     "button": "Install {eggs}"
+                  },
+                  "catalog": {
+                    "title": "Install Egg from Repository",
+                    "searchPlaceholder": "Search eggs in every repository...",
+                    "selected": "Selected: **{egg}**",
+                    "moreResults": "Showing {shown} of {total} eggs, keep typing to narrow it down.",
+                    "installingInto": "The egg will be installed into **{nest}**.",
+                    "noEggs": "No eggs are available yet. Add an egg repository under Egg Repositories, it is synced automatically.",
+                    "button": "Install",
+                    "buttonSelect": "Install & Select"
                   }
                 },
                 "drawer": {
