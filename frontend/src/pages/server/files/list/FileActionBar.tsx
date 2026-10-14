@@ -130,12 +130,20 @@ function FileActionBar() {
         : Promise.resolve(),
       rename.length > 0 ? copyFiles({ uuid: server.uuid, root: '/', files: rename }) : Promise.resolve(),
     ])
-      .then(() => {
-        addToast(
-          t('pages.server.files.toast.copyingStarted', { files: tItem('file', overwrite.length + rename.length) }),
-          'success',
-        );
-        setConflicts(null);
+      .then(([, renamed]) => {
+        const renameConflicts = (renamed?.skipped ?? []).flatMap((destination): FileConflict[] => {
+          const match = rename.find((entry) => entry.to === destination.name);
+          const source = conflicts?.find((c) => c.from === match?.from)?.source;
+          if (!match || !source) return [];
+
+          return [{ from: match.from, to: match.to, source, destination }];
+        });
+
+        const copied = overwrite.length + rename.length - renameConflicts.length;
+        if (copied > 0) {
+          addToast(t('pages.server.files.toast.copyingStarted', { files: tItem('file', copied) }), 'success');
+        }
+        setConflicts(renameConflicts.length > 0 ? renameConflicts : null);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

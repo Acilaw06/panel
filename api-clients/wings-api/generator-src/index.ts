@@ -50,7 +50,7 @@ const compatBodyProperties: Record<string, Record<string, 'client' | 'extra'>> =
     'post /api/servers/{server}/files/compress': { ignored: 'client' },
     'post /api/servers/{server}/files/copy': { ignored: 'client' },
     'post /api/servers/{server}/files/copy-many': { ignored: 'client' },
-    'post /api/servers/{server}/files/copy-remote': { ignored: 'client', destination_ignored: 'client' },
+    'post /api/servers/{server}/files/copy-remote': { ignored: 'client', destination_ignored: 'client', overwrite: 'extra' },
     'post /api/servers/{server}/files/create-directory': { ignored: 'client' },
     'post /api/servers/{server}/files/create-symlink': { ignored: 'client' },
     'post /api/servers/{server}/files/decompress': { ignored: 'client' },
@@ -71,6 +71,7 @@ const serdeDefaultProperties: Record<string, string[]> = {
 /** The same, for properties of a route's inline response bodies. */
 const serdeDefaultResponseProperties: Record<string, string[]> = {
     'get /api/servers/{server}/files/list': ['uploads'],
+    'post /api/servers/{server}/files/copy-remote': ['skipped'],
 }
 
 const openapi: oas31.OpenAPIObject = JSON.parse(fs.readFileSync('../openapi.json', 'utf-8'))

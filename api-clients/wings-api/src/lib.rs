@@ -1681,6 +1681,9 @@ pub mod servers_server_files_copy_remote {
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                #[serde(default)]
+                pub skipped: Vec<DirectoryEntry>,
             }
         }
 
@@ -1688,6 +1691,9 @@ pub mod servers_server_files_copy_remote {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
                 #[schema(inline)]
                 pub identifier: uuid::Uuid,
+                #[schema(inline)]
+                #[serde(default)]
+                pub skipped: Vec<DirectoryEntry>,
             }
         }
 
@@ -1700,6 +1706,14 @@ pub mod servers_server_files_copy_remote {
         pub enum Response {
             Ok(Response200),
             Accepted(Response202),
+        }
+
+        #[derive(Debug, Clone, Default)]
+        #[allow(clippy::manual_non_exhaustive)]
+        pub struct Extra {
+            pub overwrite: bool,
+            #[doc(hidden)]
+            pub __priv: (),
         }
     }
 }
@@ -3861,6 +3875,31 @@ pub mod transfers_files {
         pub type Response401 = ApiError;
 
         pub type Response409 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod transfers_files_stat {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub files: Vec<compact_str::CompactString>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub entries: Vec<DirectoryEntry>,
+            }
+        }
+
+        pub type Response401 = ApiError;
 
         pub type Response = Response200;
     }

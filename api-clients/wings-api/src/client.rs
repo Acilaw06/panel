@@ -626,6 +626,16 @@ impl WingsClient {
         server: uuid::Uuid,
         data: &super::servers_server_files_copy_remote::post::RequestBody,
     ) -> Result<super::servers_server_files_copy_remote::post::Response, ApiHttpError> {
+        self.post_servers_server_files_copy_remote_with(server, data, &Default::default())
+            .await
+    }
+
+    pub async fn post_servers_server_files_copy_remote_with(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_copy_remote::post::RequestBody,
+        extra: &super::servers_server_files_copy_remote::post::Extra,
+    ) -> Result<super::servers_server_files_copy_remote::post::Response, ApiHttpError> {
         request_impl(
             self,
             Method::POST,
@@ -634,6 +644,7 @@ impl WingsClient {
                 inner: data,
                 ignored: &self.ignored,
                 destination_ignored: &self.destination_ignored,
+                overwrite: &extra.overwrite,
             }),
             None,
         )
@@ -1668,6 +1679,20 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_transfers_files_stat(
+        &self,
+        data: &super::transfers_files_stat::post::RequestBody,
+    ) -> Result<super::transfers_files_stat::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            "/api/transfers/files/stat",
+            Some(data),
+            None,
+        )
+        .await
+    }
+
     pub async fn get_transfers_query(
         &self,
     ) -> Result<super::transfers_query::get::Response, ApiHttpError> {
@@ -1737,6 +1762,7 @@ struct ServersServerFilesCopyRemotePostBody<'a> {
     inner: &'a super::servers_server_files_copy_remote::post::RequestBody,
     ignored: &'a Vec<compact_str::CompactString>,
     destination_ignored: &'a Vec<compact_str::CompactString>,
+    overwrite: &'a bool,
 }
 
 #[derive(Serialize)]

@@ -31,12 +31,6 @@ export const serverFilesCopyRemoteManySchema = z.object({
   destinationServers: z.array(z.uuid()).min(1).max(25),
 });
 
-export const serverFilesCopyRemoteManyResultSchema = z.object({
-  server: z.uuid(),
-  identifier: z.uuid().nullable(),
-  error: z.string().nullable(),
-});
-
 export const serverFilesExtractSchema = z.object({
   destination: z.string().min(1).max(255),
 });
@@ -217,6 +211,13 @@ export const serverDirectoryEntrySchema = z.object({
   mime: z.string(),
   modified: z.coerce.date(),
   created: z.coerce.date(),
+});
+
+export const serverFilesCopyRemoteManyResultSchema = z.object({
+  server: z.uuid(),
+  identifier: z.uuid().nullable(),
+  error: z.string().nullable(),
+  skipped: z.array(serverDirectoryEntrySchema),
 });
 
 export const serverDirectorySizesSchema = z.object({
