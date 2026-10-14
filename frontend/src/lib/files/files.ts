@@ -140,7 +140,7 @@ export function isOpenableFile(
     ? {
         openable: true,
         handleOpen: ({ handleFileOpen }) => {
-          handleFileOpen(file.name, 'edit', {});
+          handleFileOpen(file.name, 'edit', file.editable ? {} : { compressed: 'true' });
         },
       }
     : { openable: false };
