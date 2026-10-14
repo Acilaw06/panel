@@ -28,6 +28,12 @@ pub fn validate_startup_commands(
 
     let mut seen_commands = HashSet::new();
     for command in startup_commands.values() {
+        if command.trim().is_empty() {
+            return Err(garde::Error::new(compact_str::format_compact!(
+                "startup commands cannot be empty"
+            )));
+        }
+
         if !seen_commands.insert(command) {
             return Err(garde::Error::new(compact_str::format_compact!(
                 "duplicate startup command: {}",
@@ -45,6 +51,12 @@ pub fn validate_docker_images(
 ) -> Result<(), garde::Error> {
     let mut seen_images = HashSet::new();
     for image in docker_images.values() {
+        if image.trim().is_empty() {
+            return Err(garde::Error::new(compact_str::format_compact!(
+                "docker images cannot be empty"
+            )));
+        }
+
         if !seen_images.insert(image) {
             return Err(garde::Error::new(compact_str::format_compact!(
                 "duplicate docker image: {}",
