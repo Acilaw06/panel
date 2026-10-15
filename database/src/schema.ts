@@ -818,6 +818,7 @@ export const eggRepositoriesEggsTable = pgTable(
       .notNull(),
     path: text().notNull(),
     readme: text(),
+    banner: text(),
     exported_egg: json().notNull(),
     hash: varchar({ length: 64 }),
     updated: timestamp().defaultNow().notNull(),

@@ -14,6 +14,7 @@ pub struct EggRepositoryEgg {
     pub egg_repository: Fetchable<super::egg_repository::EggRepository>,
 
     pub readme: Option<compact_str::CompactString>,
+    pub banner: Option<String>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
     pub hash: Option<compact_str::CompactString>,
 
@@ -58,6 +59,10 @@ impl BaseModel for EggRepositoryEgg {
                 compact_str::format_compact!("{prefix}readme"),
             ),
             (
+                "egg_repository_eggs.banner",
+                compact_str::format_compact!("{prefix}banner"),
+            ),
+            (
                 "egg_repository_eggs.exported_egg",
                 compact_str::format_compact!("{prefix}exported_egg"),
             ),
@@ -83,6 +88,7 @@ impl BaseModel for EggRepositoryEgg {
                 row.try_get(compact_str::format_compact!("{prefix}egg_repository_uuid").as_str())?,
             ),
             readme: row.try_get(compact_str::format_compact!("{prefix}readme").as_str())?,
+            banner: row.try_get(compact_str::format_compact!("{prefix}banner").as_str())?,
             exported_egg: serde_json::from_value(
                 row.try_get(compact_str::format_compact!("{prefix}exported_egg").as_str())?,
             )?,
@@ -107,15 +113,17 @@ impl EggRepositoryEgg {
         egg_repository_uuid: uuid::Uuid,
         path: impl AsRef<str>,
         readme: Option<&str>,
+        banner: Option<&str>,
         exported_egg: &super::nest_egg::ExportedNestEgg,
         updated: chrono::NaiveDateTime,
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(sqlx::AssertSqlSafe(format!(
             r#"
-            INSERT INTO egg_repository_eggs (egg_repository_uuid, path, readme, exported_egg, hash, updated)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO egg_repository_eggs (egg_repository_uuid, path, readme, banner, exported_egg, hash, updated)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (egg_repository_uuid, path) DO UPDATE SET
                 readme = EXCLUDED.readme,
+                banner = EXCLUDED.banner,
                 exported_egg = EXCLUDED.exported_egg,
                 hash = EXCLUDED.hash,
                 updated = EXCLUDED.updated
@@ -126,6 +134,7 @@ impl EggRepositoryEgg {
         .bind(egg_repository_uuid)
         .bind(path.as_ref())
         .bind(readme)
+        .bind(banner)
         .bind(OrderedJson(exported_egg))
         .bind(exported_egg.content_hash())
         .bind(updated)
@@ -290,6 +299,27 @@ impl EggRepositoryEgg {
         Ok(installed)
     }
 
+    pub async fn banners_by_egg_repository_uuid(
+        database: &crate::database::Database,
+        egg_repository_uuid: uuid::Uuid,
+    ) -> Result<Vec<String>, crate::database::DatabaseError> {
+        let rows = sqlx::query(
+            r#"
+            SELECT DISTINCT egg_repository_eggs.banner
+            FROM egg_repository_eggs
+            WHERE egg_repository_eggs.egg_repository_uuid = $1 AND egg_repository_eggs.banner IS NOT NULL
+            "#,
+        )
+        .bind(egg_repository_uuid)
+        .fetch_all(database.write())
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| row.try_get("banner"))
+            .try_collect_vec()?)
+    }
+
     pub async fn delete_unused(
         database: &crate::database::Database,
         egg_repository_uuid: uuid::Uuid,
@@ -324,6 +354,10 @@ impl EggRepositoryEgg {
                 .into_admin_api_object(state, ())
                 .await?,
             readme: self.readme,
+            banner: match self.banner {
+                Some(banner) => Some(state.storage.retrieve_urls().await?.get_url(banner)),
+                None => None,
+            },
             hash: self
                 .hash
                 .unwrap_or_else(|| self.exported_egg.content_hash()),
@@ -371,6 +405,10 @@ impl IntoAdminApiObject for EggRepositoryEgg {
                 uuid: self.uuid,
                 path: self.path,
                 readme: self.readme,
+                banner: match self.banner {
+                    Some(banner) => Some(state.storage.retrieve_urls().await?.get_url(banner)),
+                    None => None,
+                },
                 hash: self
                     .hash
                     .unwrap_or_else(|| self.exported_egg.content_hash()),
@@ -473,6 +511,7 @@ pub struct AdminApiEggRepositoryEgg {
     pub path: String,
 
     pub readme: Option<compact_str::CompactString>,
+    pub banner: Option<String>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
     pub hash: compact_str::CompactString,
 
@@ -496,6 +535,7 @@ pub struct AdminApiEggEggRepositoryEgg {
     pub egg_repository: super::egg_repository::AdminApiEggRepository,
 
     pub readme: Option<compact_str::CompactString>,
+    pub banner: Option<String>,
     pub exported_egg: super::nest_egg::ExportedNestEgg,
     pub hash: compact_str::CompactString,
 

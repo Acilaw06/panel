@@ -62,6 +62,14 @@ export default function EggRepositoryEggDrawer({
           )}
 
           <Stack gap='md' className='h-full'>
+            {displayEgg.banner && (
+              <img
+                src={displayEgg.banner}
+                alt={displayEgg.exportedEgg.name}
+                className='mx-auto max-h-60 max-w-full rounded-md'
+              />
+            )}
+
             {eggRepository && (
               <AdminCan action={['eggs.create', 'nests.read']}>
                 <Button leftSection={<FontAwesomeIcon icon={faDownload} />} onClick={() => setInstallOpen(true)}>

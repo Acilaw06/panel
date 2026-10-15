@@ -3351,6 +3351,7 @@ pub struct ApiServerLimits {
     #[schema(minimum = 0)]
     pub disk: i64,
     #[garde(skip)]
+    #[serde(default)]
     pub bandwidth: ApiServerBandwidth,
 }
 

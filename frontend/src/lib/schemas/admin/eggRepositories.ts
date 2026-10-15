@@ -75,6 +75,7 @@ export const adminEggRepositoryEggSchema = z.looseObject({
   uuid: z.string(),
   path: z.string(),
   readme: z.string().nullable(),
+  banner: z.string().nullable(),
   exportedEgg: z.looseObject({
     name: z.string(),
     description: z.string().nullable(),
