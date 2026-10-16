@@ -1190,6 +1190,35 @@ pub mod deauthorize_user {
         pub type Response = Response200;
     }
 }
+pub mod permissions_invalidate {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub as_of: i64,
+                #[schema(inline)]
+                pub users: Vec<uuid::Uuid>,
+                #[schema(inline)]
+                pub servers: Option<ServerSelector>,
+                #[schema(inline)]
+                pub revoke_users: Vec<uuid::Uuid>,
+                #[schema(inline)]
+                pub revoke_credentials: Vec<uuid::Uuid>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        pub type Response = Response200;
+    }
+}
 pub mod ports_used {
     use super::*;
 

@@ -1899,46 +1899,6 @@ impl Server {
         permissions
     }
 
-    pub fn wings_subuser_permissions<'a>(
-        &self,
-        settings: &crate::settings::AppSettings,
-        subuser: &'a super::server_subuser::ServerSubuser,
-        scope: &'a crate::models::user::CredentialScope,
-    ) -> Vec<&'a str> {
-        let scope = scope.server_permissions();
-        let mut permissions = vec!["websocket.connect", "meta.calagopus"];
-
-        if subuser.user.admin {
-            permissions.reserve(scope.map_or(1, |s| s.len()) + 3);
-
-            crate::utils::push_scope_or_star(&mut permissions, scope);
-
-            if Self::scope_allows_console_streams(scope) {
-                permissions.push("admin.websocket.errors");
-                permissions.push("admin.websocket.install");
-                permissions.push("admin.websocket.transfer");
-            }
-
-            return permissions;
-        }
-
-        let role_permissions = subuser
-            .user
-            .role
-            .as_ref()
-            .map_or(&[][..], |role| role.server_permissions.as_slice());
-
-        permissions.reserve(subuser.permissions.len() + role_permissions.len() + 1);
-        Self::push_granted_permissions(
-            &mut permissions,
-            role_permissions.iter().chain(subuser.permissions.iter()),
-            scope,
-            settings,
-        );
-
-        permissions
-    }
-
     /// Gets the feature limits for the server, useful in case you need to loop over them or want to pass them to the frontend individually.
     pub async fn feature_limits(
         &self,
@@ -2998,6 +2958,48 @@ impl UpdatableModel for Server {
             LazyLock::new(|| Arc::new(ModelHandlerList::default()));
 
         &UPDATE_LISTENERS
+    }
+
+    async fn update(
+        &mut self,
+        state: &crate::State,
+        options: Self::UpdateOptions,
+    ) -> Result<(), crate::database::DatabaseError> {
+        let previous_owner = options
+            .owner_uuid
+            .is_some_and(|owner_uuid| owner_uuid != self.owner.uuid)
+            .then_some(self.owner.uuid);
+
+        let mut transaction = state.database.write().begin().await?;
+
+        if let Err(err) = self
+            .update_with_transaction(state, options, &mut transaction)
+            .await
+        {
+            transaction.rollback().await?;
+            return Err(err);
+        }
+
+        transaction.commit().await?;
+
+        super::invalidate_cache_keys(&state.database, &self.cache_invalidation_keys()).await;
+
+        if let Some(previous_owner) = previous_owner {
+            match self.node.fetch_cached(&state.database).await {
+                Ok(node) => node.invalidate_permissions(
+                    &state.database,
+                    super::node::PermissionsInvalidation {
+                        users: vec![previous_owner, self.owner.uuid],
+                        ..Default::default()
+                    },
+                ),
+                Err(err) => {
+                    tracing::error!(server = %self.uuid, "failed to invalidate permissions in wings: {:?}", err);
+                }
+            }
+        }
+
+        Ok(())
     }
 
     async fn update_with_transaction(

@@ -337,6 +337,20 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_permissions_invalidate(
+        &self,
+        data: &super::permissions_invalidate::post::RequestBody,
+    ) -> Result<super::permissions_invalidate::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            "/api/permissions/invalidate",
+            Some(data),
+            None,
+        )
+        .await
+    }
+
     pub async fn get_ports_used(
         &self,
         query: &super::ports_used::get::Query,
