@@ -50,6 +50,7 @@ mod get {
 
         allow_overwriting_custom_docker_image: bool,
         allow_acknowledging_installation_failure: bool,
+        allow_changing_trash_settings: bool,
 
         container_prelude: &'a str,
     }
@@ -141,6 +142,7 @@ mod get {
                 allow_acknowledging_installation_failure: settings
                     .server
                     .allow_acknowledging_installation_failure,
+                allow_changing_trash_settings: settings.server.allow_changing_trash_settings,
                 container_prelude: &settings.server.container_prelude,
             },
             user: ResponseUser {

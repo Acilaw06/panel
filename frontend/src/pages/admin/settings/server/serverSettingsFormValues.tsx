@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import type { FieldDef } from '@/elements/form-engine/index.ts';
+import TrashRetentionInput from '@/elements/input/TrashRetentionInput.tsx';
+import TrashUsageThresholdInput from '@/elements/input/TrashUsageThresholdInput.tsx';
 import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
@@ -22,6 +24,11 @@ export const serverSettingsEmptyFormValues: ServerSettingsFormValues = {
   allowViewingInstallationLogs: false,
   allowAcknowledgingInstallationFailure: true,
   allowViewingTransferProgress: false,
+  trash: {
+    retention: 0,
+    usageThreshold: 0,
+  },
+  allowChangingTrashSettings: true,
   containerPrelude: '',
 };
 
@@ -132,6 +139,38 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       name: 'allowViewingTransferProgress',
       label: t('pages.admin.settings.tabs.server.page.form.allowViewingTransferProgress', {}),
       description: t('pages.admin.settings.tabs.server.page.form.allowViewingTransferProgressDescription', {}),
+    },
+    {
+      type: 'custom',
+      name: 'trash.retention',
+      render: (f) => (
+        <TrashRetentionInput
+          label={t('pages.admin.settings.tabs.server.page.form.trashRetention', {})}
+          description={t('pages.admin.settings.tabs.server.page.form.trashRetentionDescription', {})}
+          value={f.getValues().trash.retention}
+          onChange={(retention) => f.setFieldValue('trash.retention', retention)}
+          error={f.getInputProps('trash.retention').error}
+        />
+      ),
+    },
+    {
+      type: 'custom',
+      name: 'trash.usageThreshold',
+      render: (f) => (
+        <TrashUsageThresholdInput
+          label={t('pages.admin.settings.tabs.server.page.form.trashUsageThreshold', {})}
+          description={t('pages.admin.settings.tabs.server.page.form.trashUsageThresholdDescription', {})}
+          value={f.getValues().trash.usageThreshold}
+          onChange={(usageThreshold) => f.setFieldValue('trash.usageThreshold', usageThreshold)}
+          error={f.getInputProps('trash.usageThreshold').error}
+        />
+      ),
+    },
+    {
+      type: 'switch',
+      name: 'allowChangingTrashSettings',
+      label: t('pages.admin.settings.tabs.server.page.form.allowChangingTrashSettings', {}),
+      description: t('pages.admin.settings.tabs.server.page.form.allowChangingTrashSettingsDescription', {}),
     },
     {
       type: 'text',

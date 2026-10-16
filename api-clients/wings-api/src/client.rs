@@ -1162,6 +1162,118 @@ impl WingsClient {
         .await
     }
 
+    pub async fn get_servers_server_files_trash(
+        &self,
+        server: uuid::Uuid,
+        query: &super::servers_server_files_trash::get::Query,
+    ) -> Result<super::servers_server_files_trash::get::Response, ApiHttpError> {
+        let mut query_parts: Vec<compact_str::CompactString> = Vec::new();
+        if let Some(value) = &query.ignored {
+            for value in value {
+                query_parts.push(format!("ignored={}", urlencoding::encode(value)).into());
+            }
+        }
+        if let Some(value) = query.per_page {
+            query_parts.push(format!("per_page={}", value).into());
+        }
+        if let Some(value) = query.page {
+            query_parts.push(format!("page={}", value).into());
+        }
+        let query = if query_parts.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", query_parts.join("&"))
+        };
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}/files/trash{query}"),
+            None::<&()>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn delete_servers_server_files_trash(
+        &self,
+        server: uuid::Uuid,
+        query: &super::servers_server_files_trash::delete::Query,
+    ) -> Result<super::servers_server_files_trash::delete::Response, ApiHttpError> {
+        let mut query_parts: Vec<compact_str::CompactString> = Vec::new();
+        if let Some(value) = &query.ignored {
+            for value in value {
+                query_parts.push(format!("ignored={}", urlencoding::encode(value)).into());
+            }
+        }
+        let query = if query_parts.is_empty() {
+            String::new()
+        } else {
+            format!("?{}", query_parts.join("&"))
+        };
+        request_impl(
+            self,
+            Method::DELETE,
+            format!("/api/servers/{server}/files/trash{query}"),
+            None::<&()>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_files_trash(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_trash::post::RequestBody,
+    ) -> Result<super::servers_server_files_trash::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/files/trash"),
+            Some(&ServersServerFilesTrashPostBody {
+                inner: data,
+                ignored: &self.ignored,
+            }),
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_files_trash_purge(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_trash_purge::post::RequestBody,
+    ) -> Result<super::servers_server_files_trash_purge::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/files/trash/purge"),
+            Some(&ServersServerFilesTrashPurgePostBody {
+                inner: data,
+                ignored: &self.ignored,
+            }),
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_files_trash_restore(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_trash_restore::post::RequestBody,
+    ) -> Result<super::servers_server_files_trash_restore::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/files/trash/restore"),
+            Some(&ServersServerFilesTrashRestorePostBody {
+                inner: data,
+                ignored: &self.ignored,
+            }),
+            None,
+        )
+        .await
+    }
+
     pub async fn post_servers_server_files_write(
         &self,
         server: uuid::Uuid,
@@ -1826,6 +1938,27 @@ struct ServersServerFilesSqliteQueryPostBody<'a> {
 struct ServersServerFilesStatPostBody<'a> {
     #[serde(flatten)]
     inner: &'a super::servers_server_files_stat::post::RequestBody,
+    ignored: &'a Vec<compact_str::CompactString>,
+}
+
+#[derive(Serialize)]
+struct ServersServerFilesTrashPostBody<'a> {
+    #[serde(flatten)]
+    inner: &'a super::servers_server_files_trash::post::RequestBody,
+    ignored: &'a Vec<compact_str::CompactString>,
+}
+
+#[derive(Serialize)]
+struct ServersServerFilesTrashPurgePostBody<'a> {
+    #[serde(flatten)]
+    inner: &'a super::servers_server_files_trash_purge::post::RequestBody,
+    ignored: &'a Vec<compact_str::CompactString>,
+}
+
+#[derive(Serialize)]
+struct ServersServerFilesTrashRestorePostBody<'a> {
+    #[serde(flatten)]
+    inner: &'a super::servers_server_files_trash_restore::post::RequestBody,
     ignored: &'a Vec<compact_str::CompactString>,
 }
 

@@ -350,6 +350,21 @@
           },
           "nextRun": "Nächste Ausführung ist {timestamp}."
         },
+        "trashRetention": {
+          "days": "Tage"
+        },
+        "trashSettings": {
+          "custom": "Eigene Papierkorb-Einstellungen für diesen Server verwenden",
+          "default": "Panel-Standard: {summary}",
+          "summary": {
+            "disabled": "Deaktiviert",
+            "withThreshold": "{retention}, geleert bei {threshold}% Speichernutzung"
+          },
+          "retention": "Aufbewahrung",
+          "retentionDescription": "Wie lange gelöschte Dateien im Papierkorb bleiben. 0 deaktiviert den Papierkorb.",
+          "usageThreshold": "Leeren bei Speichernutzung",
+          "usageThresholdDescription": "Die ältesten Papierkorb-Einträge entfernen, sobald die Speichernutzung diesen Prozentsatz des Limits erreicht. 0 leert den Papierkorb nur, wenn ein Schreibvorgang das Limit überschreiten würde."
+        },
         "backupRetention": {
           "title": "Aufbewahrung",
           "disabled": "Keine Aufbewahrungsregeln",
@@ -2508,6 +2523,12 @@
                   "allowAcknowledgingInstallationFailureDescription": "Wenn aktiviert, können Benutzer Installationsfehler für Server bestätigen, die sich im Zustand „Install Failed“ befinden, und versuchen, den Server zu starten, anstatt auf einen Admin warten zu müssen. Wenn deaktiviert, können nur Admins Installationsfehler bestätigen.",
                   "allowViewingTransferProgress": "Anzeigen des Übertragungsfortschritts erlauben",
                   "allowViewingTransferProgressDescription": "Wenn aktiviert, können Benutzer mit Lesezugriff auf die Konsole auch Übertragungsfortschritts-Protokolle über die WebSocket-Verbindung sehen. Wenn deaktiviert, sind Übertragungsfortschritts-Protokolle nur für Admins verfügbar.",
+                  "trashRetention": "Papierkorb-Aufbewahrung",
+                  "trashRetentionDescription": "Wie lange gelöschte Dateien im Papierkorb eines Servers bleiben, bevor sie endgültig entfernt werden. 0 deaktiviert den Papierkorb. Dateien im Papierkorb zählen zum Speicherlimit des Servers. Jeder Server kann stattdessen eigene Papierkorb-Einstellungen verwenden.",
+                  "trashUsageThreshold": "Papierkorb leeren bei Speichernutzung",
+                  "trashUsageThresholdDescription": "Die ältesten Papierkorb-Einträge entfernen, sobald ein Server diesen Prozentsatz seines Speicherlimits erreicht. 0 leert den Papierkorb nur, wenn ein Schreibvorgang das Limit überschreiten würde.",
+                  "allowChangingTrashSettings": "Ändern der Papierkorb-Einstellungen erlauben",
+                  "allowChangingTrashSettingsDescription": "Wenn aktiviert, können Benutzer eigene Papierkorb-Einstellungen für ihre Server festlegen. Wenn deaktiviert, können nur Admins sie ändern. Bereits für einen Server festgelegte eigene Einstellungen bleiben bestehen.",
                   "containerPrelude": "Container-Präludium",
                   "containerPreludeDescription": "Das Terminal-Präludium, das für einige statusbezogene Nachrichten in der Server-Konsole verwendet wird."
                 },
@@ -3639,6 +3660,7 @@
                   "unlimited": "Unendlich",
                   "autoKillSeconds": "{seconds}s",
                   "autoKillDisabled": "Deaktiviert",
+                  "trash": "Papierkorb",
                   "labels": "Labels",
                   "uuid": "UUID"
                 },
@@ -3857,6 +3879,12 @@
               "title": "Verwaltung",
               "page": {
                 "title": "Server-Verwaltung",
+                "trash": {
+                  "title": "Papierkorb",
+                  "toast": {
+                    "updated": "Papierkorb-Einstellungen des Servers aktualisiert."
+                  }
+                },
                 "transfer": {
                   "title": "Transfer",
                   "content": "Übertrage diesen Server und seine Daten auf eine andere Node innerhalb dieses Systems.",
@@ -5607,6 +5635,12 @@
             "extract": "Entpacken",
             "archive": "Archivieren",
             "more": "Mehr",
+            "moveToTrash": "In den Papierkorb verschieben",
+            "deletePermanently": "Endgültig löschen",
+            "trash": "Papierkorb",
+            "emptyTrash": "Papierkorb leeren",
+            "backToFiles": "Zurück zu den Dateien",
+            "restoreTo": "Wiederherstellen nach...",
             "remoteCopy": "Remote-Kopie",
             "search": "Suchen",
             "exitBackup": "Backup verlassen",
@@ -5653,6 +5687,8 @@
             "permissionsSelection": "Berechtigungen ändern",
             "fingerprintSelection": "Dateifingerabdruck anzeigen",
             "deleteSelection": "Auswahl löschen",
+            "trashSelection": "Auswahl in den Papierkorb verschieben",
+            "openTrash": "Papierkorb öffnen",
             "saveFile": "Datei speichern",
             "createFile": "Datei erstellen"
           },
@@ -5727,6 +5763,10 @@
             "moveCouldNotBeUndone": "Verschieben konnte nicht rückgängig gemacht werden.",
             "downloadStarted": "Download gestartet.",
             "filesDeleted": "Dateien wurden gelöscht.",
+            "filesTrashed": "{files} in den Papierkorb verschoben.",
+            "filesTrashedPartiallyDeleted": "{files} in den Papierkorb verschoben, {deleted} endgültig gelöscht.",
+            "trashUndone": "{files} aus dem Papierkorb wiederhergestellt.",
+            "trashCouldNotBeUndone": "Dateien konnten nicht aus dem Papierkorb wiederhergestellt werden.",
             "archiveCreationStarted": "Archiverstellung hat begonnen.",
             "decompressionStarted": "Das Entpacken des Archivs hat begonnen.",
             "fileCopyingStarted": "Dateikopiervorgang hat begonnen.",
@@ -5785,6 +5825,53 @@
                 "original": "Revision",
                 "current": "Aktuell"
               }
+            }
+          },
+          "trash": {
+            "title": "Papierkorb",
+            "subtitle": "Gelöschte Dateien werden {retention} lang aufbewahrt, bevor sie endgültig entfernt werden.",
+            "subtitleDisabled": "Der Papierkorb ist für diesen Server deaktiviert. Vorhandene Einträge bleiben erhalten, bis sie wiederhergestellt oder gelöscht werden.",
+            "table": {
+              "columns": {
+                "originalLocation": "Ursprünglicher Ort",
+                "deletedAt": "Gelöscht"
+              }
+            },
+            "empty": {
+              "title": "Der Papierkorb ist leer",
+              "description": "Gelöschte Dateien landen hier und können wiederhergestellt werden, bis sie ablaufen."
+            },
+            "modal": {
+              "deleteEntries": {
+                "title": "Endgültig löschen",
+                "content": "Bist du sicher, dass du {entries} endgültig aus dem Papierkorb löschen möchtest? Dies kann nicht rückgängig gemacht werden."
+              },
+              "deleteEntry": {
+                "title": "Endgültig löschen",
+                "content": "Bist du sicher, dass du **{name}** endgültig aus dem Papierkorb löschen möchtest? Dies kann nicht rückgängig gemacht werden."
+              },
+              "emptyTrash": {
+                "title": "Papierkorb leeren",
+                "content": "Bist du sicher, dass du alles im Papierkorb endgültig löschen möchtest? Dies kann nicht rückgängig gemacht werden."
+              },
+              "restoreTo": {
+                "title": "In Verzeichnis wiederherstellen",
+                "destination": "Zielverzeichnis",
+                "restoredAs": "Diese Datei wird wiederhergestellt als "
+              },
+              "restoreConflict": {
+                "title": "Wiederherstellungskonflikte auflösen",
+                "description": "An der Stelle, an der die folgenden {files} wiederhergestellt würden, existiert bereits etwas.",
+                "confirm": "{files} wiederherstellen"
+              }
+            },
+            "toast": {
+              "restored": "{entries} wiederhergestellt.",
+              "nothingRestored": "Nichts konnte wiederhergestellt werden.",
+              "restoreUndone": "{files} zurück in den Papierkorb verschoben.",
+              "restoreCouldNotBeUndone": "Die Wiederherstellung konnte nicht rückgängig gemacht werden.",
+              "deleted": "{entries} endgültig gelöscht.",
+              "emptied": "Der Papierkorb wurde geleert."
             }
           },
           "modal": {
@@ -5866,8 +5953,12 @@
             },
             "deleteFile": {
               "title": "Datei löschen",
-              "singleFileWarning": "Du wirst den Inhalt von {file} nach dem Löschen nicht mehr wiederherstellen können.",
-              "multipleFilesWarning": "Du wirst den Inhalt der folgenden Dateien nach dem Löschen nicht mehr wiederherstellen können."
+              "singleFileWarning": "Du wirst den Inhalt von **{file}** nach dem Löschen nicht mehr wiederherstellen können.",
+              "multipleFilesWarning": "Du wirst den Inhalt der folgenden Dateien nach dem Löschen nicht mehr wiederherstellen können.",
+              "trashTitle": "In den Papierkorb verschieben",
+              "singleFileTrash": "**{file}** wird in den Papierkorb verschoben und kann {retention} lang wiederhergestellt werden.",
+              "multipleFilesTrash": "Die folgenden Dateien werden in den Papierkorb verschoben und können {retention} lang wiederhergestellt werden.",
+              "permanent": "Endgültig löschen, statt in den Papierkorb zu verschieben"
             },
             "createFile": {
               "title": "Datei erstellen"
@@ -7102,13 +7193,17 @@
               "title": "Dateien löschen",
               "description": "Löscht Dateien oder Ordner.",
               "form": {
-                "filesToDelete": "Zu löschende Dateien"
+                "filesToDelete": "Zu löschende Dateien",
+                "trash": "In den Papierkorb verschieben",
+                "trashDescription": "Die Dateien in den Papierkorb verschieben, statt sie endgültig zu löschen. Der Papierkorb muss für diesen Server aktiviert sein."
               },
               "renderer": {
                 "compact": "Lösche {files}",
+                "compactTrash": "{files} in den Papierkorb verschieben",
                 "detail": {
                   "root": "Root: {root}",
-                  "files": "Dateien: {files}"
+                  "files": "Dateien: {files}",
+                  "trash": "In den Papierkorb verschieben: {value}"
                 }
               }
             },
@@ -7777,6 +7872,12 @@
             },
             "toast": {
               "updated": "Server Auto-Kill aktualisiert."
+            }
+          },
+          "trash": {
+            "title": "Papierkorb",
+            "toast": {
+              "updated": "Papierkorb-Einstellungen des Servers aktualisiert."
             }
           },
           "autostart": {

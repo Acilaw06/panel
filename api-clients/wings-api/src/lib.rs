@@ -668,6 +668,13 @@ nestify::nest! {
             }>,
         },
 
+        #[schema(inline)]
+        pub trash: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationTrash {
+            #[schema(inline)]
+            pub retention: u64,
+            #[schema(inline)]
+            pub usage_threshold: Option<u64>,
+        }>,
     }
 }
 
@@ -859,6 +866,23 @@ nestify::nest! {
         pub bytes_total: u64,
         #[schema(inline)]
         pub files_processed: u64,
+    }
+}
+
+nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct TrashEntry {
+        #[schema(inline)]
+        pub uuid: uuid::Uuid,
+        #[schema(inline)]
+        pub name: compact_str::CompactString,
+        #[schema(inline)]
+        pub path: compact_str::CompactString,
+        #[schema(inline)]
+        pub directory: bool,
+        #[schema(inline)]
+        pub size: u64,
+        #[schema(inline)]
+        pub deleted_at: chrono::DateTime<chrono::Local>,
     }
 }
 
@@ -2190,6 +2214,8 @@ pub mod servers_server_files_rename {
 
         pub type Response404 = ApiError;
 
+        pub type Response417 = ApiError;
+
         pub type Response = Response200;
 
         #[derive(Debug, Clone, Default)]
@@ -2381,6 +2407,151 @@ pub mod servers_server_files_stat {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub entries: Vec<DirectoryEntry>,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod servers_server_files_trash {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub total: u64,
+                #[schema(inline)]
+                pub entries: Vec<TrashEntry>,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+
+        #[derive(Debug, Clone, Default)]
+        #[allow(clippy::manual_non_exhaustive)]
+        pub struct Query {
+            pub ignored: Option<Vec<compact_str::CompactString>>,
+            pub per_page: Option<u64>,
+            pub page: Option<u64>,
+            #[doc(hidden)]
+            pub __priv: (),
+        }
+    }
+
+    pub mod delete {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub deleted: u64,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+
+        #[derive(Debug, Clone, Default)]
+        #[allow(clippy::manual_non_exhaustive)]
+        pub struct Query {
+            pub ignored: Option<Vec<compact_str::CompactString>>,
+            #[doc(hidden)]
+            pub __priv: (),
+        }
+    }
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub root: compact_str::CompactString,
+                #[schema(inline)]
+                pub files: Vec<compact_str::CompactString>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub entries: Vec<TrashEntry>,
+                #[schema(inline)]
+                pub skipped: Vec<compact_str::CompactString>,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response417 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod servers_server_files_trash_purge {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub entries: Vec<uuid::Uuid>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub deleted: u64,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod servers_server_files_trash_restore {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub entries: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyEntries {
+                    #[schema(inline)]
+                    pub uuid: uuid::Uuid,
+                    #[schema(inline)]
+                    pub path: Option<compact_str::CompactString>,
+                }>,
+                #[schema(inline)]
+                pub overwrite: bool,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub restored: Vec<TrashEntry>,
+                #[schema(inline)]
+                pub conflicts: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Conflicts {
+                    #[schema(inline)]
+                    pub uuid: uuid::Uuid,
+                    #[schema(inline)]
+                    pub destination: DirectoryEntry,
+                }>,
             }
         }
 

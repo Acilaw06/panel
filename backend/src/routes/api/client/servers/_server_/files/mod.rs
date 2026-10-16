@@ -25,6 +25,7 @@ mod revisions;
 mod search;
 mod sqlite_query;
 mod stat;
+mod trash;
 mod upload;
 mod write;
 
@@ -53,6 +54,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/search", search::router(state))
         .nest("/sqlite-query", sqlite_query::router(state))
         .nest("/stat", stat::router(state))
+        .nest("/trash", trash::router(state))
         .nest("/pull", pull::router(state))
         .nest("/operations", operations::router(state))
         .nest("/revisions", revisions::router(state))
