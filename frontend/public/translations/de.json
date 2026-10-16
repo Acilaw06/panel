@@ -2232,6 +2232,13 @@
                   "passwordLoginEnabled": "Passwort-Anmeldung aktivieren",
                   "passwordLoginEnabledDescription": "Erlaube Benutzern, sich mit Benutzername und Passwort anzumelden. Wenn du dies deaktivierst, bleiben nur OAuth-Anbieter und Sicherheitsschlüssel als Zugang, und die lokale Registrierung, das Zurücksetzen von Passwörtern sowie die SFTP-Anmeldung mit Passwort werden ebenfalls gestoppt."
                 },
+                "section": {
+                  "general": "Allgemein",
+                  "branding": "Branding",
+                  "authentication": "Authentifizierung",
+                  "sessions": "Sitzungen",
+                  "telemetry": "Telemetrie"
+                },
                 "enum": {
                   "twoFactorMethod": {
                     "totp": "Authenticator-App (TOTP)",
@@ -2532,6 +2539,14 @@
                   "containerPrelude": "Container-Präludium",
                   "containerPreludeDescription": "Das Terminal-Präludium, das für einige statusbezogene Nachrichten in der Server-Konsole verwendet wird."
                 },
+                "section": {
+                  "fileManager": "Dateimanager",
+                  "limits": "Limits",
+                  "networking": "Netzwerk",
+                  "databaseInstances": "Datenbankinstanzen",
+                  "lifecycle": "Konsole & Lebenszyklus",
+                  "trash": "Papierkorb"
+                },
                 "toast": {
                   "updated": "Server-Einstellungen aktualisiert."
                 }
@@ -2553,6 +2568,10 @@
                   "allowChangingLanguageDescription": "Wenn aktiviert, können Benutzer ihre Spracheinstellungen ändern.",
                   "allowChangingAvatar": "Avatar ändern erlauben",
                   "allowChangingAvatarDescription": "Wenn aktiviert, können Benutzer ihren Avatar hochladen und entfernen."
+                },
+                "section": {
+                  "limits": "Limits",
+                  "permissions": "Berechtigungen"
                 },
                 "routeOrder": {
                   "title": "Client-Routenreihenfolge"

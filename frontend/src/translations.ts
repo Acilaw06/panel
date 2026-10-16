@@ -2114,6 +2114,13 @@ const baseTranslations = defineTranslations({
                   passwordLoginEnabledDescription:
                     'Let users sign in with a username and password. Turning this off leaves OAuth providers and security keys as the only way in, and also stops local registration, password resets and SFTP password authentication.',
                 },
+                section: {
+                  general: 'General',
+                  branding: 'Branding',
+                  authentication: 'Authentication',
+                  sessions: 'Sessions',
+                  telemetry: 'Telemetry',
+                },
                 enum: {
                   twoFactorMethod: {
                     totp: 'Authenticator App (TOTP)',
@@ -2437,6 +2444,14 @@ const baseTranslations = defineTranslations({
                   containerPreludeDescription:
                     'The terminal prelude used for some status-related messages in the server console.',
                 },
+                section: {
+                  fileManager: 'File Manager',
+                  limits: 'Limits',
+                  networking: 'Networking',
+                  databaseInstances: 'Database Instances',
+                  lifecycle: 'Console & Lifecycle',
+                  trash: 'Trash',
+                },
                 toast: {
                   updated: 'Server settings updated.',
                 },
@@ -2459,6 +2474,10 @@ const baseTranslations = defineTranslations({
                     'If enabled, users will be able to change their language preferences.',
                   allowChangingAvatar: 'Allow Changing Avatar',
                   allowChangingAvatarDescription: 'If enabled, users will be able to upload and remove their avatar.',
+                },
+                section: {
+                  limits: 'Limits',
+                  permissions: 'Permissions',
                 },
                 routeOrder: {
                   title: 'Client Route Order',

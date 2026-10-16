@@ -41,6 +41,11 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
 
   return [
     {
+      type: 'divider',
+      name: 'fileManagerDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.fileManager', {}),
+    },
+    {
       type: 'size',
       name: 'maxFileManagerViewSize',
       label: t('pages.admin.settings.tabs.server.page.form.maxFileManagerViewSize', {}),
@@ -49,10 +54,46 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       required: true,
     },
     {
+      type: 'size',
+      name: 'maxFileManagerContentSearchSize',
+      label: t('pages.admin.settings.tabs.server.page.form.maxFileManagerContentSearchSize', {}),
+      mode: 'b',
+      min: 0,
+      required: true,
+    },
+    {
+      type: 'number',
+      name: 'maxFileManagerSearchResults',
+      label: t('pages.admin.settings.tabs.server.page.form.maxFileManagerSearchResults', {}),
+      required: true,
+    },
+    {
+      type: 'divider',
+      name: 'limitsDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.limits', {}),
+    },
+    {
+      type: 'number',
+      name: 'maxSubuserCount',
+      label: t('pages.admin.settings.tabs.server.page.form.maxSubuserCount', {}),
+      required: true,
+    },
+    {
       type: 'number',
       name: 'maxScheduleStepCount',
       label: t('pages.admin.settings.tabs.server.page.form.maxScheduleStepCount', {}),
       required: true,
+    },
+    {
+      type: 'number',
+      name: 'maxBackupGroupCount',
+      label: t('pages.admin.settings.tabs.server.page.form.maxBackupGroupCount', {}),
+      required: true,
+    },
+    {
+      type: 'divider',
+      name: 'networkingDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.networking', {}),
     },
     {
       type: 'number',
@@ -79,30 +120,9 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       required: true,
     },
     {
-      type: 'size',
-      name: 'maxFileManagerContentSearchSize',
-      label: t('pages.admin.settings.tabs.server.page.form.maxFileManagerContentSearchSize', {}),
-      mode: 'b',
-      min: 0,
-      required: true,
-    },
-    {
-      type: 'number',
-      name: 'maxFileManagerSearchResults',
-      label: t('pages.admin.settings.tabs.server.page.form.maxFileManagerSearchResults', {}),
-      required: true,
-    },
-    {
-      type: 'number',
-      name: 'maxSubuserCount',
-      label: t('pages.admin.settings.tabs.server.page.form.maxSubuserCount', {}),
-      required: true,
-    },
-    {
-      type: 'number',
-      name: 'maxBackupGroupCount',
-      label: t('pages.admin.settings.tabs.server.page.form.maxBackupGroupCount', {}),
-      required: true,
+      type: 'divider',
+      name: 'databaseInstancesDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.databaseInstances', {}),
     },
     {
       type: 'number',
@@ -115,6 +135,11 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       name: 'maxDatabaseInstanceUserCount',
       label: t('pages.admin.settings.tabs.server.page.form.maxDatabaseInstanceUserCount', {}),
       required: true,
+    },
+    {
+      type: 'divider',
+      name: 'lifecycleDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.lifecycle', {}),
     },
     {
       type: 'switch',
@@ -139,6 +164,18 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       name: 'allowViewingTransferProgress',
       label: t('pages.admin.settings.tabs.server.page.form.allowViewingTransferProgress', {}),
       description: t('pages.admin.settings.tabs.server.page.form.allowViewingTransferProgressDescription', {}),
+    },
+    {
+      type: 'text',
+      name: 'containerPrelude',
+      label: t('pages.admin.settings.tabs.server.page.form.containerPrelude', {}),
+      description: t('pages.admin.settings.tabs.server.page.form.containerPreludeDescription', {}),
+      required: true,
+    },
+    {
+      type: 'divider',
+      name: 'trashDivider',
+      label: t('pages.admin.settings.tabs.server.page.section.trash', {}),
     },
     {
       type: 'custom',
@@ -171,13 +208,6 @@ export function useServerSettingsFormFields(): FieldDef<ServerSettingsFormValues
       name: 'allowChangingTrashSettings',
       label: t('pages.admin.settings.tabs.server.page.form.allowChangingTrashSettings', {}),
       description: t('pages.admin.settings.tabs.server.page.form.allowChangingTrashSettingsDescription', {}),
-    },
-    {
-      type: 'text',
-      name: 'containerPrelude',
-      label: t('pages.admin.settings.tabs.server.page.form.containerPrelude', {}),
-      description: t('pages.admin.settings.tabs.server.page.form.containerPreludeDescription', {}),
-      required: true,
     },
   ];
 }
