@@ -55,6 +55,7 @@ const compatBodyProperties: Record<string, Record<string, 'client' | 'extra'>> =
     'post /api/servers/{server}/files/create-symlink': { ignored: 'client' },
     'post /api/servers/{server}/files/decompress': { ignored: 'client' },
     'post /api/servers/{server}/files/delete': { ignored: 'client' },
+    'post /api/servers/{server}/files/ignore-matches': { ignored: 'client' },
     'post /api/servers/{server}/files/pull': { ignored: 'client' },
     'put /api/servers/{server}/files/rename': { ignored: 'client', create_directories: 'extra' },
     'post /api/servers/{server}/files/search': { match_context: 'extra' },

@@ -803,6 +803,24 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_servers_server_files_ignore_matches(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_files_ignore_matches::post::RequestBody,
+    ) -> Result<super::servers_server_files_ignore_matches::post::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/files/ignore-matches"),
+            Some(&ServersServerFilesIgnoreMatchesPostBody {
+                inner: data,
+                ignored: &self.ignored,
+            }),
+            None,
+        )
+        .await
+    }
+
     pub async fn get_servers_server_files_largest_directories(
         &self,
         server: uuid::Uuid,
@@ -1916,6 +1934,13 @@ struct ServersServerFilesDecompressPostBody<'a> {
 struct ServersServerFilesDeletePostBody<'a> {
     #[serde(flatten)]
     inner: &'a super::servers_server_files_delete::post::RequestBody,
+    ignored: &'a Vec<compact_str::CompactString>,
+}
+
+#[derive(Serialize)]
+struct ServersServerFilesIgnoreMatchesPostBody<'a> {
+    #[serde(flatten)]
+    inner: &'a super::servers_server_files_ignore_matches::post::RequestBody,
     ignored: &'a Vec<compact_str::CompactString>,
 }
 

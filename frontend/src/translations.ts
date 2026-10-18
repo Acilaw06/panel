@@ -144,6 +144,8 @@ const baseTranslations = defineTranslations({
           matches: '{count} matched',
           noMatches: 'No matches',
           exception: 'Exception',
+          invalid: 'Invalid pattern',
+          unavailable: 'Count unavailable',
           tooManyPatterns: 'Matching is not counted automatically for more than {max} patterns.',
           unanchoredException:
             '`{pattern}` matches at any depth, use `{anchored}` to only match it in the root directory.',

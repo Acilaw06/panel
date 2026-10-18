@@ -1947,6 +1947,37 @@ pub mod servers_server_files_fingerprints {
         }
     }
 }
+pub mod servers_server_files_ignore_matches {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub patterns: Vec<compact_str::CompactString>,
+                #[schema(inline)]
+                pub limit: u64,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub counts: Vec<Option<u64>>,
+            }
+        }
+
+        pub type Response400 = ApiError;
+
+        pub type Response404 = ApiError;
+
+        pub type Response417 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
 pub mod servers_server_files_largest_directories {
     use super::*;
 
