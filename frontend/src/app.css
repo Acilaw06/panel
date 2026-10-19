@@ -104,6 +104,11 @@
     font-weight: 500;
   }
 
+  .file-tree-drop-target-span {
+    background-color: var(--mantine-color-green-light) !important;
+    box-shadow: inset 3px 0 0 var(--mantine-color-green-5) !important;
+  }
+
   .file-tree-root-drop-target {
     border-color: var(--mantine-color-green-5) !important;
     box-shadow: 0 0 0 1px var(--mantine-color-green-5) !important;
