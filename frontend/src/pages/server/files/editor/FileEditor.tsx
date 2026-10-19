@@ -26,6 +26,7 @@ import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
 import { FileManagerProvider, useFileManager } from '@/providers/FileManagerProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { trackActivity } from '@/stores/activity.ts';
 import { useServerStore } from '@/stores/server.ts';
 import FileRevisionsDrawer from '../drawers/FileRevisionsDrawer.tsx';
 import FileBreadcrumbs from '../FileBreadcrumbs.tsx';
@@ -206,7 +207,7 @@ function FileEditorComponent() {
 
     let cancelled = false;
     setLoading(true);
-    getFileContent(server.uuid, join(browsingDirectory, fileName))
+    trackActivity(getFileContent(server.uuid, join(browsingDirectory, fileName)))
       .then((content) => {
         if (matchedFileEditorAction?.contentType === 'blob') {
           return content;

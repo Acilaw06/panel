@@ -129,7 +129,7 @@ export default function ServerSchedules() {
       title={t('pages.server.schedules.title', {})}
       registry={window.extensionContext.extensionRegistry.pages.server.schedules.container}
       subtitle={t('pages.server.schedules.subtitle', {
-        current: schedules?.total ?? 0,
+        current: schedules?.total ?? '…',
         max: server.featureLimits.schedules,
       })}
       search={search}
@@ -149,7 +149,7 @@ export default function ServerSchedules() {
                 enabled={atLimit}
                 label={t('pages.server.schedules.tooltip.limitReached', { max: server.featureLimits.schedules })}
               >
-                <Button onClick={() => fileInputRef.current?.click()} color='blue' disabled={atLimit}>
+                <Button onClick={() => fileInputRef.current?.click()} color='blue' disabled={!schedules || atLimit}>
                   <FontAwesomeIcon icon={faUpload} className='mr-2' />
                   {t('common.button.import', {})}
                 </Button>
@@ -159,7 +159,7 @@ export default function ServerSchedules() {
                 label={t('pages.server.schedules.tooltip.limitReached', { max: server.featureLimits.schedules })}
               >
                 <Button
-                  disabled={atLimit}
+                  disabled={!schedules || atLimit}
                   onClick={() => setOpenModal('create')}
                   color='blue'
                   leftSection={<FontAwesomeIcon icon={faPlus} />}
@@ -232,7 +232,7 @@ export default function ServerSchedules() {
                       <Button
                         variant='default'
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={atLimit}
+                        disabled={!schedules || atLimit}
                         leftSection={<FontAwesomeIcon icon={faUpload} />}
                       >
                         {t('common.button.import', {})}
@@ -243,7 +243,7 @@ export default function ServerSchedules() {
                       label={t('pages.server.schedules.tooltip.limitReached', { max: server.featureLimits.schedules })}
                     >
                       <Button
-                        disabled={atLimit}
+                        disabled={!schedules || atLimit}
                         onClick={() => setOpenModal('create')}
                         color='blue'
                         leftSection={<FontAwesomeIcon icon={faPlus} />}

@@ -216,9 +216,6 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
-      tzdata:
-        specifier: ^1.0.52
-        version: 1.0.52
       uuid:
         specifier: ^14.0.3
         version: 14.0.3
@@ -3023,9 +3020,6 @@ packages:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
     hasBin: true
-
-  tzdata@1.0.52:
-    resolution: {integrity: sha512-FUUjiOZS2fiUUJiBUqziXoUDBvrd2O1vR217xUAVolUd6sPu1Lov9YIKftzI9XqfjzRrLX5B0qlzvcb1ns+SnA==}
 
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
@@ -5845,8 +5839,6 @@ snapshots:
       '@typescript/typescript-sunos-x64': 7.0.2
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
-
-  tzdata@1.0.52: {}
 
   uc.micro@2.1.0: {}
 

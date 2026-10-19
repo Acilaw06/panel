@@ -25,6 +25,7 @@ export default function ExtensionCard({
   isBuildFailed,
   onRemove,
   onToggle,
+  busy,
 }: {
   extension?: Extension;
   backendExtension?: AdminBackendExtension;
@@ -35,6 +36,7 @@ export default function ExtensionCard({
   isBuildFailed?: boolean;
   onRemove?: () => void;
   onToggle?: (enabled: boolean) => void;
+  busy?: boolean;
 }) {
   const { t } = useTranslations();
 
@@ -148,12 +150,23 @@ export default function ExtensionCard({
                 : t('pages.admin.extensions.tooltip.disableExtension', {})
             }
           >
-            <Switch checked={!isPendingDisabled} disabled={isRemoved} onChange={(e) => onToggle(e.target.checked)} />
+            <Switch
+              checked={!isPendingDisabled}
+              disabled={isRemoved || busy}
+              onChange={(e) => onToggle(e.target.checked)}
+            />
           </Tooltip>
         )}
         {backendExtension && onRemove && (
           <Tooltip label={t('pages.admin.extensions.tooltip.removeExtension', {})}>
-            <ActionIcon color='red' variant='subtle' size='input-md' disabled={isRemoved} onClick={onRemove}>
+            <ActionIcon
+              color='red'
+              variant='subtle'
+              size='input-md'
+              disabled={isRemoved}
+              loading={busy}
+              onClick={onRemove}
+            >
               <FontAwesomeIcon icon={faTrash} />
             </ActionIcon>
           </Tooltip>

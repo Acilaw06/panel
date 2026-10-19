@@ -191,6 +191,7 @@ impl CompressionPredicate {
         "application/json",
         "application/javascript",
         "application/manifest+json",
+        "application/msgpack",
         "application/xml",
         "application/yaml",
         "image/svg+xml",

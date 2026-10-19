@@ -1,13 +1,15 @@
 import {
   faChevronDown,
+  faClock,
   faClockRotateLeft,
   faExclamationTriangle,
+  faGear,
   faPencil,
   faPlay,
   faPlayCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { useShallow } from 'zustand/react/shallow';
 import { httpErrorToHuman } from '@/api/axios.ts';
@@ -19,20 +21,21 @@ import Button from '@/elements/buttons/Button.tsx';
 import { ServerCan } from '@/elements/Can.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Badge from '@/elements/data-display/Badge.tsx';
-import Alert from '@/elements/feedback/Alert.tsx';
-import Spinner from '@/elements/feedback/Spinner.tsx';
+import EmptyState from '@/elements/feedback/EmptyState.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import Tabs from '@/elements/layout/Tabs.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import ContextMenu from '@/elements/overlays/ContextMenu.tsx';
 import Tooltip from '@/elements/overlays/Tooltip.tsx';
+import ResourceView from '@/elements/ResourceView.tsx';
 import FormattedTimestamp from '@/elements/time/FormattedTimestamp.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { useBlocker } from '@/plugins/useBlocker.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { trackActivity } from '@/stores/activity.ts';
 import { useServerStore } from '@/stores/server.ts';
 import ScheduleConditionBuilder from './forms/ScheduleConditionBuilder.tsx';
 import ScheduleCreateOrUpdateModal from './modals/ScheduleCreateOrUpdateModal.tsx';
@@ -68,12 +71,30 @@ export default function ScheduleView() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (params.id) {
-      getSchedule(server.uuid, params.id).then(setSchedule);
-      getScheduleSteps(server.uuid, params.id).then(setScheduleSteps);
-    }
-  }, [params.id]);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const requestedId = useRef<string | null>(null);
+
+  const load = () => {
+    const id = params.id;
+    if (!id) return;
+
+    requestedId.current = id;
+    setLoadError(null);
+
+    trackActivity(Promise.all([getSchedule(server.uuid, id), getScheduleSteps(server.uuid, id)]))
+      .then(([schedule, steps]) => {
+        if (requestedId.current !== id) return;
+        setSchedule(schedule);
+        setScheduleSteps(steps);
+        setLoadedId(id);
+      })
+      .catch((error) => {
+        if (requestedId.current === id) setLoadError(error);
+      });
+  };
+
+  useEffect(load, [params.id]);
 
   const doTriggerSchedule = (skipCondition: boolean) => {
     if (params.id) {
@@ -102,10 +123,12 @@ export default function ScheduleView() {
     }
   };
 
-  if (!schedule || !scheduleSteps) {
+  if (!schedule || loadedId !== params.id) {
     return (
       <div className='w-full'>
-        <Spinner.Centered />
+        <ResourceView resource={{ data: undefined, loading: !loadError, error: loadError, refetch: load }}>
+          {() => null}
+        </ResourceView>
       </div>
     );
   }
@@ -237,9 +260,11 @@ export default function ScheduleView() {
             {canUpdate ? (
               <StepsEditor schedule={schedule} />
             ) : scheduleSteps.length === 0 ? (
-              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow'>
-                {t('pages.server.schedules.view.alert.noActions', {})}
-              </Alert>
+              <EmptyState
+                icon={faGear}
+                title={t('pages.server.schedules.steps.empty.title', {})}
+                description={t('pages.server.schedules.steps.empty.descriptionReadOnly', {})}
+              />
             ) : (
               <Stack gap='md'>
                 {scheduleSteps.map((step, index) => (
@@ -283,9 +308,21 @@ export default function ScheduleView() {
             </Title>
 
             {schedule.triggers.length === 0 ? (
-              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow'>
-                {t('pages.server.schedules.view.alert.noTriggers', {})}
-              </Alert>
+              <EmptyState
+                icon={faClock}
+                title={t('pages.server.schedules.view.empty.triggers.title', {})}
+                description={
+                  canUpdate
+                    ? t('pages.server.schedules.view.empty.triggers.description', {})
+                    : t('pages.server.schedules.view.empty.triggers.descriptionReadOnly', {})
+                }
+              >
+                {canUpdate && (
+                  <Button onClick={() => setSettingsOpen(true)} leftSection={<FontAwesomeIcon icon={faPencil} />}>
+                    {t('common.button.edit', {})}
+                  </Button>
+                )}
+              </EmptyState>
             ) : (
               <Stack gap='md'>
                 {schedule.triggers.map((trigger, index) => (

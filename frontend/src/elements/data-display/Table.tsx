@@ -1,19 +1,17 @@
-import { faCubesStacked, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCubesStacked } from '@fortawesome/free-solid-svg-icons';
 import {
-  Center,
   Group,
   GroupProps,
   Pagination as MantinePagination,
   MantineSpacing,
   Table as MantineTable,
-  Stack,
   TableTdProps,
   TableTrProps,
-  Text,
 } from '@mantine/core';
 import classNames from 'classnames';
 import { forwardRef, ReactNode, useEffect, useState } from 'react';
+import EmptyState from '@/elements/feedback/EmptyState.tsx';
+import ErrorState from '@/elements/feedback/ErrorState.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Checkbox from '@/elements/input/Checkbox.tsx';
 import { type LazyString, resolveString } from '@/lib/lazy.ts';
@@ -179,28 +177,12 @@ export const NoItems = () => {
   const { t } = useTranslations();
 
   return (
-    <Center py='lg'>
-      <Stack align='center' c='dimmed'>
-        <FontAwesomeIcon icon={faCubesStacked} size='3x' className='-mb-2' />
-        <Text>{t('common.table.pagination.empty', {})}</Text>
-      </Stack>
-    </Center>
-  );
-};
-
-export const ErrorItems = ({ error }: { error: string }) => {
-  const { t } = useTranslations();
-
-  return (
-    <Center py='lg'>
-      <Stack align='center' c='red' gap='xs'>
-        <FontAwesomeIcon icon={faTriangleExclamation} size='3x' className='-mb-2' />
-        <Text fw={500}>{t('common.alert.error', {})}</Text>
-        <Text c='dimmed' size='sm'>
-          {error}
-        </Text>
-      </Stack>
-    </Center>
+    <EmptyState
+      flush
+      icon={faCubesStacked}
+      title={t('common.table.empty.title', {})}
+      description={t('common.table.empty.description', {})}
+    />
   );
 };
 
@@ -275,7 +257,7 @@ export default function Table({
 
       {error ? (
         <div className='p-2.5'>
-          <ErrorItems error={error} />
+          <ErrorState error={error} />
         </div>
       ) : (
         pagination?.total === 0 && !loading && <div className='p-2.5'>{empty ?? <NoItems />}</div>

@@ -118,17 +118,17 @@ export const MountRow = forwardRef<HTMLTableRowElement, MountRowProps>(function 
 
         <TableData>
           {contextMount.created ? (
-            <FontAwesomeIcon icon={faCheck} className='text-green-500' />
+            <FontAwesomeIcon icon={faCheck} className='text-(--mantine-color-green-text)' />
           ) : (
-            <FontAwesomeIcon icon={faX} className='text-red-500' />
+            <FontAwesomeIcon icon={faX} className='text-(--mantine-color-red-text)' />
           )}
         </TableData>
 
         <TableData>
           {contextMount.readOnly ? (
-            <FontAwesomeIcon icon={faCheck} className='text-green-500' />
+            <FontAwesomeIcon icon={faCheck} className='text-(--mantine-color-green-text)' />
           ) : (
-            <FontAwesomeIcon icon={faX} className='text-red-500' />
+            <FontAwesomeIcon icon={faX} className='text-(--mantine-color-red-text)' />
           )}
         </TableData>
 

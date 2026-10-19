@@ -16,6 +16,7 @@ export default function ExtensionStatusAlerts({
   pendingRestart,
   isBuilding,
   onRestart,
+  restarting,
 }: {
   extensionStatus: ExtensionStatus | undefined;
   supervisor: ExtensionStatus['supervisor'];
@@ -25,6 +26,7 @@ export default function ExtensionStatusAlerts({
   pendingRestart: boolean;
   isBuilding: boolean;
   onRestart: () => void;
+  restarting: boolean;
 }) {
   const { t } = useTranslations();
 
@@ -91,6 +93,7 @@ export default function ExtensionStatusAlerts({
                   variant='default'
                   leftSection={<FontAwesomeIcon icon={faPowerOff} />}
                   disabled={isBuilding}
+                  loading={restarting}
                   onClick={onRestart}
                 >
                   {t('pages.admin.extensions.button.restart', {})}

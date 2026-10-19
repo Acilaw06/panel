@@ -355,4 +355,10 @@ const user = {
   },
 };
 
-export const queryKeys = { admin, server, user };
+const global = {
+  timezones: {
+    all: () => ['global', 'timezones'] as const,
+  },
+};
+
+export const queryKeys = { admin, global, server, user };

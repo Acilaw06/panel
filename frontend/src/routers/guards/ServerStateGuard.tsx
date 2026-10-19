@@ -106,8 +106,7 @@ export default function ServerStateGuard() {
                     ? serverStatusInfo[server.status].blockContent()
                     : ''
           }
-        />
-        <div className='flex flex-row items-center justify-center gap-4 mt-6'>
+        >
           {canReadInstallationLogs && server.status === 'install_failed' && (
             <NavLink to={`/admin/servers/${server.uuid}/logs`}>
               <Button variant='outline'>{t('elements.screenBlock.serverConflict.button.viewInstallLogs', {})}</Button>
@@ -120,7 +119,7 @@ export default function ServerStateGuard() {
               </Button>
             </ServerCan>
           )}
-        </div>
+        </ScreenBlock>
       </ServerContentContainer>
     );
   }

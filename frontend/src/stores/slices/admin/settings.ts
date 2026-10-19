@@ -1,15 +1,19 @@
 import { z } from 'zod';
 import { StateCreator } from 'zustand';
+import getUpdates from '@/api/admin/system/updates/getUpdates.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
 import { adminSettingsSchema } from '@/lib/schemas/admin/settings.ts';
 import { adminUpdateInformationSchema } from '@/lib/schemas/admin/system.ts';
 import { AdminStore } from '@/stores/admin.tsx';
 
 export interface SettingsSlice extends z.infer<typeof adminSettingsSchema> {
   updateInformation: z.infer<typeof adminUpdateInformationSchema> | null;
+  updateInformationError: string | null;
 
   setSettings: (settings: z.infer<typeof adminSettingsSchema>) => void;
   updateSettings: (settings: Partial<z.infer<typeof adminSettingsSchema>>) => void;
   setUpdateInformation: (updateInformation: z.infer<typeof adminUpdateInformationSchema> | null) => void;
+  loadUpdateInformation: () => Promise<void>;
 }
 
 export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice> = (set): SettingsSlice => ({
@@ -175,6 +179,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
   },
 
   updateInformation: null,
+  updateInformationError: null,
 
   setSettings: (value) =>
     set(() => ({
@@ -203,4 +208,14 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
       ...(value.ratelimits ? { ratelimits: { ...state.ratelimits, ...value.ratelimits } } : {}),
     })),
   setUpdateInformation: (value) => set((state) => ({ ...state, updateInformation: value })),
+  loadUpdateInformation: async () => {
+    set((state) => ({ ...state, updateInformationError: null }));
+
+    try {
+      const updateInformation = await getUpdates();
+      set((state) => ({ ...state, updateInformation }));
+    } catch (error) {
+      set((state) => ({ ...state, updateInformationError: httpErrorToHuman(error) }));
+    }
+  },
 });

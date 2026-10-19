@@ -107,9 +107,9 @@ const SubuserRow = forwardRef<HTMLTableRowElement, SubuserRowProps>(function Sub
 
             <TableData>
               {subuser.user.totpEnabled ? (
-                <FontAwesomeIcon className='text-green-500' icon={faLock} />
+                <FontAwesomeIcon className='text-(--mantine-color-green-text)' icon={faLock} />
               ) : (
-                <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
+                <FontAwesomeIcon className='text-(--mantine-color-red-text)' icon={faLockOpen} />
               )}
             </TableData>
 

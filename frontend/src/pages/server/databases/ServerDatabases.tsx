@@ -52,7 +52,7 @@ export default function ServerDatabases() {
     return <ServerDatabaseInstances />;
   }
 
-  const disabled = full || databaseHosts.length === 0;
+  const disabled = !settled || full || databaseHosts.length === 0;
   const noHosts = !full && databaseHosts.length === 0;
   const isEmpty = settled && !loading && !error && !debouncedSearch && data?.total === 0;
 
@@ -60,7 +60,7 @@ export default function ServerDatabases() {
     <ServerContentContainer
       title={t('pages.server.databases.title', {})}
       subtitle={t('pages.server.databases.subtitle', {
-        current: used,
+        current: settled ? used : '…',
         max: server.featureLimits.databases,
       })}
       search={search}
@@ -69,7 +69,7 @@ export default function ServerDatabases() {
         isEmpty ? undefined : (
           <ServerCan action='databases.create'>
             <ConditionalTooltip
-              enabled={disabled}
+              enabled={settled && disabled}
               label={
                 full
                   ? t('pages.server.databases.tooltip.limitReached', {

@@ -60,15 +60,15 @@ const NodeRow = forwardRef<HTMLTableRowElement, NodeRowProps>(function NodeRow(
           <Spinner size={16} />
         ) : unavailable || !version ? (
           <Tooltip label={t('pages.admin.nodes.tabs.general.page.tooltip.errorWhileFetchingVersion', {})}>
-            <FontAwesomeIcon icon={faHeartBroken} className='text-red-500' />
+            <FontAwesomeIcon icon={faHeartBroken} className='text-(--mantine-color-red-text)' />
           </Tooltip>
         ) : updateAvailable ? (
           <Tooltip label={t('pages.admin.nodes.tabs.general.page.tooltip.updateAvailable', { version })}>
-            <FontAwesomeIcon icon={faHeart} className='text-yellow-500 animate-pulse' />
+            <FontAwesomeIcon icon={faHeart} className='text-(--mantine-color-yellow-text) animate-pulse' />
           </Tooltip>
         ) : (
           <Tooltip label={version}>
-            <FontAwesomeIcon icon={faHeart} className='text-green-500 animate-pulse' />
+            <FontAwesomeIcon icon={faHeart} className='text-(--mantine-color-green-text) animate-pulse' />
           </Tooltip>
         )}
       </TableData>
@@ -124,7 +124,7 @@ const NodeRow = forwardRef<HTMLTableRowElement, NodeRowProps>(function NodeRow(
           </Tooltip>
           {isNodeAIO(node) && (
             <Tooltip label={t('pages.admin.nodes.tabs.general.page.tooltip.allInOneNode', {})}>
-              <FontAwesomeIcon icon={faHeart} className='text-purple-500' />
+              <FontAwesomeIcon icon={faHeart} className='text-(--mantine-color-violet-text)' />
             </Tooltip>
           )}
           {nameSection}

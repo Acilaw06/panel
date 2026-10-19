@@ -77,7 +77,7 @@ export default function ServerSubusers() {
     <ServerContentContainer
       title={t('pages.server.subusers.title', {})}
       subtitle={t('pages.server.subusers.subtitle', {
-        current: subusers?.total ?? 0,
+        current: subusers?.total ?? '…',
         max: settings.server.maxSubuserCount,
       })}
       search={search}
@@ -93,7 +93,7 @@ export default function ServerSubusers() {
                 onClick={() => setOpenModal('create')}
                 color='blue'
                 leftSection={<FontAwesomeIcon icon={faPlus} />}
-                disabled={atLimit}
+                disabled={!subusers || atLimit}
               >
                 {t('common.button.create', {})}
               </Button>
@@ -151,7 +151,7 @@ export default function ServerSubusers() {
                       onClick={() => setOpenModal('create')}
                       color='blue'
                       leftSection={<FontAwesomeIcon icon={faPlus} />}
-                      disabled={atLimit}
+                      disabled={!subusers || atLimit}
                     >
                       {t('pages.server.subusers.button.createFirstSubuser', {})}
                     </Button>

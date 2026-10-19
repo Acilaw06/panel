@@ -136,7 +136,7 @@ export default function ServerBackups({
     enabled: (showGroups || showGroupLabels) && canReadGroups,
   });
 
-  const { data: usage } = useQuery({
+  const { data: usage, isError: usageFailed } = useQuery({
     queryKey: queryKeys.server(server.uuid).backups.usage(),
     queryFn: () => getBackupUsage(server.uuid),
   });
@@ -212,7 +212,8 @@ export default function ServerBackups({
   const atBackupLimit = totalBackupCount >= server.featureLimits.backups;
   // the section list is filtered to one kind, so its fallback understates the shared limit
   const usageUnknown = !usage && variant === 'section';
-  const createDisabled = atBackupLimit || usageUnknown || createBlockedReason !== null;
+  const countKnown = usage !== undefined || usageFailed;
+  const createDisabled = !countKnown || atBackupLimit || usageUnknown || createBlockedReason !== null;
   const createTooltip = atBackupLimit
     ? t(
         variant === 'page'
@@ -238,17 +239,17 @@ export default function ServerBackups({
     variant === 'page'
       ? usage && usage.databaseInstance > 0
         ? t('pages.server.backups.subtitleWithDatabase', {
-            current: totalBackupCount,
+            current: countKnown ? totalBackupCount : '…',
             max: server.featureLimits.backups,
             server: usage.server,
             database: usage.databaseInstance,
           })
         : t('pages.server.backups.subtitle', {
-            current: totalBackupCount,
+            current: countKnown ? totalBackupCount : '…',
             max: server.featureLimits.backups,
           })
       : t('pages.server.databases.instance.backups.subtitle', {
-          current: totalBackupCount,
+          current: countKnown ? totalBackupCount : '…',
           max: server.featureLimits.backups,
         });
 

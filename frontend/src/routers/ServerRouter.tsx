@@ -34,6 +34,7 @@ import { useToast } from '@/providers/ToastProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import ServerPermissionGuard from '@/routers/guards/ServerPermissionGuard.tsx';
 import serverRoutes from '@/routers/routes/serverRoutes.ts';
+import { trackActivity } from '@/stores/activity.ts';
 import { useServerStore } from '@/stores/server.ts';
 import ServerStateGuard from './guards/ServerStateGuard.tsx';
 import ServerSelectorModal from './ServerSelectorModal.tsx';
@@ -150,7 +151,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
         import('@/pages/server/console/ServerConsole.tsx').catch(() => undefined);
       }
 
-      getServer(params.id)
+      trackActivity(getServer(params.id))
         .then((data) => {
           setSocketInstance(null);
           setServer(data);

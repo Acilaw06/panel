@@ -25,6 +25,7 @@
   --animate-progress-indeterminate: progress-indeterminate 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   --animate-ring-indeterminate: ring-indeterminate 1.4s linear infinite;
   --animate-scrolling-text: scrolling-text 6s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.3s ease-out 0.15s both;
 
   @keyframes progress-indeterminate {
     from {
@@ -42,6 +43,15 @@
     }
     to {
       rotate: 360deg;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 
@@ -403,12 +413,12 @@
 /* containment on body stops its background propagating to the canvas, so html paints it */
 html {
   scrollbar-gutter: stable;
-  background-color: var(--mantine-color-body);
+  background-color: var(--mantine-color-body, #242424);
 }
 
 body {
   @apply font-sans;
-  background-color: var(--mantine-color-body);
+  background-color: var(--mantine-color-body, #242424);
   color: var(--mantine-color-text);
   container-type: inline-size;
   container-name: page;

@@ -44,6 +44,7 @@ const baseTranslations = defineTranslations({
       button: {
         create: 'Create',
         add: 'Add',
+        retry: 'Retry',
         addDefaultPort: 'Add :{port}',
         save: 'Save',
         saveAndStay: 'Save & Stay',
@@ -377,7 +378,10 @@ const baseTranslations = defineTranslations({
         selectRow: 'Select row',
         pagination: {
           results: 'Showing {start} to {end} of {total} results.',
-          empty: "No items could be found, it's almost like they are hiding.",
+        },
+        empty: {
+          title: 'No items found',
+          description: 'Try a different search, or check back once something has been added.',
         },
         columns: {
           id: 'ID',
@@ -669,9 +673,19 @@ const baseTranslations = defineTranslations({
           addRedirect: 'Add Redirect',
         },
       },
+      assetReloadNotice: {
+        title: 'Updating to the latest version',
+        reloading: 'A new version of the panel is available. Reloading...',
+        offline: 'A new version of the panel is available. Reloading once your connection is back...',
+        stalled: 'A new version of the panel is available. Reload the page to continue.',
+        button: {
+          reloadNow: 'Reload Now',
+        },
+      },
       errorBoundary: {
         message:
           'An unexpected error occurred while rendering this page. Try refreshing. If the problem persists, contact your system administrator.',
+        refresh: 'Refresh Page',
         hideDetails: 'Hide Details',
         showDetails: 'Show Details',
         errorMessage: 'Error Message:',
@@ -1305,6 +1319,12 @@ const baseTranslations = defineTranslations({
       },
       account: {
         home: {
+          empty: {
+            title: 'No Servers',
+            description:
+              'This account has no servers yet. Servers created for it, or shared with it as a subuser, show up here.',
+          },
+          emptyGroup: 'This group is empty. Drag a server here to add it.',
           title: 'Servers',
           tooltip: {
             removeFromGroup: 'Remove from Group',
@@ -1319,6 +1339,12 @@ const baseTranslations = defineTranslations({
             groupedServers: {
               title: 'Grouped Servers',
               page: {
+                empty: {
+                  title: 'No Server Groups',
+                  description:
+                    'Every server is listed on its own. Create a group to sort servers into sections and reorder them by dragging.',
+                  descriptionReadOnly: 'Every server is listed on its own.',
+                },
                 button: {
                   createGroup: 'Create Group',
                 },
@@ -1372,7 +1398,6 @@ const baseTranslations = defineTranslations({
                     moved: 'Server moved to {group}.',
                   },
                 },
-                noGroups: 'No Groups could be found, time to create one?',
               },
             },
             allServers: {
@@ -1400,7 +1425,6 @@ const baseTranslations = defineTranslations({
             partial: 'Successfully {action} {successfulServers}. {failedServers} failed.',
             groupActions: 'Group Actions',
           },
-          noServers: 'No Servers could be found, time to add one?',
         },
         admin: {
           title: 'Admin',
@@ -2281,7 +2305,6 @@ const baseTranslations = defineTranslations({
                 sidebar: {
                   templates: 'Templates',
                   globalVariables: 'Global Variables',
-                  loading: 'Loading...',
                   availableVariables: 'Available Variables',
                 },
                 alert: {
@@ -2303,7 +2326,6 @@ const baseTranslations = defineTranslations({
                     'Fragments are MiniJinja snippets with access to the same variables as the template. An empty field uses the default shown in it; languages without a value fall back to the English value, then to the built-in translation.',
                   custom: 'Custom',
                   add: 'Add Variable',
-                  loading: 'Loading...',
                   empty: 'No variables defined.',
                   error: {
                     valueRequired: 'Custom variables need an English value.',
@@ -2332,7 +2354,6 @@ const baseTranslations = defineTranslations({
                     },
                   },
                 },
-                loadingTemplate: 'Loading template...',
                 form: {
                   subject: 'Subject',
                 },
@@ -2628,11 +2649,16 @@ const baseTranslations = defineTranslations({
           },
         },
         extensions: {
+          empty: {
+            title: 'No Extensions Installed',
+            description:
+              'This panel runs without any extensions. Drop an extension file onto this page to install one.',
+            descriptionDisabled:
+              'This panel runs without any extensions. Extension management has been disabled, so none can be installed.',
+          },
           title: 'Extensions',
           unknownExtension: 'Unknown Extension',
           alert: {
-            noExtensions: 'No extensions installed.',
-            managementDisabled: 'Extension management has been disabled on this panel.',
             heavyImageMissing:
               "You don't seem to be using the heavy image required to install extensions, see [here]({docsUrl}) on how to switch to it.",
             supervisorUnreachable: {
@@ -3176,6 +3202,10 @@ const baseTranslations = defineTranslations({
                 toast: {
                   connectionLost: 'Lost connection to the node log stream.',
                 },
+                empty: {
+                  title: 'No Log Files',
+                  description: 'This node has not written any log files yet.',
+                },
               },
             },
             allocations: {
@@ -3463,7 +3493,6 @@ const baseTranslations = defineTranslations({
                 },
                 metrics: {
                   title: 'Live Peer Links',
-                  loading: 'Asking the node for its metrics...',
                   unreachable: 'The node could not be reached, so live metrics are unavailable.',
                   applied: 'State version {epoch}, {snapshots} applied',
                   stat: {
@@ -4126,6 +4155,12 @@ const baseTranslations = defineTranslations({
                   variables: {
                     title: 'Variables',
                     page: {
+                      empty: {
+                        title: 'No Variables',
+                        description:
+                          'Servers using this egg have nothing to set on their Startup page. Add a variable to pass a setting into the startup command and install script.',
+                        descriptionReadOnly: 'Servers using this egg have nothing to set on their Startup page.',
+                      },
                       title: 'Egg Variables',
                       aria: {
                         reorder: 'Reorder variable',
@@ -5626,11 +5661,17 @@ const baseTranslations = defineTranslations({
           },
           stats: {
             offline: 'Server is offline',
+            connecting: 'Connecting...',
           },
           socketConnected: 'Connected ({ping}ms ping)',
           socketDisconnected: 'Disconnected',
         },
         files: {
+          empty: {
+            title: 'Empty Directory',
+            description: 'There is nothing in this directory yet. Upload files or create new ones to fill it.',
+            descriptionReadOnly: 'There is nothing in this directory yet.',
+          },
           title: 'Files',
           editorNotFound: {
             title: 'Not Found',
@@ -6824,6 +6865,14 @@ const baseTranslations = defineTranslations({
             },
           },
           view: {
+            empty: {
+              triggers: {
+                title: 'No Triggers',
+                description:
+                  'This schedule never starts on its own and only runs when started by hand. Edit it to add a trigger.',
+                descriptionReadOnly: 'This schedule never starts on its own and only runs when started by hand.',
+              },
+            },
             badge: {
               running: 'Running',
             },
@@ -6839,10 +6888,6 @@ const baseTranslations = defineTranslations({
               actions: 'Schedule Actions',
               preConditions: 'Schedule Pre-Conditions',
               triggers: 'Schedule Triggers',
-            },
-            alert: {
-              noActions: 'No actions configured for this schedule',
-              noTriggers: 'No triggers configured for this schedule',
             },
           },
           step: {
@@ -7005,6 +7050,7 @@ const baseTranslations = defineTranslations({
               limitReached: 'This schedule is limited to {max} steps.',
             },
             empty: {
+              descriptionReadOnly: 'This schedule does nothing when it runs.',
               title: 'No Steps Configured',
               description: "This schedule doesn't have any steps yet. Add some actions to get started.",
             },
@@ -7900,6 +7946,11 @@ const baseTranslations = defineTranslations({
           },
         },
         startup: {
+          empty: {
+            title: 'No Startup Variables',
+            description:
+              'The egg this server runs on has no settings to change here, so the startup command runs as it is.',
+          },
           title: 'Startup',
           variables: 'Variables',
           dockerImageDescription:
@@ -7918,7 +7969,6 @@ const baseTranslations = defineTranslations({
                 'You have unsaved changes to your startup variables. Are you sure you want to leave this page? If you leave, your changes will be lost.',
             },
           },
-          noVariables: 'No startup variables found for this server.',
           predefinedStartupCommands: 'Predefined Startup Commands',
         },
         mounts: {

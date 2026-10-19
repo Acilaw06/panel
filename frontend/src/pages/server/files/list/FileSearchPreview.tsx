@@ -153,6 +153,7 @@ export default function FileSearchPreview({
     queryFn: canRead && !matches ? () => getFileLines(serverUuid, path, 1, FILE_SEARCH_PREVIEW_LINES) : skipToken,
     staleTime: Infinity,
     retry: false,
+    meta: { progress: false },
   });
   const block = canRead ? (matchBlock ?? (!matches && !isError ? data : undefined)) : undefined;
   const content = stripTrailingNewline(block?.content ?? '');

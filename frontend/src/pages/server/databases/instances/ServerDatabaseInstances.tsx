@@ -57,7 +57,7 @@ export default function ServerDatabaseInstances() {
     }
   };
 
-  const disabled = full || agentTemplates.length === 0;
+  const disabled = !settled || full || agentTemplates.length === 0;
   const noTemplates = !full && agentTemplates.length === 0;
   const isEmpty = settled && !loading && !error && !debouncedSearch && data?.total === 0;
 
@@ -65,7 +65,7 @@ export default function ServerDatabaseInstances() {
     <ServerContentContainer
       title={t('pages.server.databases.title', {})}
       subtitle={t('pages.server.databases.subtitle', {
-        current: used,
+        current: settled ? used : '…',
         max: server.featureLimits.databases,
       })}
       search={search}
@@ -74,7 +74,7 @@ export default function ServerDatabaseInstances() {
         isEmpty ? undefined : (
           <ServerCan action='database-instances.create'>
             <ConditionalTooltip
-              enabled={disabled}
+              enabled={settled && disabled}
               label={
                 full
                   ? t('pages.server.databases.tooltip.limitReached', {

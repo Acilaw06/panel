@@ -174,7 +174,7 @@ const AllocationRow = forwardRef<HTMLTableRowElement, AllocationRowProps>(functi
             <td className='relative w-10 text-center'>
               {allocation.isPrimary && (
                 <Tooltip label={t('common.tooltip.primary', {})}>
-                  <FontAwesomeIcon icon={faStar} className='text-yellow-500 ml-3' />
+                  <FontAwesomeIcon icon={faStar} className='text-(--mantine-color-yellow-text) ml-3' />
                 </Tooltip>
               )}
             </td>

@@ -18,6 +18,7 @@ import TitleCard from '@/elements/data-display/TitleCard.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
+import ResourceView from '@/elements/ResourceView.tsx';
 import Text from '@/elements/typography/Text.tsx';
 import { bytesToString, mbToBytes } from '@/lib/format/size.ts';
 import { formatDateTime } from '@/lib/format/time.ts';
@@ -34,7 +35,7 @@ export default function DatabaseAgentHostOverview({ databaseAgentHost }: { datab
   const { t } = useTranslations();
   const updateInformation = useAdminStore((state) => state.updateInformation);
 
-  const { data: capacity } = useResource({
+  const capacityResource = useResource({
     queryKey: queryKeys.admin.databaseAgentHosts.capacity(databaseAgentHost.uuid),
     queryFn: () => getDatabaseAgentHostCapacity(databaseAgentHost.uuid),
     silent: true,
@@ -168,62 +169,64 @@ export default function DatabaseAgentHostOverview({ databaseAgentHost }: { datab
           title={t('pages.admin.databaseAgentHosts.tabs.overview.page.card.resources', {})}
           icon={<FontAwesomeIcon icon={faChartPie} />}
           rightSection={
-            <Badge color='gray' variant='light' ml='auto' loading={!capacity}>
+            <Badge color='gray' variant='light' ml='auto' loading={!capacityResource.data && !capacityResource.error}>
               <FontAwesomeIcon icon={faServer} className='mr-1.5' />
               {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.instances', {})}:{' '}
-              {capacity?.allocated.instances}
+              {capacityResource.data?.allocated.instances}
             </Badge>
           }
         >
-          {!capacity ? (
-            <Spinner.Centered />
-          ) : (
-            <div className='grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4'>
-              <CapacityCard
-                label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.memory', {})}
-                icon={<FontAwesomeIcon icon={faMemory} />}
-                allocated={capacity.allocated.memory}
-                limit={capacity.limits.memory}
-                noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
-                footer={
-                  capacity.limits.memory === 0 ? undefined : (
-                    <p className='text-xs'>
-                      {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.free', {
-                        size: bytesToString(mbToBytes(Math.max(capacity.limits.memory - capacity.allocated.memory, 0))),
-                      })}
-                    </p>
-                  )
-                }
-              />
-              <CapacityCard
-                label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.disk', {})}
-                icon={<FontAwesomeIcon icon={faHardDrive} />}
-                allocated={capacity.allocated.disk}
-                limit={capacity.limits.disk}
-                noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
-                footer={
-                  capacity.limits.disk === 0 ? undefined : (
-                    <p className='text-xs'>
-                      {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.free', {
-                        size: bytesToString(mbToBytes(Math.max(capacity.limits.disk - capacity.allocated.disk, 0))),
-                      })}
-                    </p>
-                  )
-                }
-              />
-              <CapacityCard
-                label={t('common.stat.cpu', {})}
-                icon={<FontAwesomeIcon icon={faMicrochip} />}
-                allocated={capacity.allocated.cpu}
-                limit={0}
-                noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
-                formatValue={(value) => `${value}%`}
-                footer={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.cores', {
-                  cores: (capacity.allocated.cpu / 100).toFixed(2),
-                })}
-              />
-            </div>
-          )}
+          <ResourceView resource={capacityResource}>
+            {(capacity) => (
+              <div className='grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4'>
+                <CapacityCard
+                  label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.memory', {})}
+                  icon={<FontAwesomeIcon icon={faMemory} />}
+                  allocated={capacity.allocated.memory}
+                  limit={capacity.limits.memory}
+                  noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
+                  footer={
+                    capacity.limits.memory === 0 ? undefined : (
+                      <p className='text-xs text-(--mantine-color-dimmed)'>
+                        {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.free', {
+                          size: bytesToString(
+                            mbToBytes(Math.max(capacity.limits.memory - capacity.allocated.memory, 0)),
+                          ),
+                        })}
+                      </p>
+                    )
+                  }
+                />
+                <CapacityCard
+                  label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.disk', {})}
+                  icon={<FontAwesomeIcon icon={faHardDrive} />}
+                  allocated={capacity.allocated.disk}
+                  limit={capacity.limits.disk}
+                  noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
+                  footer={
+                    capacity.limits.disk === 0 ? undefined : (
+                      <p className='text-xs text-(--mantine-color-dimmed)'>
+                        {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.free', {
+                          size: bytesToString(mbToBytes(Math.max(capacity.limits.disk - capacity.allocated.disk, 0))),
+                        })}
+                      </p>
+                    )
+                  }
+                />
+                <CapacityCard
+                  label={t('common.stat.cpu', {})}
+                  icon={<FontAwesomeIcon icon={faMicrochip} />}
+                  allocated={capacity.allocated.cpu}
+                  limit={0}
+                  noLimitLabel={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noLimit', {})}
+                  formatValue={(value) => `${value}%`}
+                  footer={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.cores', {
+                    cores: (capacity.allocated.cpu / 100).toFixed(2),
+                  })}
+                />
+              </div>
+            )}
+          </ResourceView>
         </TitleCard>
       </Stack>
     </AdminSubContentContainer>

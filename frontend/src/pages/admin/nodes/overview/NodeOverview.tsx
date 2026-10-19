@@ -21,6 +21,7 @@ import ExtensionSlot from '@/elements/ExtensionSlot.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
+import ResourceView from '@/elements/ResourceView.tsx';
 import RedactedText from '@/elements/typography/RedactedText.tsx';
 import { bytesToString, mbToBytes } from '@/lib/format/size.ts';
 import { formatDateTime } from '@/lib/format/time.ts';
@@ -35,7 +36,7 @@ type Node = z.infer<typeof adminNodeSchema>;
 export default function NodeOverview({ node }: { node: Node }) {
   const { t } = useTranslations();
 
-  const { data: capacity } = useResource({
+  const capacityResource = useResource({
     queryKey: queryKeys.admin.nodes.capacity(node.uuid),
     queryFn: () => getNodeCapacity(node.uuid),
     silent: true,
@@ -201,80 +202,83 @@ export default function NodeOverview({ node }: { node: Node }) {
           title={t('pages.admin.nodes.tabs.capacity.page.card.resources', {})}
           icon={<FontAwesomeIcon icon={faChartPie} />}
           rightSection={
-            <Badge color='gray' variant='light' ml='auto' loading={!capacity}>
+            <Badge color='gray' variant='light' ml='auto' loading={!capacityResource.data && !capacityResource.error}>
               <FontAwesomeIcon icon={faServer} className='mr-1.5' />
-              {t('pages.admin.nodes.tabs.capacity.page.label.servers', {})}: {capacity?.allocated.servers}
+              {t('pages.admin.nodes.tabs.capacity.page.label.servers', {})}: {capacityResource.data?.allocated.servers}
             </Badge>
           }
         >
-          {!capacity ? (
-            <Spinner.Centered />
-          ) : (
-            <div className='grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4'>
-              <CapacityCard
-                label={t('pages.admin.nodes.tabs.capacity.page.label.memory', {})}
-                icon={<FontAwesomeIcon icon={faMemory} />}
-                allocated={capacity.allocated.memory}
-                limit={capacity.limits.memory}
-                noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
-                footer={
-                  capacity.limits.memory === 0 ? (
-                    capacity.allocated.memoryOverhead > 0 ? (
-                      <p className='text-xs'>
-                        {t('pages.admin.nodes.tabs.capacity.page.label.overhead', {
-                          size: bytesToString(mbToBytes(capacity.allocated.memoryOverhead)),
+          <ResourceView resource={capacityResource}>
+            {(capacity) => (
+              <div className='grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4'>
+                <CapacityCard
+                  label={t('pages.admin.nodes.tabs.capacity.page.label.memory', {})}
+                  icon={<FontAwesomeIcon icon={faMemory} />}
+                  allocated={capacity.allocated.memory}
+                  limit={capacity.limits.memory}
+                  noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
+                  footer={
+                    capacity.limits.memory === 0 ? (
+                      capacity.allocated.memoryOverhead > 0 ? (
+                        <p className='text-xs text-(--mantine-color-dimmed)'>
+                          {t('pages.admin.nodes.tabs.capacity.page.label.overhead', {
+                            size: bytesToString(mbToBytes(capacity.allocated.memoryOverhead)),
+                          })}
+                        </p>
+                      ) : undefined
+                    ) : (
+                      <p className='text-xs text-(--mantine-color-dimmed)'>
+                        {t('pages.admin.nodes.tabs.capacity.page.label.free', {
+                          size: bytesToString(
+                            mbToBytes(Math.max(capacity.limits.memory - capacity.allocated.memory, 0)),
+                          ),
+                        })}
+                        {capacity.allocated.memoryOverhead > 0 &&
+                          ` ${t('pages.admin.nodes.tabs.capacity.page.label.overhead', {
+                            size: bytesToString(mbToBytes(capacity.allocated.memoryOverhead)),
+                          })}`}
+                      </p>
+                    )
+                  }
+                />
+                <CapacityCard
+                  label={t('pages.admin.nodes.tabs.capacity.page.label.disk', {})}
+                  icon={<FontAwesomeIcon icon={faHardDrive} />}
+                  allocated={capacity.allocated.disk}
+                  limit={capacity.limits.disk}
+                  noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
+                  footer={
+                    capacity.limits.disk === 0 ? undefined : (
+                      <p className='text-xs text-(--mantine-color-dimmed)'>
+                        {t('pages.admin.nodes.tabs.capacity.page.label.free', {
+                          size: bytesToString(mbToBytes(Math.max(capacity.limits.disk - capacity.allocated.disk, 0))),
                         })}
                       </p>
-                    ) : undefined
-                  ) : (
-                    <p className='text-xs'>
-                      {t('pages.admin.nodes.tabs.capacity.page.label.free', {
-                        size: bytesToString(mbToBytes(Math.max(capacity.limits.memory - capacity.allocated.memory, 0))),
-                      })}
-                      {capacity.allocated.memoryOverhead > 0 &&
-                        ` ${t('pages.admin.nodes.tabs.capacity.page.label.overhead', {
-                          size: bytesToString(mbToBytes(capacity.allocated.memoryOverhead)),
-                        })}`}
-                    </p>
-                  )
-                }
-              />
-              <CapacityCard
-                label={t('pages.admin.nodes.tabs.capacity.page.label.disk', {})}
-                icon={<FontAwesomeIcon icon={faHardDrive} />}
-                allocated={capacity.allocated.disk}
-                limit={capacity.limits.disk}
-                noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
-                footer={
-                  capacity.limits.disk === 0 ? undefined : (
-                    <p className='text-xs'>
-                      {t('pages.admin.nodes.tabs.capacity.page.label.free', {
-                        size: bytesToString(mbToBytes(Math.max(capacity.limits.disk - capacity.allocated.disk, 0))),
-                      })}
-                    </p>
-                  )
-                }
-              />
-              <CapacityCard
-                label={t('common.stat.cpu', {})}
-                icon={<FontAwesomeIcon icon={faMicrochip} />}
-                allocated={capacity.allocated.cpu}
-                limit={0}
-                noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
-                formatValue={(value) => `${value}%`}
-                footer={t('pages.admin.nodes.tabs.capacity.page.label.cores', {
-                  cores: (capacity.allocated.cpu / 100).toFixed(2),
-                })}
-              />
-              <ExtensionSlot
-                components={
-                  window.extensionContext.extensionRegistry.pages.admin.nodes.view.overview.resources.appendedComponents
-                }
-                name='resources-ext'
-                props={{ node }}
-              />
-            </div>
-          )}
+                    )
+                  }
+                />
+                <CapacityCard
+                  label={t('common.stat.cpu', {})}
+                  icon={<FontAwesomeIcon icon={faMicrochip} />}
+                  allocated={capacity.allocated.cpu}
+                  limit={0}
+                  noLimitLabel={t('pages.admin.nodes.tabs.capacity.page.label.noLimit', {})}
+                  formatValue={(value) => `${value}%`}
+                  footer={t('pages.admin.nodes.tabs.capacity.page.label.cores', {
+                    cores: (capacity.allocated.cpu / 100).toFixed(2),
+                  })}
+                />
+                <ExtensionSlot
+                  components={
+                    window.extensionContext.extensionRegistry.pages.admin.nodes.view.overview.resources
+                      .appendedComponents
+                  }
+                  name='resources-ext'
+                  props={{ node }}
+                />
+              </div>
+            )}
+          </ResourceView>
         </TitleCard>
         <ExtensionSlot
           components={

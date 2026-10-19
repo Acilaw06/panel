@@ -165,9 +165,9 @@ const DatabaseInstanceRow = forwardRef<HTMLTableRowElement, DatabaseInstanceRowP
             <TableData>
               <Group gap='xs' wrap='nowrap'>
                 {instance.isLocked ? (
-                  <FontAwesomeIcon className='text-green-500' icon={faLock} />
+                  <FontAwesomeIcon className='text-(--mantine-color-green-text)' icon={faLock} />
                 ) : (
-                  <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
+                  <FontAwesomeIcon className='text-(--mantine-color-red-text)' icon={faLockOpen} />
                 )}
                 {instance.updateAvailable && (
                   <Badge color='yellow'>{t('pages.server.databases.instance.updateAvailable', {})}</Badge>
