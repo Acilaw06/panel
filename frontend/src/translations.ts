@@ -571,6 +571,7 @@ const baseTranslations = defineTranslations({
         },
         connectionStatus: {
           connected: 'Connected',
+          connecting: 'Connecting...',
           offline: 'Offline',
         },
         serverAutoStartBehavior: {
@@ -6436,8 +6437,10 @@ const baseTranslations = defineTranslations({
                 logs: 'Logs',
               },
               stats: {
+                connecting: 'Connecting...',
                 offline: 'Instance is offline',
               },
+              connectionLost: 'Lost connection to the database instance.',
             },
             databases: {
               title: 'Databases',
@@ -7057,6 +7060,12 @@ const baseTranslations = defineTranslations({
             warning: {
               unclosedIf: 'An "If" block is missing its "End If". All remaining steps run as part of the block.',
               orphanBranch: 'There is an "Else", "Else If" or "End If" step without a matching "If" before it.',
+              variable: {
+                never: 'The variable "{variable}" is never set by this schedule, so it will not resolve.',
+                unavailable: 'The variable "{variable}" is not set by a trigger or an earlier step at this point.',
+                conditional:
+                  'The variable "{variable}" is only set on some runs, for example inside another branch, by one of several triggers or by a step that may fail.',
+              },
             },
             groups: {
               server: 'Server',

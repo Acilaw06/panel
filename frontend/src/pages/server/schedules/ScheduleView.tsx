@@ -21,6 +21,7 @@ import Button from '@/elements/buttons/Button.tsx';
 import { ServerCan } from '@/elements/Can.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Badge from '@/elements/data-display/Badge.tsx';
+import Alert from '@/elements/feedback/Alert.tsx';
 import EmptyState from '@/elements/feedback/EmptyState.tsx';
 import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
@@ -43,6 +44,8 @@ import DetailCard from './renderers/DetailCard.tsx';
 import TriggerCard from './renderers/TriggerCard.tsx';
 import StepCard from './StepCard.tsx';
 import StepsEditor, { stepIndentStyle, stepIndents } from './StepsEditor.tsx';
+import VariableIssueList from './VariableIssueList.tsx';
+import { analyzeScheduleVariables } from './variableAnalysis.ts';
 
 export default function ScheduleView() {
   const params = useParams<'id'>();
@@ -134,6 +137,7 @@ export default function ScheduleView() {
   }
 
   const indents = stepIndents(scheduleSteps);
+  const variableIssues = analyzeScheduleVariables(schedule, scheduleSteps);
 
   return (
     <ServerContentContainer title={t('pages.server.schedules.title', {})} hideTitleComponent>
@@ -273,6 +277,7 @@ export default function ScheduleView() {
                       schedule={schedule}
                       step={step}
                       isActive={step.uuid === runningScheduleSteps.get(schedule.uuid)}
+                      variableIssues={variableIssues.steps.get(step.uuid)}
                     />
                   </div>
                 ))}
@@ -292,6 +297,12 @@ export default function ScheduleView() {
                 setConditionsDirty(true);
               }}
             />
+
+            {variableIssues.condition.length > 0 && (
+              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow' mt='md'>
+                <VariableIssueList issues={variableIssues.condition} />
+              </Alert>
+            )}
 
             <ServerCan action='schedules.update'>
               <div className='flex flex-row mt-4'>

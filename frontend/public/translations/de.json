@@ -749,6 +749,7 @@
         },
         "connectionStatus": {
           "connected": "Verbunden",
+          "connecting": "Verbindung wird hergestellt...",
           "offline": "Offline"
         },
         "serverAutoStartBehavior": {
@@ -6361,8 +6362,10 @@
                 "logs": "Logs"
               },
               "stats": {
+                "connecting": "Verbindung wird hergestellt...",
                 "offline": "Instanz ist offline"
-              }
+              },
+              "connectionLost": "Verbindung zur Datenbankinstanz verloren."
             },
             "databases": {
               "title": "Datenbanken",
