@@ -1967,7 +1967,10 @@
           "modal": {
             "deleteOAuthLinks": {
               "title": "Löschen der OAuth-Verknüpfungen bestätigen",
-              "content": "Bist du sicher, dass du **{oauthLinks}** aus deinem Konto löschen möchtest?"
+              "content": "Bist du sicher, dass du **{oauthLinks}** aus deinem Konto löschen möchtest?",
+              "alert": {
+                "skipped": "Übersprungen: {oauthLinks}. Verknüpfungen mit Anbietern, die das Trennen nicht erlauben, können nicht entfernt werden."
+              }
             },
             "deleteOAuthLink": {
               "title": "Löschen der OAuth-Verknüpfung bestätigen",

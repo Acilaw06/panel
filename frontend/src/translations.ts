@@ -1836,6 +1836,10 @@ const baseTranslations = defineTranslations({
             deleteOAuthLinks: {
               title: 'Confirm OAuth Link Deletion',
               content: 'Are you sure you want to delete **{oauthLinks}** from your account?',
+              alert: {
+                skipped:
+                  '{oauthLinks} will be skipped. Links to providers that do not allow unlinking cannot be removed.',
+              },
             },
             deleteOAuthLink: {
               title: 'Confirm OAuth Link Deletion',
