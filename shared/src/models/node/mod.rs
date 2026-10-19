@@ -632,12 +632,12 @@ impl Node {
         database
             .cache
             .cached(
-                &format!("node::{}::configuration", self.uuid),
+                &format!("node::{}::configuration::raw", self.uuid),
                 120,
                 || async {
-                    Ok::<_, anyhow::Error>(
+                    Ok::<_, anyhow::Error>(wings_api::Config(
                         self.api_client(database).await?.get_system_config().await?,
-                    )
+                    ))
                 },
             )
             .await
@@ -662,7 +662,7 @@ impl Node {
 
         database
             .cache
-            .invalidate(&format!("node::{}::configuration", self.uuid))
+            .invalidate(&format!("node::{}::configuration::raw", self.uuid))
             .await?;
 
         Ok(true)
@@ -955,13 +955,7 @@ impl Node {
                 .ok()?
                 .ok()?;
 
-        Some(
-            !config.system.user.rootless.enabled
-                && !matches!(
-                    config.docker.firewall.backend,
-                    wings_api::FirewallBackendKind::Disabled
-                ),
-        )
+        firewall_supported(&config).ok()
     }
 
     /// The node's `allowed_mounts` / `allowed_devices`, `None` when its configuration could
@@ -978,7 +972,7 @@ impl Node {
                 .ok()?
                 .ok()?;
 
-        Some(NodeAllowedSources::from_config(&config))
+        NodeAllowedSources::from_config(&config).ok()
     }
 
     pub async fn bandwidth_status(
@@ -1131,6 +1125,35 @@ impl Node {
     ) -> Result<String, anyhow::Error> {
         Ok(jwt.create_custom(self.token.decrypt(database).await?.as_bytes(), payload)?)
     }
+}
+
+/// Whether a node with this config enforces firewall rules, see [`Node::fetch_firewall_support`].
+fn firewall_supported(config: &wings_api::Config) -> Result<bool, serde_json::Error> {
+    nestify::nest! {
+        #[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfig {
+            system: #[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfigSystem {
+                user: #[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfigSystemUser {
+                    rootless: #[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfigSystemUserRootless {
+                        enabled: bool,
+                    },
+                },
+            },
+            docker: #[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfigDocker {
+                // absent on wings releases predating firewalling
+                firewall: Option<#[derive(Default, Deserialize)] #[serde(default)] struct FirewallConfigDockerFirewall {
+                    backend: compact_str::CompactString,
+                }>,
+            },
+        }
+    }
+
+    let config: FirewallConfig = config.view()?;
+
+    Ok(!config.system.user.rootless.enabled
+        && config
+            .docker
+            .firewall
+            .is_some_and(|firewall| firewall.backend != "disabled"))
 }
 
 #[async_trait::async_trait]
@@ -1718,4 +1741,58 @@ pub struct AdminApiNode {
     pub disk: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    // firewall_supported
+    #[test]
+    fn firewall_is_unsupported_without_a_firewall_section() {
+        let config = wings_api::Config(json!({ "docker": { "network": {} } }));
+
+        assert!(!firewall_supported(&config).unwrap());
+    }
+
+    #[test]
+    fn firewall_is_supported_when_the_section_has_no_backend() {
+        let config = wings_api::Config(json!({ "docker": { "firewall": {} } }));
+
+        assert!(firewall_supported(&config).unwrap());
+    }
+
+    #[test]
+    fn firewall_is_unsupported_when_the_backend_is_disabled() {
+        let config = wings_api::Config(json!({
+            "docker": { "firewall": { "backend": "disabled" } },
+        }));
+
+        assert!(!firewall_supported(&config).unwrap());
+    }
+
+    #[test]
+    fn unknown_firewall_backends_count_as_supported() {
+        let config = wings_api::Config(json!({
+            "docker": { "firewall": { "backend": "some_future_backend", "new_option": 1 } },
+        }));
+
+        assert!(firewall_supported(&config).unwrap());
+    }
+
+    #[test]
+    fn firewall_is_unsupported_when_rootless() {
+        let rootless = wings_api::Config(json!({
+            "system": { "user": { "rootless": { "enabled": true } } },
+            "docker": { "firewall": { "backend": "nftables" } },
+        }));
+        let rootful = wings_api::Config(json!({
+            "system": { "user": { "rootless": { "enabled": false } } },
+            "docker": { "firewall": { "backend": "nftables" } },
+        }));
+
+        assert!(!firewall_supported(&rootless).unwrap());
+        assert!(firewall_supported(&rootful).unwrap());
+    }
 }

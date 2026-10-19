@@ -346,16 +346,16 @@ impl DatabaseAgentHost {
     pub async fn fetch_configuration(
         &self,
         database: &crate::database::Database,
-    ) -> Result<db_agent_api::system_config::get::Response, anyhow::Error> {
+    ) -> Result<db_agent_api::Config, anyhow::Error> {
         database
             .cache
             .cached(
-                &format!("database_agent_host::{}::configuration", self.uuid),
+                &format!("database_agent_host::{}::configuration::raw", self.uuid),
                 120,
                 || async {
-                    Ok::<_, anyhow::Error>(
+                    Ok::<_, anyhow::Error>(db_agent_api::Config(
                         self.api_client(database).await?.get_system_config().await?,
-                    )
+                    ))
                 },
             )
             .await
@@ -407,7 +407,7 @@ impl DatabaseAgentHost {
         database
             .cache
             .invalidate(&format!(
-                "database_agent_host::{}::configuration",
+                "database_agent_host::{}::configuration::raw",
                 self.uuid
             ))
             .await?;
