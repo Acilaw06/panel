@@ -807,7 +807,7 @@ impl NestEgg {
 
     pub async fn by_user_with_pagination(
         database: &crate::database::Database,
-        user: &super::user::User,
+        permissions: &super::user::PermissionManager,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -833,8 +833,8 @@ impl NestEgg {
             Self::columns_sql(None),
             search = super::search_sql(3, &["nest_eggs.name"], &["nest_eggs.uuid"])
         )))
-        .bind(user.uuid)
-        .bind(user.role.as_ref().map_or(user.admin, |r| r.admin_permissions.iter().any(|p| p == "servers.read")))
+        .bind(permissions.user_uuid())
+        .bind(permissions.has_admin_permission("servers.read").is_ok())
         .bind(search)
         .bind(per_page)
         .bind(offset)

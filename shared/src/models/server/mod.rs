@@ -629,7 +629,7 @@ impl Server {
     /// The server and the caller's subuser entry are cached until they are written to.
     pub async fn by_user_identifier(
         database: &crate::database::Database,
-        user: &super::user::User,
+        permissions: &super::user::PermissionManager,
         identifier: &str,
     ) -> Result<Option<Self>, anyhow::Error> {
         let server = match identifier.len() {
@@ -645,34 +645,33 @@ impl Server {
             return Ok(None);
         };
 
-        if server.owner.uuid == user.uuid {
+        if server.owner.uuid == permissions.user_uuid() {
             return Ok(Some(server));
         }
 
-        if let Some((permissions, ignored_files)) =
+        if let Some((subuser_permissions, ignored_files)) =
             super::server_subuser::ServerSubuser::permissions_by_server_uuid_user_uuid_cached(
                 database,
                 server.uuid,
-                user.uuid,
+                permissions.user_uuid(),
             )
             .await?
         {
-            server.subuser_permissions = Some(Arc::new(permissions));
+            server.subuser_permissions = Some(Arc::new(subuser_permissions));
             server.subuser_ignored_files = Some(ignored_files);
 
             return Ok(Some(server));
         }
 
-        let admin_bypass = user.role.as_ref().map_or(user.admin, |role| {
-            role.admin_permissions.iter().any(|p| p == "servers.read")
-        });
-
-        Ok(admin_bypass.then_some(server))
+        Ok(permissions
+            .has_admin_permission("servers.read")
+            .is_ok()
+            .then_some(server))
     }
 
     pub async fn by_user_uuids(
         database: &crate::database::Database,
-        user: &super::user::User,
+        permissions: &super::user::PermissionManager,
         uuids: &[uuid::Uuid],
     ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
@@ -691,12 +690,8 @@ impl Server {
             "#,
             Self::columns_sql(None)
         )))
-        .bind(user.uuid)
-        .bind(
-            user.role.as_ref().map_or(user.admin, |r| {
-                r.admin_permissions.iter().any(|p| p == "servers.read")
-            }),
-        )
+        .bind(permissions.user_uuid())
+        .bind(permissions.has_admin_permission("servers.read").is_ok())
         .bind(uuids)
         .fetch_all(database.read())
         .await?;
@@ -754,7 +749,7 @@ impl Server {
 
     pub async fn by_user_uuid_server_order_with_pagination(
         database: &crate::database::Database,
-        user: &super::user::User,
+        permissions: &super::user::PermissionManager,
         server_order: &[uuid::Uuid],
         page: i64,
         per_page: i64,
@@ -782,16 +777,12 @@ impl Server {
             Self::columns_sql(None),
             search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
         )))
-        .bind(user.uuid)
+        .bind(permissions.user_uuid())
         .bind(server_order)
         .bind(search)
         .bind(per_page)
         .bind(offset)
-        .bind(
-            user.role.as_ref().map_or(user.admin, |r| {
-                r.admin_permissions.iter().any(|p| p == "servers.read")
-            }),
-        )
+        .bind(permissions.has_admin_permission("servers.read").is_ok())
         .fetch_all(database.read())
         .await?;
 

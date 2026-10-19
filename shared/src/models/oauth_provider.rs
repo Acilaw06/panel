@@ -1220,6 +1220,30 @@ pub struct UpdateOAuthProviderOptions {
     pub avatar_overwrite: Option<bool>,
 }
 
+impl UpdateOAuthProviderOptions {
+    /// Whether this changes how the provider identifies users or how they may sign in with it,
+    /// which amounts to taking over every linked account.
+    pub fn changes_identity(&self, oauth_provider: &OAuthProvider) -> bool {
+        fn differs<T: PartialEq>(new: &Option<T>, current: &T) -> bool {
+            new.as_ref().is_some_and(|new| new != current)
+        }
+
+        differs(&self.client_id, &oauth_provider.client_id)
+            || differs(&self.auth_url, &oauth_provider.auth_url)
+            || differs(&self.token_url, &oauth_provider.token_url)
+            || differs(&self.info_url, &oauth_provider.info_url)
+            || differs(&self.info_urls, &oauth_provider.info_urls)
+            || differs(&self.scopes, &oauth_provider.scopes)
+            || differs(&self.identifier_path, &oauth_provider.identifier_path)
+            || differs(&self.login_only, &oauth_provider.login_only)
+            || differs(
+                &self.login_bypass_two_factor,
+                &oauth_provider.login_bypass_two_factor,
+            )
+            || differs(&self.user_manageable, &oauth_provider.user_manageable)
+    }
+}
+
 #[async_trait::async_trait]
 impl UpdatableModel for OAuthProvider {
     type UpdateOptions = UpdateOAuthProviderOptions;

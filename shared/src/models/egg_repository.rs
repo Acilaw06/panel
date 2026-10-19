@@ -89,7 +89,7 @@ fn validate_git_repository(
         gix::url::Scheme::Http | gix::url::Scheme::Https | gix::url::Scheme::Ssh => {}
         _ => {
             return Err(garde::Error::new(
-                "Invalid git repository: only http, https and ssh urls are supported, scp-style urls have to be written as ssh://user@host/path",
+                "Invalid git repository: only http, https, ssh and scp-style (user@host:path) urls are supported",
             ));
         }
     }
@@ -99,6 +99,20 @@ fn validate_git_repository(
     }
 
     Ok(())
+}
+
+/// Stored credentials are only ever sent back to the scheme, host and port they were entered for.
+fn same_origin(a: &str, b: &str) -> bool {
+    match (gix::url::parse(a), gix::url::parse(b)) {
+        (Ok(a), Ok(b)) => {
+            a.scheme == b.scheme
+                && a.port_or_default() == b.port_or_default()
+                && a.host()
+                    .zip(b.host())
+                    .is_some_and(|(a, b)| a.eq_ignore_ascii_case(b))
+        }
+        _ => false,
+    }
 }
 
 #[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
@@ -889,6 +903,15 @@ impl UpdatableModel for EggRepository {
         transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     ) -> Result<(), crate::database::DatabaseError> {
         options.validate()?;
+
+        if options.credentials.is_none()
+            && options
+                .git_repository
+                .as_deref()
+                .is_some_and(|git_repository| !same_origin(git_repository, &self.git_repository))
+        {
+            options.credentials = Some(EggRepositoryCredentials::None);
+        }
 
         let mut query_builder = UpdateQueryBuilder::new("egg_repositories");
 

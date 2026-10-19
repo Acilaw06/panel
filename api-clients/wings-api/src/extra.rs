@@ -736,6 +736,22 @@ pub enum ScheduleTrigger {
     Crash,
 }
 
+impl ScheduleTrigger {
+    pub fn permissions(&self) -> &'static [&'static str] {
+        match self {
+            ScheduleTrigger::Cron { .. } => &[],
+            ScheduleTrigger::PowerAction { .. } => &[],
+            ScheduleTrigger::ServerState { .. } => &[],
+            ScheduleTrigger::BackupStatus { .. } => &[],
+            ScheduleTrigger::DatabaseBackupStatus { .. } => &[],
+            ScheduleTrigger::ScheduleCompletion { .. } => &[],
+            ScheduleTrigger::ResourceUsage { .. } => &[],
+            ScheduleTrigger::ConsoleLine { .. } => &["control.read-console"],
+            ScheduleTrigger::Crash => &[],
+        }
+    }
+}
+
 #[derive(ToSchema, Deserialize, Serialize, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 pub enum ScheduleConditionComparator {

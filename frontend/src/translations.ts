@@ -4462,6 +4462,10 @@ const baseTranslations = defineTranslations({
                 toast: {
                   synced: 'Egg repository synchronised, found {eggs}.',
                 },
+                alert: {
+                  credentialsCleared:
+                    'Changing the scheme, host or port of the repository clears its stored credentials. Enter them again below if the new host needs them.',
+                },
                 modal: {
                   delete: {
                     title: 'Confirm Egg Repository Deletion',
@@ -5090,6 +5094,10 @@ const baseTranslations = defineTranslations({
                 modal: {
                   delete: {
                     title: 'Confirm Backup Configuration Deletion',
+                    alert: {
+                      detachWarning:
+                        'Existing backups made with this configuration will be detached from it and can no longer be restored or downloaded. Prefer editing the configuration over deleting it.',
+                    },
                   },
                   removeProvider: {
                     title: 'Confirm Provider Settings Removal',

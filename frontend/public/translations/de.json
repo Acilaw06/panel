@@ -4451,6 +4451,9 @@
                 "toast": {
                   "synced": "Egg Repository synchronisiert, {eggs} gefunden."
                 },
+                "alert": {
+                  "credentialsCleared": "Wenn Schema, Host oder Port des Repositorys geändert werden, werden die gespeicherten Zugangsdaten gelöscht. Gib sie unten erneut ein, falls der neue Host sie benötigt."
+                },
                 "modal": {
                   "delete": {
                     "title": "Egg Repository Löschung bestätigen"
@@ -5046,7 +5049,10 @@
                 },
                 "modal": {
                   "delete": {
-                    "title": "Löschen der Backup-Konfiguration bestätigen"
+                    "title": "Löschen der Backup-Konfiguration bestätigen",
+                    "alert": {
+                      "detachWarning": "Bestehende Backups, die mit dieser Konfiguration erstellt wurden, werden von ihr getrennt und können nicht mehr wiederhergestellt oder heruntergeladen werden. Bearbeite die Konfiguration lieber, anstatt sie zu löschen."
+                    }
                   },
                   "removeProvider": {
                     "title": "Entfernen der Provider-Einstellungen bestätigen",
