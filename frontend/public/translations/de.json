@@ -2768,6 +2768,10 @@
               "content": "Diese Erweiterungen werden erst wieder erstellt, wenn sie sich ändern oder du den Build ausdrücklich erneut startest.",
               "failedExtensions": "Der Build ist in {extensions} fehlgeschlagen. Aktualisiere oder entferne sie und starte den Build dann erneut."
             },
+            "startFailed": {
+              "title": "Einige Erweiterungen konnten nicht gestartet werden",
+              "content": "Sie sind beim Start abgestürzt, oder ihre Routen oder CLI-Befehle kollidieren mit dem Panel oder einer anderen Erweiterung, daher laufen sie nicht. Aktualisiere oder entferne sie und starte das Panel danach neu."
+            },
             "pendingRestart": {
               "title": "Einige Erweiterungen wurden aktiviert oder deaktiviert",
               "content": "Das Panel übernimmt die Änderung beim nächsten Start."
@@ -2817,6 +2821,7 @@
             "backendMissing": "Backend fehlt",
             "pendingBuild": "Build ausstehend",
             "buildFailed": "Build fehlgeschlagen",
+            "startFailed": "Start fehlgeschlagen",
             "pendingRemoval": "Entfernung ausstehend",
             "pendingRestart": "Neustart ausstehend",
             "disabled": "Deaktiviert",

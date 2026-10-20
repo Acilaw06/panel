@@ -73,6 +73,7 @@ export default function InstalledExtensionsGrid({
             isDisabled={backendExtension ? adminExtensions.disabled.includes(extension.packageName) : false}
             isPendingDisabled={adminExtensions.pendingDisabled.includes(extension.packageName)}
             isBuildFailed={failedExtensions.includes(extension.packageName)}
+            isStartFailed={extension.packageName in adminExtensions.failed}
             onRemove={extensionStatus && backendExtension ? () => onRemove(backendExtension) : undefined}
             onToggle={backendExtension ? (enabled) => onToggle(extension.packageName, enabled) : undefined}
             busy={isPending(`toggle:${extension.packageName}`) || isPending(`remove:${extension.packageName}`)}
@@ -87,6 +88,7 @@ export default function InstalledExtensionsGrid({
           isDisabled={adminExtensions.disabled.includes(backendExtension.metadataToml.packageName)}
           isPendingDisabled={adminExtensions.pendingDisabled.includes(backendExtension.metadataToml.packageName)}
           isBuildFailed={failedExtensions.includes(backendExtension.metadataToml.packageName)}
+          isStartFailed={backendExtension.metadataToml.packageName in adminExtensions.failed}
           onRemove={extensionStatus ? () => onRemove(backendExtension) : undefined}
           onToggle={(enabled) => onToggle(backendExtension.metadataToml.packageName, enabled)}
           busy={

@@ -380,6 +380,91 @@ pub async fn handle_postprocessing(
     Ok(response)
 }
 
+fn mount_extension_routes(
+    state: &shared::State,
+    routes: shared::extensions::ExtensionRouteBuilder,
+) -> OpenApiRouter<shared::State> {
+    // route_layer panics on a router without routes
+    fn non_empty(
+        router: Option<Box<OpenApiRouter<shared::State>>>,
+    ) -> Option<OpenApiRouter<shared::State>> {
+        router
+            .map(|router| *router)
+            .filter(|router| axum::Router::from(router.clone()).has_routes())
+    }
+
+    let mut router = OpenApiRouter::new().with_state(state.clone());
+
+    if let Some(global) = routes.global {
+        router = router.merge(*global);
+    }
+    if let Some(api_admin) = non_empty(routes.api_admin) {
+        router = router.nest(
+            "/api/admin",
+            api_admin
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::admin::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::client::auth,
+                )),
+        );
+    }
+    if let Some(api_auth) = routes.api_auth {
+        router = router.nest("/api/auth", *api_auth);
+    }
+    if let Some(api_client) = non_empty(routes.api_client) {
+        router = router.nest(
+            "/api/client",
+            api_client.route_layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                routes::api::client::auth,
+            )),
+        );
+    }
+    if let Some(api_client_servers_server) = non_empty(routes.api_client_servers_server) {
+        router = router.nest(
+            "/api/client/servers/{server}",
+            api_client_servers_server
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::client::servers::_server_::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::client::auth,
+                )),
+        );
+    }
+    if let Some(api_remote) = non_empty(routes.api_remote) {
+        router = router.nest(
+            "/api/remote",
+            api_remote.route_layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                routes::api::remote::auth,
+            )),
+        );
+    }
+    if let Some(api_remote_servers_server) = non_empty(routes.api_remote_servers_server) {
+        router = router.nest(
+            "/api/remote/servers/{server}",
+            api_remote_servers_server
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::remote::servers::_server_::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    routes::api::remote::auth,
+                )),
+        );
+    }
+
+    router
+}
+
 pub async fn handle_startup() -> Result<
     (
         sentry::ClientInitGuard,
@@ -562,7 +647,9 @@ pub async fn handle_startup() -> Result<
 
             tracing::info!("collecting extension migrations...");
             for extension in extensions.extensions().await.iter() {
-                if extensions.is_disabled(extension.package_name) {
+                if extensions.is_disabled(extension.package_name)
+                    || extensions.is_failed(extension.package_name)
+                {
                     continue;
                 }
 
@@ -673,76 +760,13 @@ pub async fn handle_startup() -> Result<
 
     state.updates.init(state.clone());
 
-    let (routes, background_task_builder, shutdown_handler_builder) =
-        extensions.init(state.clone()).await;
-    let mut extension_router = OpenApiRouter::new().with_state(state.clone());
-
-    if let Some(global) = routes.global {
-        extension_router = extension_router.merge(*global);
-    }
-    if let Some(api_admin) = routes.api_admin {
-        extension_router = extension_router.nest(
-            "/api/admin",
-            api_admin
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::admin::auth,
-                ))
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::client::auth,
-                )),
-        );
-    }
-    if let Some(api_auth) = routes.api_auth {
-        extension_router = extension_router.nest("/api/auth", *api_auth);
-    }
-    if let Some(api_client) = routes.api_client {
-        extension_router = extension_router.nest(
-            "/api/client",
-            api_client.route_layer(axum::middleware::from_fn_with_state(
-                state.clone(),
-                routes::api::client::auth,
-            )),
-        );
-    }
-    if let Some(api_client_servers_server) = routes.api_client_servers_server {
-        extension_router = extension_router.nest(
-            "/api/client/servers/{server}",
-            api_client_servers_server
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::client::servers::_server_::auth,
-                ))
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::client::auth,
-                )),
-        );
-    }
-    if let Some(api_remote) = routes.api_remote {
-        extension_router = extension_router.nest(
-            "/api/remote",
-            api_remote.route_layer(axum::middleware::from_fn_with_state(
-                state.clone(),
-                routes::api::remote::auth,
-            )),
-        );
-    }
-    if let Some(api_remote_servers_server) = routes.api_remote_servers_server {
-        extension_router = extension_router.nest(
-            "/api/remote/servers/{server}",
-            api_remote_servers_server
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::remote::servers::_server_::auth,
-                ))
-                .route_layer(axum::middleware::from_fn_with_state(
-                    state.clone(),
-                    routes::api::remote::auth,
-                )),
-        );
-    }
+    let (app, background_task_builder, shutdown_handler_builder) = extensions
+        .init(
+            state.clone(),
+            OpenApiRouter::new().merge(routes::router(&state)),
+            |routes| mount_extension_routes(&state, routes),
+        )
+        .await;
 
     tasks::define_background_tasks(&background_task_builder).await;
 
@@ -761,9 +785,7 @@ pub async fn handle_startup() -> Result<
         .merge_builder(shutdown_handler_builder)
         .await;
 
-    let app = OpenApiRouter::new()
-        .merge(routes::router(&state))
-        .merge(extension_router)
+    let app = app
         .fallback(
             |state: GetState, ip: GetIp, req: Request<Body>| async move {
                 let is_upgrade = req

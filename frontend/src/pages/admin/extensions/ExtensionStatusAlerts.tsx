@@ -13,6 +13,7 @@ export default function ExtensionStatusAlerts({
   buildFailed,
   failureReason,
   failedExtensions,
+  startFailedExtensions,
   pendingRestart,
   isBuilding,
   onRestart,
@@ -23,6 +24,7 @@ export default function ExtensionStatusAlerts({
   buildFailed: boolean;
   failureReason: string | null;
   failedExtensions: string[];
+  startFailedExtensions: Record<string, string>;
   pendingRestart: boolean;
   isBuilding: boolean;
   onRestart: () => void;
@@ -74,6 +76,25 @@ export default function ExtensionStatusAlerts({
               </span>
             )}
             <span>{t('pages.admin.extensions.alert.buildFailed.content', {})}</span>
+          </div>
+        </Alert>
+      )}
+
+      {Object.keys(startFailedExtensions).length > 0 && (
+        <Alert
+          color='red'
+          icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
+          title={t('pages.admin.extensions.alert.startFailed.title', {})}
+          mb='md'
+        >
+          <div className='flex flex-col items-start gap-2'>
+            <span>{t('pages.admin.extensions.alert.startFailed.content', {})}</span>
+            {Object.entries(startFailedExtensions).map(([packageName, reason]) => (
+              <div key={packageName} className='flex flex-col items-start gap-1'>
+                <Code>{packageName}</Code>
+                <Code block>{reason}</Code>
+              </div>
+            ))}
           </div>
         </Alert>
       )}

@@ -23,6 +23,7 @@ export default function ExtensionCard({
   isDisabled,
   isPendingDisabled,
   isBuildFailed,
+  isStartFailed,
   onRemove,
   onToggle,
   busy,
@@ -34,6 +35,7 @@ export default function ExtensionCard({
   isDisabled?: boolean;
   isPendingDisabled?: boolean;
   isBuildFailed?: boolean;
+  isStartFailed?: boolean;
   onRemove?: () => void;
   onToggle?: (enabled: boolean) => void;
   busy?: boolean;
@@ -52,9 +54,10 @@ export default function ExtensionCard({
     isDisabled: !!isDisabled,
     isPendingDisabled: !!isPendingDisabled,
     isBuildFailed: !!isBuildFailed,
+    isStartFailed: !!isStartFailed,
   });
 
-  const configureDisabled = !backendExtension || !!isDisabled || !extension?.cardConfigurationPage;
+  const configureDisabled = !backendExtension || !!isDisabled || !!isStartFailed || !extension?.cardConfigurationPage;
   const configureButton = (
     <Button leftSection={<FontAwesomeIcon icon={faWrench} />} disabled={configureDisabled} className='w-full!'>
       {t('pages.admin.extensions.button.configure', {})}

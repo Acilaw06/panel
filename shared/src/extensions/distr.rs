@@ -923,6 +923,8 @@ pub fn resync_extension_list() -> Result<(), anyhow::Error> {
         packages.push((dir.file_name(), metadata_toml, cargo_toml.package));
     }
 
+    packages.sort_by(|(_, a, _), (_, b, _)| a.package_name.cmp(&b.package_name));
+
     std::fs::create_dir_all(internal_list_extension).unwrap();
     std::fs::create_dir_all(internal_list_extension.join("src")).unwrap();
 

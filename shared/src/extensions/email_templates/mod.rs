@@ -7,6 +7,7 @@ use utoipa::ToSchema;
 mod variables;
 pub use variables::*;
 
+#[derive(Clone)]
 pub struct EmailTemplate {
     pub identifier: &'static str,
     pub available_variables: Vec<&'static str>,
@@ -132,6 +133,7 @@ impl EmailTemplate {
     }
 }
 
+#[derive(Clone)]
 pub struct ExtensionEmailTemplateBuilder {
     pub templates: Vec<EmailTemplate>,
     pub variables: Vec<EmailVariable>,

@@ -75,6 +75,7 @@ export default function AdminExtensions() {
         buildFailed={ext.buildFailed}
         failureReason={ext.failureReason}
         failedExtensions={ext.failedExtensions}
+        startFailedExtensions={ext.adminExtensions?.failed ?? {}}
         pendingRestart={ext.pendingRestart}
         isBuilding={ext.isBuilding}
         onRestart={ext.handleRestart}

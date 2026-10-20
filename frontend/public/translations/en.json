@@ -2784,6 +2784,10 @@
               "content": "These extensions are not built again until they change, or until you retry the build explicitly.",
               "failedExtensions": "The build failed in {extensions}. Update or remove them, then retry the build."
             },
+            "startFailed": {
+              "title": "Some extensions failed to start",
+              "content": "They crashed while starting, or their routes or CLI commands conflict with the panel or another extension, so they are not running. Update or remove them, then restart the panel."
+            },
             "pendingRestart": {
               "title": "Some extensions were enabled or disabled",
               "content": "The panel picks up the change the next time it starts."
@@ -2833,6 +2837,7 @@
             "backendMissing": "Backend missing",
             "pendingBuild": "Pending build",
             "buildFailed": "Build failed",
+            "startFailed": "Failed to start",
             "pendingRemoval": "Pending removal",
             "pendingRestart": "Pending restart",
             "disabled": "Disabled",
