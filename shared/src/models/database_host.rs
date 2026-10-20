@@ -31,6 +31,29 @@ pub enum DatabasePool {
     Mongodb(mongodb::Client),
 }
 
+impl DatabasePool {
+    pub async fn version(&self) -> Result<String, anyhow::Error> {
+        Ok(match self {
+            Self::Mysql(pool) => {
+                sqlx::query_scalar::<_, String>("SELECT VERSION()")
+                    .fetch_one(pool)
+                    .await?
+            }
+            Self::Postgres(pool) => {
+                sqlx::query_scalar::<_, String>("SHOW server_version")
+                    .fetch_one(pool)
+                    .await?
+            }
+            Self::Mongodb(client) => client
+                .database("admin")
+                .run_command(mongodb::bson::doc! { "buildInfo": 1 })
+                .await?
+                .get_str("version")?
+                .to_string(),
+        })
+    }
+}
+
 type DatabasePoolValue = (std::time::Instant, DatabasePool);
 static DATABASE_CLIENTS: LazyLock<Arc<Mutex<HashMap<uuid::Uuid, DatabasePoolValue>>>> =
     LazyLock::new(|| {

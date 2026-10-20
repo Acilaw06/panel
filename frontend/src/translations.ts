@@ -4537,6 +4537,9 @@ const baseTranslations = defineTranslations({
                 button: {
                   testConnection: 'Test Connection',
                 },
+                tooltip: {
+                  errorWhileFetchingVersion: 'Error while fetching version',
+                },
                 toast: {
                   tested: 'Test successfully completed.',
                 },

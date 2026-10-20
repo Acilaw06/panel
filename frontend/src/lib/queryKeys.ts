@@ -117,6 +117,7 @@ const admin = {
     all: () => ['admin', 'database-hosts'] as const,
     detail: (uuid: string) => ['admin', 'database-hosts', { uuid }] as const,
     databases: (hostUuid: string) => ['admin', 'database-hosts', hostUuid, 'databases'] as const,
+    version: (hostUuid: string) => ['admin', 'database-hosts', hostUuid, 'version'] as const,
   },
 
   databaseAgentHosts: {
