@@ -183,40 +183,24 @@ impl SystemBackupPolicy {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM system_backup_policies
-            WHERE {search}
-            ORDER BY system_backup_policies.created
-            LIMIT $2 OFFSET $3
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(
-                1,
-                &["system_backup_policies.name"],
-                &["system_backup_policies.uuid"]
-            )
-        )))
+            format!(
+                r#"
+                FROM system_backup_policies
+                WHERE {search}
+                "#,
+                search = super::search_sql(
+                    1,
+                    &["system_backup_policies.name"],
+                    &["system_backup_policies.uuid"]
+                ),
+            ),
+            "system_backup_policies.created",
+        )
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn all_schedulable(

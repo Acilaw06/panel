@@ -204,39 +204,23 @@ impl ServerSubuser {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM server_subusers
-            JOIN users ON users.uuid = server_subusers.user_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE server_subusers.server_uuid = $1 AND {search}
-            ORDER BY server_subusers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["users.username"], &["users.uuid"])
-        )))
+            format!(
+                r#"
+                FROM server_subusers
+                JOIN users ON users.uuid = server_subusers.user_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                WHERE server_subusers.server_uuid = $1 AND {search}
+                "#,
+                search = super::search_sql(2, &["users.username"], &["users.uuid"]),
+            ),
+            "server_subusers.created",
+        )
         .bind(server_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn count_by_server_uuid(

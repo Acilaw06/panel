@@ -402,35 +402,17 @@ impl OAuthProviderMapping {
         page: i64,
         per_page: i64,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
+        super::PaginatedQueryBuilder::new(
+            Self::columns_sql(None),
             r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
             FROM oauth_provider_mappings
             WHERE oauth_provider_mappings.oauth_provider_uuid = $1
-            ORDER BY oauth_provider_mappings.created
-            LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None)
-        )))
+            "oauth_provider_mappings.created",
+        )
         .bind(oauth_provider_uuid)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn all_by_oauth_provider_uuid(

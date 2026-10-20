@@ -708,43 +708,27 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.owner_uuid = $1 AND {search}
-            ORDER BY servers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE servers.owner_uuid = $1 AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(owner_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn by_user_uuid_server_order_with_pagination(
@@ -755,48 +739,32 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE servers.uuid = ANY($2)
-                AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $6)
-                AND {search}
-            ORDER BY array_position($2, servers.uuid), servers.created
-            LIMIT $4 OFFSET $5
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                WHERE servers.uuid = ANY($2)
+                    AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $4)
+                    AND {search}
+                "#,
+                search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"]),
+            ),
+            "array_position($2, servers.uuid), servers.created",
+        )
         .bind(permissions.user_uuid())
         .bind(server_order)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
         .bind(permissions.has_admin_permission("servers.read").is_ok())
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn by_user_uuid_with_pagination(
@@ -806,50 +774,34 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE
-                servers.uuid IN (
-                    SELECT owned.uuid FROM servers owned WHERE owned.owner_uuid = $1
-                    UNION ALL
-                    SELECT server_subusers.server_uuid FROM server_subusers WHERE server_subusers.user_uuid = $1
-                )
-                AND {search}
-            ORDER BY servers.created, servers.uuid
-            LIMIT $3 OFFSET $4
-            "#,
-            Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
-        )))
+        super::PaginatedQueryBuilder::new(
+            format!("{}, server_subusers.permissions, server_subusers.ignored_files", Self::columns_sql(None)),
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                WHERE
+                    servers.uuid IN (
+                        SELECT owned.uuid FROM servers owned WHERE owned.owner_uuid = $1
+                        UNION ALL
+                        SELECT server_subusers.server_uuid FROM server_subusers WHERE server_subusers.user_uuid = $1
+                    )
+                    AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name", "users.username", "users.email"], &["servers.uuid"]),
+            ),
+            "servers.created, servers.uuid",
+        )
         .bind(user_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn all_uuids_by_node_uuid_user_uuid(
@@ -887,46 +839,30 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE
-                servers.owner_uuid != $1 AND (server_subusers.user_uuid IS NULL OR server_subusers.user_uuid != $1)
-                AND {search}
-            ORDER BY servers.created, servers.uuid
-            LIMIT $3 OFFSET $4
-            "#,
-            Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
-        )))
+        super::PaginatedQueryBuilder::new(
+            format!("{}, server_subusers.permissions, server_subusers.ignored_files", Self::columns_sql(None)),
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                WHERE
+                    servers.owner_uuid != $1 AND (server_subusers.user_uuid IS NULL OR server_subusers.user_uuid != $1)
+                    AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name", "users.username", "users.email"], &["servers.uuid"]),
+            ),
+            "servers.created, servers.uuid",
+        )
         .bind(user_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     /// Servers the user may connect `server_uuid` to over the private network: on the mesh, and
@@ -940,61 +876,46 @@ impl Server {
         search: Option<&str>,
         exclude: &HashSet<(uuid::Uuid, uuid::Uuid)>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
         let (excluded_egg_uuids, excluded_node_uuids): (Vec<_>, Vec<_>) =
             exclude.iter().copied().unzip();
 
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
-            FROM server_tunnels
-            JOIN servers ON servers.uuid = server_tunnels.server_uuid
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE
-                servers.uuid IN (
-                    SELECT owned.uuid FROM servers owned WHERE owned.owner_uuid = $1
-                    UNION ALL
-                    SELECT server_subusers.server_uuid FROM server_subusers WHERE server_subusers.user_uuid = $1
-                )
-                AND servers.uuid != $2
-                AND NOT servers.suspended
-                AND servers.destination_node_uuid IS NULL
-                AND servers.status IS NULL
-                AND (servers.egg_uuid, servers.node_uuid) NOT IN (SELECT * FROM UNNEST($6::uuid[], $7::uuid[]))
-                AND {search}
-            ORDER BY servers.created, servers.uuid
-            LIMIT $4 OFFSET $5
-            "#,
-            Self::columns_sql(None),
-            search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
-        )))
+        super::PaginatedQueryBuilder::new(
+            format!("{}, server_subusers.permissions, server_subusers.ignored_files", Self::columns_sql(None)),
+            format!(
+                r#"
+                FROM server_tunnels
+                JOIN servers ON servers.uuid = server_tunnels.server_uuid
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                WHERE
+                    servers.uuid IN (
+                        SELECT owned.uuid FROM servers owned WHERE owned.owner_uuid = $1
+                        UNION ALL
+                        SELECT server_subusers.server_uuid FROM server_subusers WHERE server_subusers.user_uuid = $1
+                    )
+                    AND servers.uuid != $2
+                    AND NOT servers.suspended
+                    AND servers.destination_node_uuid IS NULL
+                    AND servers.status IS NULL
+                    AND (servers.egg_uuid, servers.node_uuid) NOT IN (SELECT * FROM UNNEST($4::uuid[], $5::uuid[]))
+                    AND {search}
+                "#,
+                search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"]),
+            ),
+            "servers.created, servers.uuid",
+        )
         .bind(user_uuid)
         .bind(server_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
         .bind(excluded_egg_uuids)
         .bind(excluded_node_uuids)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn tunnel_available_by_not_user_uuid_with_pagination(
@@ -1006,57 +927,42 @@ impl Server {
         search: Option<&str>,
         exclude: &HashSet<(uuid::Uuid, uuid::Uuid)>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
         let (excluded_egg_uuids, excluded_node_uuids): (Vec<_>, Vec<_>) =
             exclude.iter().copied().unzip();
 
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
-            FROM server_tunnels
-            JOIN servers ON servers.uuid = server_tunnels.server_uuid
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE
-                servers.owner_uuid != $1 AND (server_subusers.user_uuid IS NULL OR server_subusers.user_uuid != $1)
-                AND servers.uuid != $2
-                AND NOT servers.suspended
-                AND servers.destination_node_uuid IS NULL
-                AND servers.status IS NULL
-                AND (servers.egg_uuid, servers.node_uuid) NOT IN (SELECT * FROM UNNEST($6::uuid[], $7::uuid[]))
-                AND {search}
-            ORDER BY servers.created, servers.uuid
-            LIMIT $4 OFFSET $5
-            "#,
-            Self::columns_sql(None),
-            search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"])
-        )))
+        super::PaginatedQueryBuilder::new(
+            format!("{}, server_subusers.permissions, server_subusers.ignored_files", Self::columns_sql(None)),
+            format!(
+                r#"
+                FROM server_tunnels
+                JOIN servers ON servers.uuid = server_tunnels.server_uuid
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                WHERE
+                    servers.owner_uuid != $1 AND (server_subusers.user_uuid IS NULL OR server_subusers.user_uuid != $1)
+                    AND servers.uuid != $2
+                    AND NOT servers.suspended
+                    AND servers.destination_node_uuid IS NULL
+                    AND servers.status IS NULL
+                    AND (servers.egg_uuid, servers.node_uuid) NOT IN (SELECT * FROM UNNEST($4::uuid[], $5::uuid[]))
+                    AND {search}
+                "#,
+                search = super::search_sql(3, &["servers.name", "users.username", "users.email"], &["servers.uuid"]),
+            ),
+            "servers.created, servers.uuid",
+        )
         .bind(user_uuid)
         .bind(server_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
         .bind(excluded_egg_uuids)
         .bind(excluded_node_uuids)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn all_with_firewall_by_egg_node_pairs(
@@ -1097,43 +1003,27 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.node_uuid = $1 AND {search}
-            ORDER BY servers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE servers.node_uuid = $1 AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(node_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn by_node_uuid_transferring_with_pagination(
@@ -1143,44 +1033,28 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.node_uuid = $1 AND servers.destination_node_uuid IS NOT NULL
-                AND {search}
-            ORDER BY servers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE servers.node_uuid = $1 AND servers.destination_node_uuid IS NOT NULL
+                    AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(node_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn by_egg_uuid_with_pagination(
@@ -1190,43 +1064,27 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.egg_uuid = $1 AND {search}
-            ORDER BY servers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE servers.egg_uuid = $1 AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(egg_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn by_backup_configuration_uuid_with_pagination(
@@ -1236,43 +1094,27 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.backup_configuration_uuid = $1 AND {search}
-            ORDER BY servers.created
-            LIMIT $3 OFFSET $4
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(2, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE servers.backup_configuration_uuid = $1 AND {search}
+                "#,
+                search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(backup_configuration_uuid)
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn all_with_pagination(
@@ -1281,42 +1123,26 @@ impl Server {
         per_page: i64,
         search: Option<&str>,
     ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
-        let offset = (page - 1) * per_page;
-
-        let rows = sqlx::query(sqlx::AssertSqlSafe(format!(
-            r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE {search}
-            ORDER BY servers.created
-            LIMIT $2 OFFSET $3
-            "#,
+        super::PaginatedQueryBuilder::new(
             Self::columns_sql(None),
-            search = super::search_sql(1, &["servers.name"], &["servers.uuid"])
-        )))
+            format!(
+                r#"
+                FROM servers
+                LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                JOIN users ON users.uuid = servers.owner_uuid
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                WHERE {search}
+                "#,
+                search = super::search_sql(1, &["servers.name"], &["servers.uuid"]),
+            ),
+            "servers.created",
+        )
         .bind(search)
-        .bind(per_page)
-        .bind(offset)
-        .fetch_all(database.read())
-        .await?;
-
-        Ok(super::Pagination {
-            total: rows
-                .first()
-                .map_or(Ok(0), |row| row.try_get("total_count"))?,
-            per_page,
-            page,
-            data: rows
-                .into_iter()
-                .map(|row| Self::map(None, &row))
-                .try_collect_vec()?,
-        })
+        .fetch(database, page, per_page)
+        .await
     }
 
     pub async fn count_by_user_uuid(
