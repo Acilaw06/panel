@@ -409,7 +409,7 @@ pub async fn define_background_tasks(
 
                             let request_data = wings_api::system_restic_prune::post::RequestBody {
                                 configuration: Some(configuration.clone()),
-                                dry_run: true,
+                                dry_run: false,
                                 foreground: false,
                             };
                             let request = client.post_system_restic_prune(
