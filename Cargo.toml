@@ -131,5 +131,4 @@ inherits = "release"
 opt-level = 0
 lto = false
 codegen-units = 128
-incremental = true
 strip = true
