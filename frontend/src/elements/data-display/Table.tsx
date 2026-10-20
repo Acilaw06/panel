@@ -306,7 +306,13 @@ export const TableSelectionCell = ({ id, checked, disabled, onChange }: TableSel
   const { t } = useTranslations();
 
   return (
-    <TableData className='pl-4 relative cursor-pointer w-10 text-center'>
+    <TableData
+      className='pl-4 relative cursor-pointer w-10 text-center'
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!disabled) onChange(!checked);
+      }}
+    >
       <Checkbox
         id={id}
         checked={checked}
