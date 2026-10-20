@@ -58,6 +58,7 @@ const baseTranslations = defineTranslations({
         verify: 'Verify',
         update: 'Update',
         close: 'Close',
+        copy: 'Copy',
         cancel: 'Cancel',
         continue: 'Continue',
         skip: 'Skip',
