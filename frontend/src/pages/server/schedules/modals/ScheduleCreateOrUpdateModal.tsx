@@ -19,7 +19,11 @@ import { ModalFooter } from '@/elements/modals/Modal.tsx';
 import Title from '@/elements/typography/Title.tsx';
 import { mappingToSelectData, scheduleTriggerDefaultMapping, scheduleTriggerLabelMapping } from '@/lib/enums.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
-import { serverScheduleSchema, serverScheduleUpdateSchema } from '@/lib/schemas/server/schedules.ts';
+import {
+  serverScheduleSchema,
+  serverScheduleTriggerSchema,
+  serverScheduleUpdateSchema,
+} from '@/lib/schemas/server/schedules.ts';
 import { useModalForm } from '@/plugins/form/useModalForm.ts';
 import { useServerCan } from '@/plugins/usePermissions.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -128,7 +132,14 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
                     ...item,
                     disabled: item.value === 'console_line' && !canReadConsole,
                   }))}
-                  {...form.getInputProps(`triggers.${index}.type`)}
+                  value={form.values.triggers[index].type}
+                  onChange={(type) =>
+                    type &&
+                    form.setFieldValue(
+                      `triggers.${index}`,
+                      scheduleTriggerDefaultMapping[type as z.infer<typeof serverScheduleTriggerSchema>['type']],
+                    )
+                  }
                 />
 
                 <TriggerInlineForm form={form} index={index} />
