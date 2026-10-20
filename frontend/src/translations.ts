@@ -786,6 +786,21 @@ const baseTranslations = defineTranslations({
       serverSelect: {
         showOtherUsersServers: "Show other user's servers",
       },
+      allocationBar: {
+        tooltip: {
+          total: 'Change Total',
+        },
+        form: {
+          total: 'Measure Against',
+          customTotal: 'Custom Total',
+        },
+        total: {
+          limit: 'Configured Limit',
+          live: 'Live Capacity',
+          aggregate: 'Allocated Total',
+          custom: 'Custom',
+        },
+      },
       can: {
         tooltip: {
           cantSave: 'You do not have permission to save.',
@@ -3175,6 +3190,7 @@ const baseTranslations = defineTranslations({
                   'Resources allocated to servers on this node, measured against the limits configured in node settings, not the physical machine capacity. Deployment only checks memory and disk.',
                 card: {
                   resources: 'Allocated Resources',
+                  breakdown: 'Allocation Breakdown',
                 },
                 status: {
                   deploymentEnabled: 'Deployment Enabled',
@@ -3191,6 +3207,11 @@ const baseTranslations = defineTranslations({
                   free: '{size} free',
                   overhead: '+ {size} reserved overhead',
                   cores: '{cores} cores allocated',
+                  other: 'Other ({servers})',
+                  suspended: 'Suspended',
+                  unlimitedServers: '{servers} with no limit',
+                  overallocated: 'Overallocated by {size}',
+                  noAllocations: 'No servers allocate this resource.',
                 },
               },
             },
@@ -4717,6 +4738,7 @@ const baseTranslations = defineTranslations({
                   hostDetails: 'Host Details',
                   systemInfo: 'System Information',
                   resources: 'Allocated Resources',
+                  breakdown: 'Allocation Breakdown',
                 },
                 label: {
                   createdAt: 'Created',
@@ -4730,6 +4752,10 @@ const baseTranslations = defineTranslations({
                   noLimit: 'No host limit',
                   free: '{size} free',
                   cores: '{cores} cores allocated',
+                  other: 'Other ({instances})',
+                  unlimitedInstances: '{instances} with no limit',
+                  overallocated: 'Overallocated by {size}',
+                  noAllocations: 'No instances allocate this resource.',
                 },
                 badge: {
                   updateAvailable: 'Update Available',

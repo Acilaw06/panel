@@ -333,18 +333,17 @@ export function useUserSettingMapEntry<T>(
   schema: z.ZodType<T>,
   fallback: T,
 ): [T, (value: T) => void] {
-  const value = useUserSettingsStore((state) => {
+  const stored = useUserSettingsStore((state) => {
     const map = effectiveValueOf(state, key);
-    if (map === null || typeof map !== 'object' || Array.isArray(map)) return fallback;
+    if (map === null || typeof map !== 'object' || Array.isArray(map)) return undefined;
 
-    const stored = (map as Record<string, UserSettingValue>)[entry];
-    if (stored === undefined) return fallback;
-
-    const parsed = schema.safeParse(stored);
-    return parsed.success ? parsed.data : fallback;
+    return (map as Record<string, UserSettingValue>)[entry];
   });
 
-  return [value, (next) => setUserSettingMapEntry(key, entry, next as UserSettingValue)];
+  return [
+    parseSettingValue(`${key}[${entry}]`, stored, schema, fallback),
+    (next) => setUserSettingMapEntry(key, entry, next as UserSettingValue),
+  ];
 }
 
 export function setUserSettingMapEntry(key: string, entry: string, value: UserSettingValue) {

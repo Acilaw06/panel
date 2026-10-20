@@ -1,4 +1,5 @@
 import {
+  faChartBar,
   faChartPie,
   faCircleInfo,
   faHardDrive,
@@ -11,6 +12,12 @@ import { Text } from '@mantine/core';
 import { z } from 'zod';
 import getNodeCapacity from '@/api/admin/nodes/getNodeCapacity.ts';
 import getNodeSystemOverview from '@/api/admin/nodes/system/getNodeSystemOverview.ts';
+import getNodeSystemStats from '@/api/admin/nodes/system/getNodeSystemStats.ts';
+import AllocationBar, {
+  allocationTotalsSchema,
+  groupAllocationSegments,
+  noAllocationTotals,
+} from '@/elements/admin/AllocationBar.tsx';
 import CapacityCard from '@/elements/admin/CapacityCard.tsx';
 import InfoRow from '@/elements/admin/InfoRow.tsx';
 import AdminSubContentContainer from '@/elements/containers/AdminSubContentContainer.tsx';
@@ -23,18 +30,58 @@ import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import ResourceView from '@/elements/ResourceView.tsx';
 import RedactedText from '@/elements/typography/RedactedText.tsx';
-import { bytesToString, mbToBytes } from '@/lib/format/size.ts';
+import { bytesToMb, bytesToString, mbToBytes } from '@/lib/format/size.ts';
 import { formatDateTime } from '@/lib/format/time.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
-import { adminNodeSchema } from '@/lib/schemas/admin/nodes.ts';
+import { adminNodeCapacitySchema, adminNodeSchema } from '@/lib/schemas/admin/nodes.ts';
+import { useUserSettingMapEntry } from '@/lib/userSettings.ts';
 import { useNodeUpdateAvailable } from '@/plugins/nodes/useNodeVersion.ts';
 import { useResource } from '@/plugins/resource/useResource.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 type Node = z.infer<typeof adminNodeSchema>;
+type CapacityServer = z.infer<typeof adminNodeCapacitySchema>['servers'][number];
 
 export default function NodeOverview({ node }: { node: Node }) {
-  const { t } = useTranslations();
+  const { t, tItem } = useTranslations();
+
+  const [allocationTotals, setAllocationTotals] = useUserSettingMapEntry(
+    'admin::node_allocation_totals',
+    node.uuid,
+    allocationTotalsSchema,
+    noAllocationTotals,
+  );
+
+  const { data: systemStats } = useResource({
+    queryKey: queryKeys.admin.nodes.systemStats(node.uuid),
+    queryFn: () => getNodeSystemStats(node.uuid),
+    enabled: Object.values(allocationTotals).some((total) => total?.mode === 'live'),
+    silent: true,
+  });
+
+  const serverSegments = (servers: CapacityServer[], value: (server: CapacityServer) => number) =>
+    groupAllocationSegments(
+      servers,
+      value,
+      (server) => ({
+        key: server.uuid,
+        label: server.name,
+        to: `/admin/servers/${server.uuid}`,
+        striped: server.suspended,
+        hint: server.suspended ? t('pages.admin.nodes.tabs.capacity.page.label.suspended', {}) : undefined,
+      }),
+      (count) => t('pages.admin.nodes.tabs.capacity.page.label.other', { servers: tItem('server', count) }),
+    );
+
+  const unlimitedServers = (servers: CapacityServer[], value: (server: CapacityServer) => number) => {
+    const count = servers.filter((server) => value(server) === 0).length;
+
+    return count > 0 ? (
+      <Text size='xs' c='dimmed'>
+        {t('pages.admin.nodes.tabs.capacity.page.label.unlimitedServers', { servers: tItem('server', count) })}
+      </Text>
+    ) : undefined;
+  };
 
   const capacityResource = useResource({
     queryKey: queryKeys.admin.nodes.capacity(node.uuid),
@@ -280,6 +327,86 @@ export default function NodeOverview({ node }: { node: Node }) {
             )}
           </ResourceView>
         </TitleCard>
+
+        <TitleCard
+          title={t('pages.admin.nodes.tabs.capacity.page.card.breakdown', {})}
+          icon={<FontAwesomeIcon icon={faChartBar} />}
+        >
+          <ResourceView resource={capacityResource}>
+            {(capacity) => {
+              const formatSize = (value: number) => bytesToString(mbToBytes(value));
+              const emptyLabel = t('pages.admin.nodes.tabs.capacity.page.label.noAllocations', {});
+              const overallocatedLabel = (size: string) =>
+                t('pages.admin.nodes.tabs.capacity.page.label.overallocated', { size });
+
+              return (
+                <Stack gap='lg'>
+                  <AllocationBar
+                    label={t('pages.admin.nodes.tabs.capacity.page.label.memory', {})}
+                    icon={<FontAwesomeIcon icon={faMemory} />}
+                    segments={[
+                      ...serverSegments(capacity.servers, (server) => server.memory),
+                      ...(capacity.allocated.memoryOverhead > 0
+                        ? [
+                            {
+                              key: 'overhead',
+                              label: t('pages.admin.nodes.tabs.capacity.page.label.memoryOverhead', {}),
+                              value: capacity.allocated.memoryOverhead,
+                              color: 'dark.3',
+                            },
+                          ]
+                        : []),
+                    ]}
+                    limit={capacity.limits.memory}
+                    formatValue={formatSize}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedServers(capacity.servers, (server) => server.memory)}
+                    totalSource={{
+                      unit: 'mb',
+                      value: allocationTotals.memory,
+                      onChange: (memory) => setAllocationTotals({ ...allocationTotals, memory }),
+                      liveTotal: systemStats ? bytesToMb(systemStats.memory.total) : null,
+                    }}
+                  />
+                  <AllocationBar
+                    label={t('pages.admin.nodes.tabs.capacity.page.label.disk', {})}
+                    icon={<FontAwesomeIcon icon={faHardDrive} />}
+                    segments={serverSegments(capacity.servers, (server) => server.disk)}
+                    limit={capacity.limits.disk}
+                    formatValue={formatSize}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedServers(capacity.servers, (server) => server.disk)}
+                    totalSource={{
+                      unit: 'mb',
+                      value: allocationTotals.disk,
+                      onChange: (disk) => setAllocationTotals({ ...allocationTotals, disk }),
+                      liveTotal: systemStats ? bytesToMb(systemStats.disk.total) : null,
+                    }}
+                  />
+                  <AllocationBar
+                    label={t('common.stat.cpu', {})}
+                    icon={<FontAwesomeIcon icon={faMicrochip} />}
+                    segments={serverSegments(capacity.servers, (server) => server.cpu)}
+                    limit={0}
+                    formatValue={(value) => `${value}%`}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedServers(capacity.servers, (server) => server.cpu)}
+                    totalSource={{
+                      unit: 'percent',
+                      value: allocationTotals.cpu,
+                      onChange: (cpu) => setAllocationTotals({ ...allocationTotals, cpu }),
+                      liveTotal: systemStats ? systemStats.cpu.threads * 100 : null,
+                    }}
+                  />
+                </Stack>
+              );
+            }}
+          </ResourceView>
+        </TitleCard>
+
         <ExtensionSlot
           components={
             window.extensionContext.extensionRegistry.pages.admin.nodes.view.overview.appendedCards.appendedComponents

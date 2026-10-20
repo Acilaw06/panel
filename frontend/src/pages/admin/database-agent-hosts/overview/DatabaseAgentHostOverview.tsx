@@ -1,4 +1,5 @@
 import {
+  faChartBar,
   faChartPie,
   faCircleInfo,
   faHardDrive,
@@ -10,6 +11,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { z } from 'zod';
 import getDatabaseAgentHostCapacity from '@/api/admin/database-agent-hosts/getDatabaseAgentHostCapacity.ts';
 import getDatabaseAgentHostSystemOverview from '@/api/admin/database-agent-hosts/getDatabaseAgentHostSystemOverview.ts';
+import getDatabaseAgentHostSystemStats from '@/api/admin/database-agent-hosts/getDatabaseAgentHostSystemStats.ts';
+import AllocationBar, {
+  allocationTotalsSchema,
+  groupAllocationSegments,
+  noAllocationTotals,
+} from '@/elements/admin/AllocationBar.tsx';
 import CapacityCard from '@/elements/admin/CapacityCard.tsx';
 import InfoRow from '@/elements/admin/InfoRow.tsx';
 import AdminSubContentContainer from '@/elements/containers/AdminSubContentContainer.tsx';
@@ -20,19 +27,38 @@ import Group from '@/elements/layout/Group.tsx';
 import Stack from '@/elements/layout/Stack.tsx';
 import ResourceView from '@/elements/ResourceView.tsx';
 import Text from '@/elements/typography/Text.tsx';
-import { bytesToString, mbToBytes } from '@/lib/format/size.ts';
+import { bytesToMb, bytesToString, mbToBytes } from '@/lib/format/size.ts';
 import { formatDateTime } from '@/lib/format/time.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';
-import { adminDatabaseAgentHostSchema } from '@/lib/schemas/admin/databaseAgentHosts.ts';
+import {
+  adminDatabaseAgentHostCapacitySchema,
+  adminDatabaseAgentHostSchema,
+} from '@/lib/schemas/admin/databaseAgentHosts.ts';
+import { useUserSettingMapEntry } from '@/lib/userSettings.ts';
 import { parseVersion } from '@/lib/version.ts';
 import { useResource } from '@/plugins/resource/useResource.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useAdminStore } from '@/stores/admin.tsx';
 
 type DatabaseAgentHost = z.infer<typeof adminDatabaseAgentHostSchema>;
+type CapacityInstance = z.infer<typeof adminDatabaseAgentHostCapacitySchema>['instances'][number];
 
 export default function DatabaseAgentHostOverview({ databaseAgentHost }: { databaseAgentHost: DatabaseAgentHost }) {
-  const { t } = useTranslations();
+  const { t, tItem } = useTranslations();
+
+  const [allocationTotals, setAllocationTotals] = useUserSettingMapEntry(
+    'admin::database_agent_host_allocation_totals',
+    databaseAgentHost.uuid,
+    allocationTotalsSchema,
+    noAllocationTotals,
+  );
+
+  const { data: systemStats } = useResource({
+    queryKey: queryKeys.admin.databaseAgentHosts.systemStats(databaseAgentHost.uuid),
+    queryFn: () => getDatabaseAgentHostSystemStats(databaseAgentHost.uuid),
+    enabled: Object.values(allocationTotals).some((total) => total?.mode === 'live'),
+    silent: true,
+  });
   const updateInformation = useAdminStore((state) => state.updateInformation);
 
   const capacityResource = useResource({
@@ -46,6 +72,32 @@ export default function DatabaseAgentHostOverview({ databaseAgentHost }: { datab
     queryFn: () => getDatabaseAgentHostSystemOverview(databaseAgentHost.uuid),
     silent: true,
   });
+
+  const instanceSegments = (instances: CapacityInstance[], value: (instance: CapacityInstance) => number) =>
+    groupAllocationSegments(
+      instances,
+      value,
+      (instance) => ({
+        key: instance.uuid,
+        label: instance.name,
+        to: `/admin/servers/${instance.serverUuid}`,
+        hint: instance.serverName,
+      }),
+      (count) =>
+        t('pages.admin.databaseAgentHosts.tabs.overview.page.label.other', { instances: tItem('instance', count) }),
+    );
+
+  const unlimitedInstances = (instances: CapacityInstance[], value: (instance: CapacityInstance) => number) => {
+    const count = instances.filter((instance) => value(instance) === 0).length;
+
+    return count > 0 ? (
+      <Text size='xs' c='dimmed'>
+        {t('pages.admin.databaseAgentHosts.tabs.overview.page.label.unlimitedInstances', {
+          instances: tItem('instance', count),
+        })}
+      </Text>
+    ) : undefined;
+  };
 
   const hasUpdate =
     overview && updateInformation
@@ -226,6 +278,73 @@ export default function DatabaseAgentHostOverview({ databaseAgentHost }: { datab
                 />
               </div>
             )}
+          </ResourceView>
+        </TitleCard>
+
+        <TitleCard
+          title={t('pages.admin.databaseAgentHosts.tabs.overview.page.card.breakdown', {})}
+          icon={<FontAwesomeIcon icon={faChartBar} />}
+        >
+          <ResourceView resource={capacityResource}>
+            {(capacity) => {
+              const formatSize = (value: number) => bytesToString(mbToBytes(value));
+              const emptyLabel = t('pages.admin.databaseAgentHosts.tabs.overview.page.label.noAllocations', {});
+              const overallocatedLabel = (size: string) =>
+                t('pages.admin.databaseAgentHosts.tabs.overview.page.label.overallocated', { size });
+
+              return (
+                <Stack gap='lg'>
+                  <AllocationBar
+                    label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.memory', {})}
+                    icon={<FontAwesomeIcon icon={faMemory} />}
+                    segments={instanceSegments(capacity.instances, (instance) => instance.memory)}
+                    limit={capacity.limits.memory}
+                    formatValue={formatSize}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedInstances(capacity.instances, (instance) => instance.memory)}
+                    totalSource={{
+                      unit: 'mb',
+                      value: allocationTotals.memory,
+                      onChange: (memory) => setAllocationTotals({ ...allocationTotals, memory }),
+                      liveTotal: systemStats ? bytesToMb(systemStats.memory.total) : null,
+                    }}
+                  />
+                  <AllocationBar
+                    label={t('pages.admin.databaseAgentHosts.tabs.overview.page.label.disk', {})}
+                    icon={<FontAwesomeIcon icon={faHardDrive} />}
+                    segments={instanceSegments(capacity.instances, (instance) => instance.disk)}
+                    limit={capacity.limits.disk}
+                    formatValue={formatSize}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedInstances(capacity.instances, (instance) => instance.disk)}
+                    totalSource={{
+                      unit: 'mb',
+                      value: allocationTotals.disk,
+                      onChange: (disk) => setAllocationTotals({ ...allocationTotals, disk }),
+                      liveTotal: systemStats ? bytesToMb(systemStats.disk.total) : null,
+                    }}
+                  />
+                  <AllocationBar
+                    label={t('common.stat.cpu', {})}
+                    icon={<FontAwesomeIcon icon={faMicrochip} />}
+                    segments={instanceSegments(capacity.instances, (instance) => instance.cpu)}
+                    limit={0}
+                    formatValue={(value) => `${value}%`}
+                    emptyLabel={emptyLabel}
+                    overallocatedLabel={overallocatedLabel}
+                    details={unlimitedInstances(capacity.instances, (instance) => instance.cpu)}
+                    totalSource={{
+                      unit: 'percent',
+                      value: allocationTotals.cpu,
+                      onChange: (cpu) => setAllocationTotals({ ...allocationTotals, cpu }),
+                      liveTotal: systemStats ? systemStats.cpu.threads * 100 : null,
+                    }}
+                  />
+                </Stack>
+              );
+            }}
           </ResourceView>
         </TitleCard>
       </Stack>

@@ -949,6 +949,21 @@
       "serverSelect": {
         "showOtherUsersServers": "Server anderer Benutzer anzeigen"
       },
+      "allocationBar": {
+        "tooltip": {
+          "total": "Gesamtwert ändern"
+        },
+        "form": {
+          "total": "Messen gegen",
+          "customTotal": "Eigener Gesamtwert"
+        },
+        "total": {
+          "limit": "Konfiguriertes Limit",
+          "live": "Live-Kapazität",
+          "aggregate": "Zugewiesene Summe",
+          "custom": "Eigener Wert"
+        }
+      },
       "can": {
         "tooltip": {
           "cantSave": "Du hast keine Berechtigung zum Speichern.",
@@ -3243,7 +3258,8 @@
                 "title": "Deployment-Kapazität",
                 "subtitle": "Ressourcen, die Servern auf diesem Node zugewiesen sind, gemessen an den in den Node-Einstellungen konfigurierten Limits, nicht an der physischen Kapazität der Maschine. Das Deployment prüft nur Arbeitsspeicher und Festplatte.",
                 "card": {
-                  "resources": "Zugewiesene Ressourcen"
+                  "resources": "Zugewiesene Ressourcen",
+                  "breakdown": "Zuteilungsaufschlüsselung"
                 },
                 "status": {
                   "deploymentEnabled": "Deployment aktiviert",
@@ -3259,7 +3275,12 @@
                   "noLimit": "Kein Node-Limit",
                   "free": "{size} frei",
                   "overhead": "+ {size} reservierter Overhead",
-                  "cores": "{cores} Kerne zugewiesen"
+                  "cores": "{cores} Kerne zugewiesen",
+                  "other": "Sonstige ({servers})",
+                  "suspended": "Gesperrt",
+                  "unlimitedServers": "{servers} ohne Limit",
+                  "overallocated": "Um {size} überbucht",
+                  "noAllocations": "Keine Server belegen diese Ressource."
                 }
               }
             },
@@ -4692,7 +4713,8 @@
                 "card": {
                   "hostDetails": "Host-Details",
                   "systemInfo": "Systeminformationen",
-                  "resources": "Zugewiesene Ressourcen"
+                  "resources": "Zugewiesene Ressourcen",
+                  "breakdown": "Zuteilungsaufschlüsselung"
                 },
                 "label": {
                   "createdAt": "Erstellt",
@@ -4705,7 +4727,11 @@
                   "unavailable": "Nicht verfügbar",
                   "noLimit": "Kein Host-Limit",
                   "free": "{size} frei",
-                  "cores": "{cores} Kerne zugewiesen"
+                  "cores": "{cores} Kerne zugewiesen",
+                  "other": "Sonstige ({instances})",
+                  "unlimitedInstances": "{instances} ohne Limit",
+                  "overallocated": "Um {size} überbucht",
+                  "noAllocations": "Keine Instanzen belegen diese Ressource."
                 },
                 "badge": {
                   "updateAvailable": "Update verfügbar"
