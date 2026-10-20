@@ -2687,71 +2687,73 @@ impl ServerBackup {
         Ok(())
     }
 
-    pub async fn fail_deletion_attempt(&self, state: &crate::State) -> Result<i32, anyhow::Error> {
-        let deletion_retries: Option<i32> = sqlx::query_scalar(
+    pub async fn fail_deletion_attempt(&self, state: &crate::State) -> Result<(), anyhow::Error> {
+        let finalized = sqlx::query(
             r#"
             UPDATE server_backups
-            SET deletion_retries = deletion_retries + 1
+            SET deletion_retries = $2
             WHERE
                 server_backups.uuid = $1
                 AND server_backups.deleted IS NULL
                 AND server_backups.deleting IS NOT NULL
-            RETURNING server_backups.deletion_retries
+                AND server_backups.deletion_retries = $2 - 1
             "#,
         )
         .bind(self.uuid)
-        .fetch_optional(state.database.write())
-        .await?;
+        .bind(Self::MAX_DELETION_RETRIES)
+        .execute(state.database.write())
+        .await?
+        .rows_affected();
 
-        let Some(deletion_retries) = deletion_retries else {
-            return Ok(0);
-        };
+        if finalized > 0 {
+            self.finalize_failed_deletion(state).await;
+        }
 
-        if deletion_retries >= Self::MAX_DELETION_RETRIES {
-            if let Some(server) = &self.server
-                && let Err(err) = super::server_activity::ServerActivity::create(
-                    state,
-                    super::server_activity::CreateServerActivityOptions {
-                        server_uuid: server.uuid,
-                        user_uuid: None,
-                        impersonator_uuid: None,
-                        api_key_uuid: None,
-                        schedule_uuid: None,
-                        event: match self.kind {
-                            ServerBackupKind::Server => "server:backup.delete-failed",
-                            ServerBackupKind::DatabaseInstance => {
-                                "server:database-backup.delete-failed"
-                            }
+        Ok(())
+    }
+
+    async fn finalize_failed_deletion(&self, state: &crate::State) {
+        if let Some(server) = &self.server
+            && let Err(err) = super::server_activity::ServerActivity::create(
+                state,
+                super::server_activity::CreateServerActivityOptions {
+                    server_uuid: server.uuid,
+                    user_uuid: None,
+                    impersonator_uuid: None,
+                    api_key_uuid: None,
+                    schedule_uuid: None,
+                    event: match self.kind {
+                        ServerBackupKind::Server => "server:backup.delete-failed",
+                        ServerBackupKind::DatabaseInstance => {
+                            "server:database-backup.delete-failed"
                         }
-                        .into(),
-                        ip: None,
-                        data: serde_json::json!({
-                            "uuid": self.uuid,
-                            "name": self.name,
-                            "database_instance_uuid": self.database_instance_uuid,
-                        }),
-                        created: None,
-                    },
-                )
-                .await
-            {
-                tracing::warn!(
-                    backup = %self.uuid,
-                    "failed to log backup deletion failure activity: {:#?}",
-                    err
-                );
-            }
-
-            Self::get_event_emitter().emit(
-                state.clone(),
-                ServerBackupEvent::DeletionCompleted {
-                    backup: Box::new(self.clone()),
-                    successful: false,
+                    }
+                    .into(),
+                    ip: None,
+                    data: serde_json::json!({
+                        "uuid": self.uuid,
+                        "name": self.name,
+                        "database_instance_uuid": self.database_instance_uuid,
+                    }),
+                    created: None,
                 },
+            )
+            .await
+        {
+            tracing::warn!(
+                backup = %self.uuid,
+                "failed to log backup deletion failure activity: {:#?}",
+                err
             );
         }
 
-        Ok(deletion_retries)
+        Self::get_event_emitter().emit(
+            state.clone(),
+            ServerBackupEvent::DeletionCompleted {
+                backup: Box::new(self.clone()),
+                successful: false,
+            },
+        );
     }
 
     pub async fn redispatch_stale_deletions(state: &crate::State) -> Result<u64, anyhow::Error> {
@@ -2794,17 +2796,30 @@ impl ServerBackup {
                 continue;
             }
 
-            let deletion_retries: i32 = sqlx::query_scalar(
+            let deletion_retries: Option<i32> = sqlx::query_scalar(
                 r#"
                 UPDATE server_backups
                 SET deleting = NOW(), deletion_retries = deletion_retries + 1
-                WHERE server_backups.uuid = $1 AND server_backups.deleted IS NULL
+                WHERE
+                    server_backups.uuid = $1
+                    AND server_backups.deleted IS NULL
+                    AND server_backups.deleting = $2
                 RETURNING server_backups.deletion_retries
                 "#,
             )
             .bind(backup.uuid)
-            .fetch_one(state.database.write())
+            .bind(backup.deleting)
+            .fetch_optional(state.database.write())
             .await?;
+
+            let Some(deletion_retries) = deletion_retries else {
+                continue;
+            };
+
+            if deletion_retries >= Self::MAX_DELETION_RETRIES {
+                backup.finalize_failed_deletion(state).await;
+                continue;
+            }
 
             match backup
                 .dispatch_deletion(state, &DeleteServerBackupOptions::default())
@@ -2824,15 +2839,7 @@ impl ServerBackup {
                         err
                     );
 
-                    if deletion_retries >= Self::MAX_DELETION_RETRIES {
-                        Self::get_event_emitter().emit(
-                            state.clone(),
-                            ServerBackupEvent::DeletionCompleted {
-                                backup: Box::new(backup.clone()),
-                                successful: false,
-                            },
-                        );
-                    }
+                    backup.fail_deletion_attempt(state).await?;
 
                     continue;
                 }

@@ -543,10 +543,7 @@ pub async fn define_background_tasks(
                     shared::models::server_backup::ServerBackup::redispatch_stale_deletions(&state)
                         .await?;
                 if redispatched > 0 {
-                    tracing::info!(
-                        "redispatched {} backup deletions without a completion callback",
-                        redispatched
-                    );
+                    tracing::info!("retried {} pending backup deletions", redispatched);
                 }
 
                 Ok(())
