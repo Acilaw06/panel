@@ -17,6 +17,7 @@ export const DEVICE_ONLY_SETTING_KEYS: ReadonlySet<string> = new Set([
   'file_manager::editor_engine',
   'file_manager::vscode_uri_scheme',
   'file_manager::audio_player_volume',
+  'file_manager::tree_width',
 ]);
 
 const FLUSH_DEBOUNCE_MS = 1000;

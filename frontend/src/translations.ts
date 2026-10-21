@@ -5768,6 +5768,7 @@ const baseTranslations = defineTranslations({
             unsavedTab: '{name} has unsaved changes',
             dropToSplit: 'Drop to open in a new editor pane',
             resizeEditorPanes: 'Resize editor panes',
+            resizeFileTree: 'Resize file tree',
             selectPane: 'Select editor pane',
             editorPane: 'Editor pane {number}',
           },

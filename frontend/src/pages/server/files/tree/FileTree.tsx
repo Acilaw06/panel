@@ -1124,16 +1124,21 @@ function FileTree({
             onReload={reloadTree}
           />
 
+          {/* Reserves the same scrollbar gutter as the rows' viewport so the fluid name column lines up. */}
           <div
-            ref={headerRef}
-            role='row'
             data-file-manager-tree-header
-            className='grid h-8 min-w-(--file-manager-tree-min-content-width) shrink-0 grid-cols-(--file-manager-tree-columns) items-center gap-x-2 border-b border-(--mantine-color-default-border) text-xs font-medium text-(--mantine-color-dimmed) will-change-transform'
+            className='file-manager-tree-viewport shrink-0 overflow-hidden border-b border-(--mantine-color-default-border)'
           >
-            <span className='pl-2.5'>{t('common.table.columns.name', {})}</span>
-            <span>{t('common.table.columns.size', {})}</span>
-            <span>{t('pages.server.files.table.columns.modified', {})}</span>
-            <span aria-hidden='true' />
+            <div
+              ref={headerRef}
+              role='row'
+              className='grid h-8 min-w-(--file-manager-tree-min-content-width) grid-cols-(--file-manager-tree-columns) items-center gap-x-2 text-xs font-medium text-(--mantine-color-dimmed) will-change-transform'
+            >
+              <span className='pl-2.5'>{t('common.table.columns.name', {})}</span>
+              <span>{t('common.table.columns.size', {})}</span>
+              <span>{t('pages.server.files.table.columns.modified', {})}</span>
+              <span aria-hidden='true' />
+            </div>
           </div>
 
           <FileMassContextMenu

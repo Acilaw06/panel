@@ -5695,6 +5695,7 @@
             "unsavedTab": "{name} hat ungespeicherte Änderungen",
             "dropToSplit": "Hier ablegen, um in einem neuen Editorbereich zu öffnen",
             "resizeEditorPanes": "Größe der Editorbereiche ändern",
+            "resizeFileTree": "Größe des Dateibaums ändern",
             "selectPane": "Editorbereich auswählen",
             "editorPane": "Editorbereich {number}"
           },
