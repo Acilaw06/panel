@@ -1029,7 +1029,13 @@ pub async fn handle_startup() -> Result<
 
                         let base_filesystem =
                             match settings.storage_driver.get_cap_filesystem(base_dir).await {
-                                Some(filesystem) => filesystem?,
+                                Some(Ok(filesystem)) => filesystem,
+                                Some(Err(err)) if err.kind() == std::io::ErrorKind::NotFound => {
+                                    return ApiResponse::error("file not found")
+                                        .with_status(StatusCode::NOT_FOUND)
+                                        .ok();
+                                }
+                                Some(Err(err)) => return Err(err.into()),
                                 None => {
                                     return ApiResponse::error("file not found")
                                         .with_status(StatusCode::NOT_FOUND)

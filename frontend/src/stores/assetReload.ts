@@ -33,6 +33,9 @@ export function scheduleAssetReload() {
 
       useAssetReloadStore.setState({ status: 'offline' });
       window.addEventListener('online', reloadNow, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reloadNow();
+      });
     },
     1000 * 2 ** attempts,
   );
