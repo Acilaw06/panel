@@ -120,6 +120,13 @@ impl ExtensionManager {
             crate::permissions::BASE_SERVER_PERMISSIONS.clone(),
         );
 
+        let mut settings_map = crate::settings::Settings::fetch_settings_map(&state.database)
+            .await
+            .unwrap_or_else(|err| {
+                tracing::error!("failed to fetch settings for extension settings probe: {err:#}");
+                Default::default()
+            });
+
         for ext in self.vec.read().await.iter() {
             if self.is_disabled(ext.package_name) {
                 tracing::info!(extension = %ext.package_name, "extension is disabled, skipping its entrypoints");
@@ -129,15 +136,30 @@ impl ExtensionManager {
                 continue;
             }
 
-            match AssertUnwindSafe(ext.settings_deserializer(state.clone()))
-                .catch_unwind()
-                .await
+            match AssertUnwindSafe(async {
+                let deserializer = ext.settings_deserializer(state.clone()).await;
+                deserializer
+                    .deserialize_boxed(crate::extensions::settings::SettingsDeserializer::new(
+                        state.database.clone(),
+                        ext.package_name,
+                        &mut settings_map,
+                    ))
+                    .await
+                    .map(|_| deserializer)
+            })
+            .catch_unwind()
+            .await
             {
-                Ok(deserializer) => {
+                Ok(Ok(deserializer)) => {
                     crate::settings::SETTINGS_DESER_EXTENSIONS
                         .write()
                         .insert(ext.package_name, deserializer);
                 }
+                Ok(Err(err)) => self.fail(
+                    ext.package_name,
+                    "settings_deserializer",
+                    &format!("{err:#}"),
+                ),
                 Err(err) => self.fail(
                     ext.package_name,
                     "settings_deserializer",
