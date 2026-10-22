@@ -1990,6 +1990,10 @@ const baseTranslations = defineTranslations({
           alert: {
             newPanelVersion:
               'A new version is available for the panel! You are currently on {current} and the latest version is {latest}. You may want to consider upgrading. [Click here]({upgradeUrl}) to view upgrade instructions.',
+            extensionBuildFailed: {
+              content: 'The last extension build failed.',
+              link: 'View extensions',
+            },
           },
           tabs: {
             overview: {
