@@ -35,6 +35,7 @@ function ServersContainer() {
     search,
     setSearch,
     setPage,
+    setPerPage,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.servers.all(),
     fetcher: getServers,
@@ -101,6 +102,7 @@ function ServersContainer() {
             loading={loading}
             pagination={servers}
             onPageSelect={setPage}
+            onPerPageSelect={setPerPage}
             error={error}
           >
             {servers?.data.map((server) => (

@@ -54,9 +54,10 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
     search,
     setSearch,
     setPage,
+    setPerPage,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.nodes.servers(node.uuid),
-    fetcher: (page, search) => getNodeServers(node.uuid, page, search),
+    fetcher: (page, search, perPage) => getNodeServers(node.uuid, page, search, perPage),
   });
 
   const {
@@ -226,7 +227,14 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
         }
       >
         <SelectionArea {...selectionAreaProps}>
-          <Table columns={columns} loading={loading} error={error} pagination={nodeServers} onPageSelect={setPage}>
+          <Table
+            columns={columns}
+            loading={loading}
+            error={error}
+            pagination={nodeServers}
+            onPageSelect={setPage}
+            onPerPageSelect={setPerPage}
+          >
             {nodeServers?.data.map((server) => (
               <SelectionArea.Selectable key={server.uuid} item={server}>
                 {(innerRef: Ref<HTMLElement>) => (

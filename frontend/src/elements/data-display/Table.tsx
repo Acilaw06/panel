@@ -14,8 +14,10 @@ import EmptyState from '@/elements/feedback/EmptyState.tsx';
 import ErrorState from '@/elements/feedback/ErrorState.tsx';
 import Spinner from '@/elements/feedback/Spinner.tsx';
 import Checkbox from '@/elements/input/Checkbox.tsx';
+import Select from '@/elements/input/Select.tsx';
 import { type LazyString, resolveString } from '@/lib/lazy.ts';
 import { matchesShortcut } from '@/plugins/quick-actions/useKeyboardShortcuts.ts';
+import { TABLE_PER_PAGE_OPTIONS } from '@/plugins/resource/useTablePerPage.ts';
 import { getTranslations, useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export interface TableHeaderProps {
@@ -101,11 +103,13 @@ export const TableData = forwardRef<HTMLTableCellElement, TableTdProps>(({ class
 interface PaginationProps<T> {
   data: Pagination<T>;
   onPageSelect: (page: number) => void;
+  onPerPageSelect?: (perPage: number) => void;
 }
 
 export function Pagination<T>({
   data,
   onPageSelect,
+  onPerPageSelect,
   withShortcuts = true,
   ...props
 }: PaginationProps<T> & { withShortcuts?: boolean } & GroupProps) {
@@ -169,7 +173,9 @@ export function Pagination<T>({
   const rangeStart = (currentPage - 1) * data.perPage + 1;
   const rangeEnd = Math.min(currentPage * data.perPage, data.total);
 
-  return isFirstPage && isLastPage ? null : (
+  const withPerPage = !!onPerPageSelect && data.total > TABLE_PER_PAGE_OPTIONS[0];
+
+  return isFirstPage && isLastPage && !withPerPage ? null : (
     <Group justify='space-between' hidden={rangeEnd === 0} {...props}>
       <p className='text-sm leading-5 text-(--mantine-color-dimmed)'>
         {t('common.table.pagination.results', {
@@ -178,7 +184,23 @@ export function Pagination<T>({
           total: data.total,
         })}
       </p>
-      <MantinePagination boundaries={1} value={currentPage} total={totalPages} onChange={setPage} />
+      <Group gap='xs'>
+        {withPerPage && (
+          <Select
+            className='w-32'
+            aria-label={t('common.table.pagination.perPageLabel', {})}
+            data={TABLE_PER_PAGE_OPTIONS.map((option) => ({
+              value: option.toString(),
+              label: t('common.table.pagination.perPage', { count: option }),
+            }))}
+            value={data.perPage.toString()}
+            onChange={(value) => value && onPerPageSelect(Number(value))}
+          />
+        )}
+        {totalPages > 1 && (
+          <MantinePagination boundaries={1} value={currentPage} total={totalPages} onChange={setPage} />
+        )}
+      </Group>
     </Group>
   );
 }
@@ -202,6 +224,7 @@ interface TableProps {
   error?: string | null;
   pagination?: Pagination<unknown>;
   onPageSelect?: (page: number) => void;
+  onPerPageSelect?: (perPage: number) => void;
   allowSelect?: boolean;
   flush?: boolean;
   empty?: ReactNode;
@@ -215,6 +238,7 @@ export default function Table({
   error,
   pagination,
   onPageSelect,
+  onPerPageSelect,
   allowSelect = true,
   flush = false,
   empty,
@@ -235,7 +259,13 @@ export default function Table({
       }
     >
       {!error && pagination && onPageSelect && pagination.total > pagination.perPage && (
-        <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} withShortcuts={false} />
+        <Pagination
+          data={pagination}
+          m='xs'
+          onPageSelect={onPageSelect}
+          onPerPageSelect={onPerPageSelect}
+          withShortcuts={false}
+        />
       )}
 
       <MantineTable.ScrollContainer minWidth={0} type='native'>
@@ -273,7 +303,9 @@ export default function Table({
         pagination?.total === 0 && !loading && <div className='p-2.5'>{empty ?? <NoItems />}</div>
       )}
 
-      {!error && pagination && onPageSelect && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
+      {!error && pagination && onPageSelect && (
+        <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} onPerPageSelect={onPerPageSelect} />
+      )}
     </div>
   );
 }

@@ -34,11 +34,12 @@ export default function ServerDatabaseInstances() {
 
   const { canReadAgent, used, full, agentTemplates, settled } = useDatabaseRelevance();
 
-  const { data, loading, error, search, debouncedSearch, setSearch, setPage, refetch } = useSearchablePaginatedTable({
-    queryKey: queryKeys.server(server.uuid).databases.instances.all(),
-    fetcher: (page, search) => getDatabaseInstances(server.uuid, page, search),
-    canRequest: canReadAgent,
-  });
+  const { data, loading, error, search, debouncedSearch, setSearch, setPage, setPerPage, refetch } =
+    useSearchablePaginatedTable({
+      queryKey: queryKeys.server(server.uuid).databases.instances.all(),
+      fetcher: (page, search, perPage) => getDatabaseInstances(server.uuid, page, search, perPage),
+      canRequest: canReadAgent,
+    });
 
   const {
     selected: selectedInstances,
@@ -130,6 +131,7 @@ export default function ServerDatabaseInstances() {
           loading={loading}
           pagination={data}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
           empty={
             debouncedSearch ? undefined : (

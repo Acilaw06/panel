@@ -33,6 +33,7 @@ export default function DashboardApiKeys() {
     search,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.user.apiKeys.all(),
@@ -112,6 +113,7 @@ export default function DashboardApiKeys() {
           loading={loading}
           pagination={apiKeys}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
         >
           {apiKeys?.data.map((key) => (

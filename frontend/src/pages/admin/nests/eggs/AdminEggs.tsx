@@ -51,9 +51,10 @@ function EggsContainer({ contextNest }: { contextNest: z.infer<typeof adminNestS
     search,
     setSearch,
     setPage,
+    setPerPage,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.nests.eggs(contextNest.uuid),
-    fetcher: (page, search) => getEggs(contextNest.uuid, page, search),
+    fetcher: (page, search, perPage) => getEggs(contextNest.uuid, page, search, perPage),
   });
 
   const {
@@ -202,7 +203,14 @@ function EggsContainer({ contextNest }: { contextNest: z.infer<typeof adminNestS
       />
 
       <SelectionArea {...selectionAreaProps}>
-        <Table columns={columns} loading={loading} pagination={eggs} onPageSelect={setPage} error={error}>
+        <Table
+          columns={columns}
+          loading={loading}
+          pagination={eggs}
+          onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
+          error={error}
+        >
           {eggs?.data.map((egg) => (
             <SelectionArea.Selectable key={egg.uuid} item={egg}>
               {(innerRef: Ref<HTMLElement>) => (

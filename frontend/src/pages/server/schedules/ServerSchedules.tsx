@@ -54,11 +54,12 @@ export default function ServerSchedules() {
     debouncedSearch,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.server(server.uuid).schedules.all(),
-    fetcher: (page, search) =>
-      getSchedules(server.uuid, page, search).then((schedules) => ({
+    fetcher: (page, search, perPage) =>
+      getSchedules(server.uuid, page, search, perPage).then((schedules) => ({
         ...schedules,
         data: schedules.data.map((schedule) =>
           applyScheduleCompletion(schedule, serverStoreApi.getState().scheduleCompletions),
@@ -211,6 +212,7 @@ export default function ServerSchedules() {
           error={error}
           pagination={schedules}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           empty={
             debouncedSearch ? undefined : (
               <EmptyState

@@ -93,10 +93,11 @@ export default function AdminNodeAllocations({ node }: { node: z.infer<typeof ad
     debouncedSearch,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.nodes.allocations(node.uuid),
-    fetcher: (page, search) => getNodeAllocations(node.uuid, page, buildFilter(search)),
+    fetcher: (page, search, perPage) => getNodeAllocations(node.uuid, page, buildFilter(search), perPage),
     deps: [node.uuid, ipFilter, portFrom, portTo, assignedFilter],
   });
 
@@ -261,6 +262,7 @@ export default function AdminNodeAllocations({ node }: { node: z.infer<typeof ad
           error={error}
           pagination={nodeAllocations}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
         >
           {nodeAllocations?.data.map((allocation) => (
             <SelectionArea.Selectable key={allocation.uuid} item={allocation}>

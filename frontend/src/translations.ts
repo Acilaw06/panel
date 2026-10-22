@@ -379,6 +379,8 @@ const baseTranslations = defineTranslations({
         selectRow: 'Select row',
         pagination: {
           results: 'Showing {start} to {end} of {total} results.',
+          perPage: '{count} / page',
+          perPageLabel: 'Results per page',
         },
         empty: {
           title: 'No items found',

@@ -31,9 +31,10 @@ export default function EggRepositoryEggs({
     search,
     setSearch,
     setPage,
+    setPerPage,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.eggRepositories.eggs(contextEggRepository.uuid),
-    fetcher: (page, search) => getEggRepositoryEggs(contextEggRepository.uuid, page, search),
+    fetcher: (page, search, perPage) => getEggRepositoryEggs(contextEggRepository.uuid, page, search, perPage),
   });
 
   const { selected, toggle, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
@@ -79,6 +80,7 @@ export default function EggRepositoryEggs({
           error={error}
           pagination={eggRepositoryEggs}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
         >
           {eggRepositoryEggs?.data.map((eggRepositoryEgg) => (
             <SelectionArea.Selectable key={eggRepositoryEgg.uuid} item={eggRepositoryEgg}>

@@ -51,10 +51,11 @@ export default function ServerSubusers() {
     debouncedSearch,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.server(server.uuid).subusers.all(),
-    fetcher: (page, search) => getSubusers(server.uuid, page, search),
+    fetcher: (page, search, perPage) => getSubusers(server.uuid, page, search, perPage),
   });
 
   const {
@@ -129,6 +130,7 @@ export default function ServerSubusers() {
           loading={loading}
           pagination={subusers}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
           empty={
             debouncedSearch ? undefined : (

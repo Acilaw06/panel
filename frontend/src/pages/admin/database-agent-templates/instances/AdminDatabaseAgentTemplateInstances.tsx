@@ -41,10 +41,12 @@ export default function AdminDatabaseAgentTemplateInstances({
     search,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.admin.databaseInstances.byTemplate(databaseAgentTemplate.uuid),
-    fetcher: (page, search) => getDatabaseAgentTemplateInstances(databaseAgentTemplate.uuid, page, search),
+    fetcher: (page, search, perPage) =>
+      getDatabaseAgentTemplateInstances(databaseAgentTemplate.uuid, page, search, perPage),
   });
 
   const { selected, toggle, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
@@ -146,7 +148,14 @@ export default function AdminDatabaseAgentTemplateInstances({
       </ActionBar>
 
       <SelectionArea onSelectedStart={selectionAreaProps.onSelectedStart} onSelected={selectionAreaProps.onSelected}>
-        <Table columns={columns} loading={loading} error={error} pagination={instances} onPageSelect={setPage}>
+        <Table
+          columns={columns}
+          loading={loading}
+          error={error}
+          pagination={instances}
+          onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
+        >
           {instances?.data.map((databaseAgent) => (
             <SelectionArea.Selectable key={databaseAgent.uuid} item={databaseAgent}>
               {(innerRef: Ref<HTMLElement>) => (
