@@ -21,7 +21,10 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
 
                 let mut environment = minijinja::Environment::new();
                 environment.set_auto_escape_callback(|_| minijinja::AutoEscape::Html);
-                environment.add_global("settings", minijinja::Value::from_serialize(&*settings));
+                environment.add_global(
+                    "settings",
+                    minijinja::Value::from(minijinja::value::Serde(&*settings)),
+                );
                 drop(settings);
 
                 let api_html = environment.render_str(

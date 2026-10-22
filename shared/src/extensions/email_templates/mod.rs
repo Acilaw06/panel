@@ -379,8 +379,8 @@ mod tests {
 
     fn fixture_context() -> minijinja::Value {
         minijinja::context! {
-            user => serde_json::json!({ "username": "tester", "email": "tester@example.com" }),
-            server => serde_json::json!({ "name": "Example Server" }),
+            user => minijinja::value::Serde(serde_json::json!({ "username": "tester", "email": "tester@example.com" })),
+            server => minijinja::value::Serde(serde_json::json!({ "name": "Example Server" })),
             email => "tester@example.com",
             reset_link => "https://panel.example.com/auth/reset-password?token=x",
             verification_link => "https://panel.example.com/auth/verify-email?token=x",
@@ -400,13 +400,16 @@ mod tests {
         environment.set_auto_escape_callback(|_| minijinja::AutoEscape::Html);
         environment.add_global(
             "settings",
-            minijinja::Value::from_serialize(serde_json::json!({
+            minijinja::Value::from(minijinja::value::Serde(serde_json::json!({
                 "app": { "name": "Panel & Co", "url": "https://panel.example.com" }
-            })),
+            }))),
         );
         environment.add_global("language", "en");
         environment.add_global("subject", "Subject");
-        environment.add_global("vars", minijinja::Value::from_serialize(variables));
+        environment.add_global(
+            "vars",
+            minijinja::Value::from(minijinja::value::Serde(variables)),
+        );
 
         environment
     }

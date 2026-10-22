@@ -469,9 +469,9 @@ impl CreatableModel for UserSession {
                         "session_created",
                         &user,
                         minijinja::context! {
-                            user => user,
-                            ip => options.ip.ip().to_compact_string(),
-                            user_agent => options.user_agent,
+                            user => minijinja::value::Serde(&user),
+                            ip => minijinja::value::Serde(options.ip.ip().to_compact_string()),
+                            user_agent => minijinja::value::Serde(&options.user_agent),
                             sessions_link => format!("{}/account/sessions", settings.app.url),
                         },
                     )

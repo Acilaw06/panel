@@ -332,7 +332,7 @@ impl ExtensionDistrFile {
         while let Ok(mut entry) = self.zip.by_index(i) {
             i += 1;
 
-            if !entry.name().starts_with("backend/") {
+            if !entry.name()?.starts_with("backend/") {
                 continue;
             }
 
@@ -371,7 +371,7 @@ impl ExtensionDistrFile {
         while let Ok(mut entry) = self.zip.by_index(i) {
             i += 1;
 
-            if !entry.name().starts_with("frontend/") {
+            if !entry.name()?.starts_with("frontend/") {
                 continue;
             }
 
@@ -409,7 +409,7 @@ impl ExtensionDistrFile {
         while let Ok(mut entry) = self.zip.by_index(i) {
             i += 1;
 
-            if !entry.name().starts_with("migrations/") {
+            if !entry.name()?.starts_with("migrations/") {
                 continue;
             }
 
@@ -444,7 +444,7 @@ impl ExtensionDistrFile {
         while let Ok(entry) = self.zip.by_index(i) {
             i += 1;
 
-            let entry_name = entry.name().to_string();
+            let entry_name = entry.name()?.to_string();
             if entry_name.starts_with("migrations/")
                 && entry_name.ends_with("/up.sql")
                 && !entry.is_dir()

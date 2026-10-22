@@ -201,7 +201,7 @@ impl UserEmailVerification {
                 "email_verification",
                 MailRecipient::new(email, user.language.clone()),
                 minijinja::context! {
-                    user => user,
+                    user => minijinja::value::Serde(&user),
                     email => email,
                     verification_link => verification_link,
                 },

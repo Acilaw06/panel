@@ -1157,7 +1157,7 @@ impl CreatableModel for User {
                             "account_created",
                             &result,
                             minijinja::context! {
-                                user => result,
+                                user => minijinja::value::Serde(&result),
                                 reset_link => format!(
                                     "{}/auth/reset-password?token={}",
                                     settings.app.url,

@@ -987,10 +987,15 @@ impl Deref for SettingsReadGuard<'_> {
 fn render_index_html(settings: &AppSettings) -> Result<String, anyhow::Error> {
     let mut environment = minijinja::Environment::new();
     environment.set_auto_escape_callback(|_| minijinja::AutoEscape::Html);
-    environment.add_global("settings", minijinja::Value::from_serialize(settings));
+    environment.add_global(
+        "settings",
+        minijinja::Value::from(minijinja::value::Serde(settings)),
+    );
     environment.add_global(
         "metadata",
-        minijinja::Value::from_serialize(settings.metadata.resolve(&settings.app)),
+        minijinja::Value::from(minijinja::value::Serde(
+            settings.metadata.resolve(&settings.app),
+        )),
     );
 
     let index_html = crate::frontend_index_html().ok_or_else(|| {
