@@ -38,10 +38,11 @@ export default function ServerNetwork() {
     search,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.server(server.uuid).network.all(),
-    fetcher: (page, search) => getAllocations(server.uuid, page, search),
+    fetcher: (page, search, perPage) => getAllocations(server.uuid, page, search, perPage),
     canRequest: canReadAllocations,
   });
 
@@ -132,6 +133,7 @@ export default function ServerNetwork() {
           loading={loading}
           pagination={allocations}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
         >
           {allocations?.data.map((allocation) => (
@@ -141,7 +143,9 @@ export default function ServerNetwork() {
                   allocation={allocation}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedAllocations.has(allocation.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleAllocation(allocation, selected) : undefined}
+                  onSelectionChange={
+                    canDelete ? (selected, range) => toggleAllocation(allocation, selected, range) : undefined
+                  }
                 />
               )}
             </SelectionArea.Selectable>

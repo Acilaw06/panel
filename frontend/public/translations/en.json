@@ -559,7 +559,9 @@
       "table": {
         "selectRow": "Select row",
         "pagination": {
-          "results": "Showing {start} to {end} of {total} results."
+          "results": "Showing {start} to {end} of {total} results.",
+          "perPage": "{count} / page",
+          "perPageLabel": "Results per page"
         },
         "empty": {
           "title": "No items found",
@@ -7576,7 +7578,9 @@
           "toast": {
             "downloadStarted": "Download started.",
             "restoringBackup": "Restoring backup...",
-            "exportStarted": "Backup export started."
+            "exportStarted": "Backup export started.",
+            "locked": "Backup locked.",
+            "unlocked": "Backup unlocked."
           },
           "modal": {
             "createBackup": {

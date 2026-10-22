@@ -54,11 +54,12 @@ export default function ServerSchedules() {
     debouncedSearch,
     setSearch,
     setPage,
+    setPerPage,
     refetch,
   } = useSearchablePaginatedTable({
     queryKey: queryKeys.server(server.uuid).schedules.all(),
-    fetcher: (page, search) =>
-      getSchedules(server.uuid, page, search).then((schedules) => ({
+    fetcher: (page, search, perPage) =>
+      getSchedules(server.uuid, page, search, perPage).then((schedules) => ({
         ...schedules,
         data: schedules.data.map((schedule) =>
           applyScheduleCompletion(schedule, serverStoreApi.getState().scheduleCompletions),
@@ -76,10 +77,10 @@ export default function ServerSchedules() {
   } = useTableSelection({ items: schedules?.data, shortcuts: canSelect });
 
   const handleScheduleClick = (schedule: z.infer<typeof serverScheduleSchema>, event: React.MouseEvent) => {
-    if (canSelect && (event.ctrlKey || event.metaKey)) {
+    if (canSelect && (event.ctrlKey || event.metaKey || event.shiftKey)) {
       event.preventDefault();
       event.stopPropagation();
-      toggleSchedule(schedule, !selectedSchedules.has(schedule.uuid));
+      toggleSchedule(schedule, !selectedSchedules.has(schedule.uuid), event.shiftKey);
     }
   };
 
@@ -211,6 +212,7 @@ export default function ServerSchedules() {
           error={error}
           pagination={schedules}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           empty={
             debouncedSearch ? undefined : (
               <EmptyState
@@ -265,7 +267,9 @@ export default function ServerSchedules() {
                   atLimit={atLimit}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedSchedules.has(schedule.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleSchedule(schedule, selected) : undefined}
+                  onSelectionChange={
+                    canSelect ? (selected, range) => toggleSchedule(schedule, selected, range) : undefined
+                  }
                   onClick={(e) => handleScheduleClick(schedule, e)}
                 />
               )}

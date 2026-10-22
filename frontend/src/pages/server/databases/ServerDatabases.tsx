@@ -33,11 +33,12 @@ export default function ServerDatabases() {
 
   const { canReadClassic, used, full, databaseHosts, classicRelevant, agentRelevant, settled } = useDatabaseRelevance();
 
-  const { data, loading, error, search, debouncedSearch, setSearch, setPage, refetch } = useSearchablePaginatedTable({
-    queryKey: queryKeys.server(server.uuid).databases.all(),
-    fetcher: (page, search) => getDatabases(server.uuid, page, search),
-    canRequest: canReadClassic,
-  });
+  const { data, loading, error, search, debouncedSearch, setSearch, setPage, setPerPage, refetch } =
+    useSearchablePaginatedTable({
+      queryKey: queryKeys.server(server.uuid).databases.all(),
+      fetcher: (page, search, perPage) => getDatabases(server.uuid, page, search, perPage),
+      canRequest: canReadClassic,
+    });
 
   const {
     selected: selectedDatabases,
@@ -121,6 +122,7 @@ export default function ServerDatabases() {
           loading={loading}
           pagination={data}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
           empty={
             debouncedSearch ? undefined : (
@@ -164,7 +166,9 @@ export default function ServerDatabases() {
                   database={database}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedDatabases.has(database.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleDatabase(database, selected) : undefined}
+                  onSelectionChange={
+                    canDelete ? (selected, range) => toggleDatabase(database, selected, range) : undefined
+                  }
                 />
               )}
             </SelectionArea.Selectable>

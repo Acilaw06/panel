@@ -1,5 +1,4 @@
 import { faFileLines } from '@fortawesome/free-solid-svg-icons';
-import { type OnMount } from '@monaco-editor/react';
 import classNames from 'classnames';
 import debounce from 'debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -18,6 +17,7 @@ import NumberInput from '@/elements/input/NumberInput.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import { downloadBlob } from '@/lib/download/download.ts';
+import { type OnMount } from '@/lib/editor/monacoLoader.ts';
 import { stripAnsi } from '@/lib/format/ansi.ts';
 import { bytesToString } from '@/lib/format/size.ts';
 import { queryKeys } from '@/lib/queryKeys.ts';

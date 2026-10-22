@@ -20,7 +20,7 @@ import SubuserUpdateModal from './modals/SubuserUpdateModal.tsx';
 interface SubuserRowProps {
   subuser: z.infer<typeof serverSubuserSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 const SubuserRow = forwardRef<HTMLTableRowElement, SubuserRowProps>(function SubuserRow(

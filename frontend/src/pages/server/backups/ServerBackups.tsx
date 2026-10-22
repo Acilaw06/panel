@@ -122,9 +122,10 @@ export default function ServerBackups({
 
   const groupsQueryKey = useMemo(() => queryKeys.server(server.uuid).backups.groups.all(), [server.uuid]);
 
-  const { loading, error, search, debouncedSearch, setSearch, setPage } = useSearchablePaginatedTable({
+  const { loading, error, search, debouncedSearch, setSearch, setPage, setPerPage } = useSearchablePaginatedTable({
     queryKey: queryKeys.server(server.uuid).backups.all(),
-    fetcher: (page, search) => getBackups(server.uuid, page, search, showGroups && canReadGroups, filter),
+    fetcher: (page, search, perPage) =>
+      getBackups(server.uuid, page, search, showGroups && canReadGroups, filter, perPage),
     deps: [filter],
     setStoreData: setBackups,
     modifyParams: modifyParams ?? variant === 'page',
@@ -325,6 +326,7 @@ export default function ServerBackups({
           loading={loading}
           pagination={backups}
           onPageSelect={setPage}
+          onPerPageSelect={setPerPage}
           error={error}
           empty={
             isEmpty ? (
@@ -356,7 +358,7 @@ export default function ServerBackups({
                   columns={columns}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedBackups.has(backup.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleBackup(backup, selected) : undefined}
+                  onSelectionChange={canSelect ? (selected, range) => toggleBackup(backup, selected, range) : undefined}
                 />
               )}
             </SelectionArea.Selectable>
