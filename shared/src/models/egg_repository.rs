@@ -536,7 +536,10 @@ impl EggRepository {
                                 Err(_) => continue,
                             }
                         } else {
-                            match serde_norway::from_str(file_content.trim()) {
+                            match serde_saphyr::from_str_with_options(
+                                file_content.trim(),
+                                crate::utils::yaml_deserialize_options(),
+                            ) {
                                 Ok(egg) => egg,
                                 Err(_) => continue,
                             }

@@ -288,7 +288,10 @@ impl ExportedNestEgg {
         Ok(if content.starts_with(b"{") {
             serde_json::from_slice(content)?
         } else {
-            serde_norway::from_slice(content)?
+            serde_saphyr::from_slice_with_options(
+                content,
+                crate::utils::yaml_deserialize_options(),
+            )?
         })
     }
 }
