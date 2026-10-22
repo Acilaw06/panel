@@ -7571,7 +7571,9 @@
           "toast": {
             "downloadStarted": "Download started.",
             "restoringBackup": "Restoring backup...",
-            "exportStarted": "Backup export started."
+            "exportStarted": "Backup export started.",
+            "locked": "Backup locked.",
+            "unlocked": "Backup unlocked."
           },
           "modal": {
             "createBackup": {

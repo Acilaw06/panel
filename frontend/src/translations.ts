@@ -7645,6 +7645,8 @@ const baseTranslations = defineTranslations({
             downloadStarted: 'Download started.',
             restoringBackup: 'Restoring backup...',
             exportStarted: 'Backup export started.',
+            locked: 'Backup locked.',
+            unlocked: 'Backup unlocked.',
           },
           modal: {
             createBackup: {
