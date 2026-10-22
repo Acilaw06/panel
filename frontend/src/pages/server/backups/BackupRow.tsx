@@ -56,7 +56,7 @@ interface BackupRowProps {
   columns: BackupColumns;
   readOnly?: boolean;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 const BackupRow = forwardRef<HTMLTableRowElement, BackupRowProps>(function BackupRow(

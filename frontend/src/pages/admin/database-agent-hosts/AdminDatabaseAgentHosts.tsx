@@ -86,7 +86,7 @@ function DatabaseAgentHostsContainer() {
                   databaseAgentHost={host}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedHosts.has(host.uuid)}
-                  onSelectionChange={(selected) => toggleHost(host, selected)}
+                  onSelectionChange={(selected, range) => toggleHost(host, selected, range)}
                 />
               )}
             </SelectionArea.Selectable>

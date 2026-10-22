@@ -356,7 +356,7 @@ export default function ServerBackups({
                   columns={columns}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedBackups.has(backup.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleBackup(backup, selected) : undefined}
+                  onSelectionChange={canSelect ? (selected, range) => toggleBackup(backup, selected, range) : undefined}
                 />
               )}
             </SelectionArea.Selectable>

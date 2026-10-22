@@ -34,7 +34,7 @@ import DatabaseRecreateModal from './modals/DatabaseRecreateModal.tsx';
 interface DatabaseRowProps {
   database: z.infer<typeof serverDatabaseSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 const DatabaseRow = forwardRef<HTMLTableRowElement, DatabaseRowProps>(function DatabaseRow(

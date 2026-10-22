@@ -94,10 +94,10 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
   }, []);
 
   const handleServerClick = (server: z.infer<typeof adminServerSchema>, event: React.MouseEvent) => {
-    if (sKeyPressed || event.ctrlKey || event.metaKey) {
+    if (sKeyPressed || event.ctrlKey || event.metaKey || event.shiftKey) {
       event.preventDefault();
       event.stopPropagation();
-      toggleServer(server, !selectedServers.has(server));
+      toggleServer(server, !selectedServers.has(server), event.shiftKey);
     }
   };
 
@@ -235,7 +235,7 @@ export default function AdminNodeServers({ node }: { node: AdminNode }) {
                     server={server}
                     ref={innerRef as Ref<HTMLTableRowElement>}
                     isSelected={selectedServers.has(server.uuid)}
-                    onSelectionChange={(selected) => toggleServer(server, selected)}
+                    onSelectionChange={(selected, range) => toggleServer(server, selected, range)}
                     onClick={(e) => handleServerClick(server, e)}
                   />
                 )}

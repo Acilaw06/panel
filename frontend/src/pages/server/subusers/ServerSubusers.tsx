@@ -168,7 +168,7 @@ export default function ServerSubusers() {
                   subuser={su}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedSubusers.has(su.user.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleSubuser(su, selected) : undefined}
+                  onSelectionChange={canDelete ? (selected, range) => toggleSubuser(su, selected, range) : undefined}
                 />
               )}
             </SelectionArea.Selectable>

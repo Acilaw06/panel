@@ -164,7 +164,9 @@ export default function ServerDatabases() {
                   database={database}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedDatabases.has(database.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleDatabase(database, selected) : undefined}
+                  onSelectionChange={
+                    canDelete ? (selected, range) => toggleDatabase(database, selected, range) : undefined
+                  }
                 />
               )}
             </SelectionArea.Selectable>

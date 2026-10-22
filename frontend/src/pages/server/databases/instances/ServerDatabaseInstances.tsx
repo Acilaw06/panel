@@ -50,10 +50,10 @@ export default function ServerDatabaseInstances() {
   } = useTableSelection({ items: data?.data, shortcuts: canSelect });
 
   const handleInstanceClick = (instance: z.infer<typeof serverDatabaseInstanceSchema>, event: React.MouseEvent) => {
-    if (canSelect && (event.ctrlKey || event.metaKey)) {
+    if (canSelect && (event.ctrlKey || event.metaKey || event.shiftKey)) {
       event.preventDefault();
       event.stopPropagation();
-      toggleInstance(instance, !selectedInstances.has(instance.uuid));
+      toggleInstance(instance, !selectedInstances.has(instance.uuid), event.shiftKey);
     }
   };
 
@@ -173,7 +173,9 @@ export default function ServerDatabaseInstances() {
                   instance={instance}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedInstances.has(instance.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleInstance(instance, selected) : undefined}
+                  onSelectionChange={
+                    canSelect ? (selected, range) => toggleInstance(instance, selected, range) : undefined
+                  }
                   onClick={(e) => handleInstanceClick(instance, e)}
                 />
               )}

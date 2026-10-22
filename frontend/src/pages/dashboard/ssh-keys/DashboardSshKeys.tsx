@@ -117,7 +117,7 @@ export default function DashboardSshKeys() {
                   sshKey={key}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedSshKeys.has(key.uuid)}
-                  onSelectionChange={(selected) => toggleSshKey(key, selected)}
+                  onSelectionChange={(selected, range) => toggleSshKey(key, selected, range)}
                 />
               )}
             </SelectionArea.Selectable>

@@ -72,13 +72,23 @@ export const TableBody = ({ children }: { children: ReactNode }) => {
   return <MantineTable.Tbody>{children}</MantineTable.Tbody>;
 };
 
-export const TableRow = forwardRef<HTMLTableRowElement, TableTrProps>(({ className, children, ...rest }, ref) => {
-  return (
-    <MantineTable.Tr ref={ref} className={className} {...rest}>
-      {children}
-    </MantineTable.Tr>
-  );
-});
+export const TableRow = forwardRef<HTMLTableRowElement, TableTrProps>(
+  ({ className, children, onMouseDown, ...rest }, ref) => {
+    return (
+      <MantineTable.Tr
+        ref={ref}
+        className={className}
+        onMouseDown={(e) => {
+          if (e.shiftKey && rest.onClick) e.preventDefault();
+          onMouseDown?.(e);
+        }}
+        {...rest}
+      >
+        {children}
+      </MantineTable.Tr>
+    );
+  },
+);
 
 export const TableData = forwardRef<HTMLTableCellElement, TableTdProps>(({ className, children, ...rest }, ref) => {
   return (
@@ -299,7 +309,7 @@ interface TableSelectionCellProps {
   id: string;
   checked: boolean;
   disabled?: boolean;
-  onChange: (checked: boolean) => void;
+  onChange: (checked: boolean, range: boolean) => void;
 }
 
 export const TableSelectionCell = ({ id, checked, disabled, onChange }: TableSelectionCellProps) => {
@@ -308,16 +318,19 @@ export const TableSelectionCell = ({ id, checked, disabled, onChange }: TableSel
   return (
     <TableData
       className='pl-4 relative cursor-pointer w-10 text-center'
+      onMouseDown={(e) => {
+        if (e.shiftKey) e.preventDefault();
+      }}
       onClick={(e) => {
         e.stopPropagation();
-        if (!disabled) onChange(!checked);
+        if (!disabled) onChange(!checked, e.shiftKey);
       }}
     >
       <Checkbox
         id={id}
         checked={checked}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
+        onChange={(e) => onChange(e.target.checked, 'shiftKey' in e.nativeEvent && !!e.nativeEvent.shiftKey)}
         onClick={(e) => e.stopPropagation()}
         aria-label={t('common.table.selectRow', {})}
         classNames={{ input: 'cursor-pointer!' }}

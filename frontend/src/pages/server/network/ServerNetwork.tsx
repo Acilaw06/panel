@@ -141,7 +141,9 @@ export default function ServerNetwork() {
                   allocation={allocation}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedAllocations.has(allocation.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleAllocation(allocation, selected) : undefined}
+                  onSelectionChange={
+                    canDelete ? (selected, range) => toggleAllocation(allocation, selected, range) : undefined
+                  }
                 />
               )}
             </SelectionArea.Selectable>

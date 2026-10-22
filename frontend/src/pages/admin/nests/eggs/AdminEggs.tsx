@@ -58,8 +58,7 @@ function EggsContainer({ contextNest }: { contextNest: z.infer<typeof adminNestS
 
   const {
     selected: selectedEggs,
-    add: addSelectedEgg,
-    remove: removeSelectedEgg,
+    toggle: toggleEgg,
     clear: clearSelectedEggs,
     selectAll,
     allSelected,
@@ -212,7 +211,7 @@ function EggsContainer({ contextNest }: { contextNest: z.infer<typeof adminNestS
                   nest={contextNest}
                   egg={egg}
                   isSelected={selectedEggs.has(egg.uuid)}
-                  onSelectionChange={(selected) => (selected ? addSelectedEgg(egg) : removeSelectedEgg(egg))}
+                  onSelectionChange={(selected, range) => toggleEgg(egg, selected, range)}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                 />
               )}

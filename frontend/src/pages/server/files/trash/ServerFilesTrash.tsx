@@ -158,7 +158,7 @@ export default function ServerFilesTrash() {
                   entry={entry}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedEntries.has(entry.uuid)}
-                  onSelectionChange={canDelete ? (selected) => toggleEntry(entry, selected) : undefined}
+                  onSelectionChange={canDelete ? (selected, range) => toggleEntry(entry, selected, range) : undefined}
                   onFinished={refetch}
                 />
               )}

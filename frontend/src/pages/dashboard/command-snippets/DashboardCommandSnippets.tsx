@@ -106,7 +106,7 @@ export default function DashboardCommandSnippets() {
                   commandSnippet={snippet}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedCommandSnippets.has(snippet.uuid)}
-                  onSelectionChange={(selected) => toggleCommandSnippet(snippet, selected)}
+                  onSelectionChange={(selected, range) => toggleCommandSnippet(snippet, selected, range)}
                 />
               )}
             </SelectionArea.Selectable>

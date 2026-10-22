@@ -22,7 +22,7 @@ import { useServerStore } from '@/stores/server.ts';
 interface DeviceRowProps {
   contextDevice: z.infer<typeof serverDeviceSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 export const DeviceRow = forwardRef<HTMLTableRowElement, DeviceRowProps>(function DeviceRow(

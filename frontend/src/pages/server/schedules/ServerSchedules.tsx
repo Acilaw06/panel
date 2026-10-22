@@ -76,10 +76,10 @@ export default function ServerSchedules() {
   } = useTableSelection({ items: schedules?.data, shortcuts: canSelect });
 
   const handleScheduleClick = (schedule: z.infer<typeof serverScheduleSchema>, event: React.MouseEvent) => {
-    if (canSelect && (event.ctrlKey || event.metaKey)) {
+    if (canSelect && (event.ctrlKey || event.metaKey || event.shiftKey)) {
       event.preventDefault();
       event.stopPropagation();
-      toggleSchedule(schedule, !selectedSchedules.has(schedule.uuid));
+      toggleSchedule(schedule, !selectedSchedules.has(schedule.uuid), event.shiftKey);
     }
   };
 
@@ -265,7 +265,9 @@ export default function ServerSchedules() {
                   atLimit={atLimit}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedSchedules.has(schedule.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleSchedule(schedule, selected) : undefined}
+                  onSelectionChange={
+                    canSelect ? (selected, range) => toggleSchedule(schedule, selected, range) : undefined
+                  }
                   onClick={(e) => handleScheduleClick(schedule, e)}
                 />
               )}

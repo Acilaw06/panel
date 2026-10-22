@@ -35,7 +35,7 @@ import DatabaseInstanceDeleteModal from './modals/DatabaseInstanceDeleteModal.ts
 interface DatabaseInstanceRowProps {
   instance: z.infer<typeof serverDatabaseInstanceSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
   onClick?: (event: React.MouseEvent) => void;
 }
 

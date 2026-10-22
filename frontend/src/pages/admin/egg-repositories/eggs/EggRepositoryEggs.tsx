@@ -36,7 +36,7 @@ export default function EggRepositoryEggs({
     fetcher: (page, search) => getEggRepositoryEggs(contextEggRepository.uuid, page, search),
   });
 
-  const { selected, add, remove, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
+  const { selected, toggle, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
     items: eggRepositoryEggs?.data,
   });
 
@@ -88,7 +88,7 @@ export default function EggRepositoryEggs({
                   egg={eggRepositoryEgg}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selected.has(eggRepositoryEgg.uuid)}
-                  onSelectionChange={(isSelected) => (isSelected ? add(eggRepositoryEgg) : remove(eggRepositoryEgg))}
+                  onSelectionChange={(isSelected, range) => toggle(eggRepositoryEgg, isSelected, range)}
                   onOpen={() => setDrawerEgg(eggRepositoryEgg)}
                   onInstall={() => setInstallEgg(eggRepositoryEgg)}
                 />

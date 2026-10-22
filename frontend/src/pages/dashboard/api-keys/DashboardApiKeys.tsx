@@ -122,7 +122,7 @@ export default function DashboardApiKeys() {
                   apiKey={key}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedApiKeys.has(key.uuid)}
-                  onSelectionChange={(selected) => toggleApiKey(key, selected)}
+                  onSelectionChange={(selected, range) => toggleApiKey(key, selected, range)}
                 />
               )}
             </SelectionArea.Selectable>

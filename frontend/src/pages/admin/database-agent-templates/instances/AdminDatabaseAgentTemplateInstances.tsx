@@ -47,7 +47,7 @@ export default function AdminDatabaseAgentTemplateInstances({
     fetcher: (page, search) => getDatabaseAgentTemplateInstances(databaseAgentTemplate.uuid, page, search),
   });
 
-  const { selected, add, remove, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
+  const { selected, toggle, clear, selectAll, allSelected, selectionAreaProps } = useTableSelection({
     items: instances?.data,
   });
 
@@ -154,7 +154,7 @@ export default function AdminDatabaseAgentTemplateInstances({
                   key={databaseAgent.uuid}
                   databaseAgent={databaseAgent}
                   isSelected={selected.has(databaseAgent.uuid)}
-                  onSelectionChange={(isSelected) => (isSelected ? add(databaseAgent) : remove(databaseAgent))}
+                  onSelectionChange={(isSelected, range) => toggle(databaseAgent, isSelected, range)}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                 />
               )}

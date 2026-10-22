@@ -22,7 +22,7 @@ import { useServerStore } from '@/stores/server.ts';
 interface MountRowProps {
   contextMount: z.infer<typeof serverMountSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 export const MountRow = forwardRef<HTMLTableRowElement, MountRowProps>(function MountRow(

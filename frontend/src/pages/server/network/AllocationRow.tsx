@@ -27,7 +27,7 @@ import { useServerStore } from '@/stores/server.ts';
 interface AllocationRowProps {
   allocation: z.infer<typeof serverAllocationSchema>;
   isSelected?: boolean;
-  onSelectionChange?: (selected: boolean) => void;
+  onSelectionChange?: (selected: boolean, range?: boolean) => void;
 }
 
 const AllocationRow = forwardRef<HTMLTableRowElement, AllocationRowProps>(function AllocationRow(

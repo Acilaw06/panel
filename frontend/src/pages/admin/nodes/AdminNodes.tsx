@@ -98,7 +98,7 @@ function NodesContainer() {
                     node={node}
                     ref={innerRef as Ref<HTMLTableRowElement>}
                     isSelected={selectedNodes.has(node.uuid)}
-                    onSelectionChange={(selected) => toggleNode(node, selected)}
+                    onSelectionChange={(selected, range) => toggleNode(node, selected, range)}
                   />
                 )}
               </SelectionArea.Selectable>

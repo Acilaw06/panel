@@ -118,7 +118,7 @@ export default function DashboardOAuthLinks() {
                   oauthLink={link}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedOAuthLinks.has(link.uuid)}
-                  onSelectionChange={(selected) => toggleOAuthLink(link, selected)}
+                  onSelectionChange={(selected, range) => toggleOAuthLink(link, selected, range)}
                 />
               )}
             </SelectionArea.Selectable>

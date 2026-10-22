@@ -83,7 +83,7 @@ export default function ServerDevices() {
                   contextDevice={device}
                   ref={innerRef as Ref<HTMLTableRowElement>}
                   isSelected={selectedDevices.has(device.uuid)}
-                  onSelectionChange={canSelect ? (selected) => toggleDevice(device, selected) : undefined}
+                  onSelectionChange={canSelect ? (selected, range) => toggleDevice(device, selected, range) : undefined}
                 />
               )}
             </SelectionArea.Selectable>
