@@ -189,7 +189,7 @@ impl ServerDatabase {
                 search =
                     super::search_sql(2, &["server_databases.name"], &["server_databases.uuid"]),
             ),
-            "server_databases.created",
+            "server_databases.created, server_databases.uuid",
         )
         .bind(database_host_uuid)
         .bind(search)
@@ -215,7 +215,7 @@ impl ServerDatabase {
                 search =
                     super::search_sql(2, &["server_databases.name"], &["server_databases.uuid"]),
             ),
-            "server_databases.created",
+            "server_databases.created, server_databases.uuid",
         )
         .bind(server_uuid)
         .bind(search)

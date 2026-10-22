@@ -414,7 +414,7 @@ impl EggRepository {
                 search =
                     super::search_sql(1, &["egg_repositories.name"], &["egg_repositories.uuid"]),
             ),
-            "egg_repositories.created",
+            "egg_repositories.created, egg_repositories.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -429,7 +429,7 @@ impl EggRepository {
             SELECT {}
             FROM egg_repositories
             WHERE egg_repositories.auto_sync
-            ORDER BY egg_repositories.created
+            ORDER BY egg_repositories.created, egg_repositories.uuid
             "#,
             Self::columns_sql(None)
         )))

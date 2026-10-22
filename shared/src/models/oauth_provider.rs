@@ -374,7 +374,7 @@ impl OAuthProvider {
                 "#,
                 search = super::search_sql(1, &["oauth_providers.name"], &["oauth_providers.uuid"]),
             ),
-            "oauth_providers.created",
+            "oauth_providers.created, oauth_providers.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -408,7 +408,7 @@ impl OAuthProvider {
             SELECT {}
             FROM oauth_providers
             WHERE oauth_providers.enabled = true
-            ORDER BY oauth_providers.created
+            ORDER BY oauth_providers.created, oauth_providers.uuid
             "#,
             Self::columns_sql(None)
         )))

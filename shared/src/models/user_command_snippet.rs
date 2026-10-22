@@ -123,7 +123,7 @@ impl UserCommandSnippet {
                     &["user_command_snippets.uuid"]
                 ),
             ),
-            "user_command_snippets.created",
+            "user_command_snippets.created, user_command_snippets.uuid",
         )
         .bind(user_uuid)
         .bind(search)
@@ -141,7 +141,7 @@ impl UserCommandSnippet {
             SELECT {}
             FROM user_command_snippets
             WHERE user_command_snippets.user_uuid = $1 AND ($2 = ANY(user_command_snippets.eggs) OR user_command_snippets.eggs = '{{}}'::uuid[])
-            ORDER BY user_command_snippets.created
+            ORDER BY user_command_snippets.created, user_command_snippets.uuid
             "#,
             Self::columns_sql(None)
         )))

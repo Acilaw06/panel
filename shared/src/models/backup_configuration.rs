@@ -560,7 +560,7 @@ impl BackupConfiguration {
                     &["backup_configurations.uuid"]
                 ),
             ),
-            "backup_configurations.created",
+            "backup_configurations.created, backup_configurations.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

@@ -118,7 +118,7 @@ impl Location {
                 "#,
                 search = super::search_sql(2, &["locations.name"], &["locations.uuid"]),
             ),
-            "locations.created",
+            "locations.created, locations.uuid",
         )
         .bind(backup_configuration_uuid)
         .bind(search)
@@ -141,7 +141,7 @@ impl Location {
                 "#,
                 search = super::search_sql(1, &["locations.name"], &["locations.uuid"]),
             ),
-            "locations.created",
+            "locations.created, locations.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

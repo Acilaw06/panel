@@ -408,7 +408,7 @@ impl OAuthProviderMapping {
             FROM oauth_provider_mappings
             WHERE oauth_provider_mappings.oauth_provider_uuid = $1
             "#,
-            "oauth_provider_mappings.created",
+            "oauth_provider_mappings.created, oauth_provider_mappings.uuid",
         )
         .bind(oauth_provider_uuid)
         .fetch(database, page, per_page)
@@ -424,7 +424,7 @@ impl OAuthProviderMapping {
             SELECT {}
             FROM oauth_provider_mappings
             WHERE oauth_provider_mappings.oauth_provider_uuid = $1
-            ORDER BY oauth_provider_mappings.created
+            ORDER BY oauth_provider_mappings.created, oauth_provider_mappings.uuid
             "#,
             Self::columns_sql(None)
         )))

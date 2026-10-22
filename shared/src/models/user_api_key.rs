@@ -290,7 +290,7 @@ impl UserApiKey {
                 "#,
                 search = super::search_sql(2, &["user_api_keys.name"], &["user_api_keys.uuid"]),
             ),
-            "user_api_keys.created",
+            "user_api_keys.created, user_api_keys.uuid",
         )
         .bind(user_uuid)
         .bind(search)

@@ -499,7 +499,7 @@ impl DatabaseHost {
                 "#,
                 search = super::search_sql(1, &["database_hosts.name"], &["database_hosts.uuid"]),
             ),
-            "database_hosts.created",
+            "database_hosts.created, database_hosts.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -557,7 +557,7 @@ impl DatabaseHost {
                     WHERE location_database_hosts.database_host_uuid = database_hosts.uuid AND location_database_hosts.location_uuid = $2
                 )
             )
-            ORDER BY database_hosts.created DESC
+            ORDER BY database_hosts.created DESC, database_hosts.uuid
             "#,
             Self::columns_sql(None)
         )))

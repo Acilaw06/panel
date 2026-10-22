@@ -723,7 +723,7 @@ impl Server {
                 "#,
                 search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(owner_uuid)
         .bind(search)
@@ -1018,7 +1018,7 @@ impl Server {
                 "#,
                 search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(node_uuid)
         .bind(search)
@@ -1049,7 +1049,7 @@ impl Server {
                 "#,
                 search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(node_uuid)
         .bind(search)
@@ -1079,7 +1079,7 @@ impl Server {
                 "#,
                 search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(egg_uuid)
         .bind(search)
@@ -1109,7 +1109,7 @@ impl Server {
                 "#,
                 search = super::search_sql(2, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(backup_configuration_uuid)
         .bind(search)
@@ -1138,7 +1138,7 @@ impl Server {
                 "#,
                 search = super::search_sql(1, &["servers.name"], &["servers.uuid"]),
             ),
-            "servers.created",
+            "servers.created, servers.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -1905,7 +1905,7 @@ impl Server {
                     "SELECT server_schedule_steps.uuid, server_schedule_steps.schedule_uuid, server_schedule_steps.action
                     FROM server_schedule_steps
                     WHERE server_schedule_steps.schedule_uuid = $1
-                    ORDER BY server_schedule_steps.order_, server_schedule_steps.created",
+                    ORDER BY server_schedule_steps.order_, server_schedule_steps.created, server_schedule_steps.uuid",
                     schedule.uuid
                 )
                 .fetch_all(state.database.read()),

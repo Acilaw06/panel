@@ -131,7 +131,7 @@ impl LocationDatabaseHost {
                 "#,
                 search = super::search_sql(2, &["database_hosts.name"], &["database_hosts.uuid"]),
             ),
-            "location_database_hosts.created",
+            "location_database_hosts.created, location_database_hosts.location_uuid, location_database_hosts.database_host_uuid",
         )
         .bind(location_uuid)
         .bind(search)

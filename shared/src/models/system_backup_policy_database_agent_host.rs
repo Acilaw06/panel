@@ -116,7 +116,7 @@ impl SystemBackupPolicyDatabaseAgentHost {
                 "#,
                 search = super::search_sql(2, &["database_agent_hosts.name"], &["database_agent_hosts.uuid"]),
             ),
-            "system_backup_policy_database_agent_hosts.created",
+            "system_backup_policy_database_agent_hosts.created, system_backup_policy_database_agent_hosts.system_backup_policy_uuid, system_backup_policy_database_agent_hosts.database_agent_host_uuid",
         )
         .bind(system_backup_policy_uuid)
         .bind(search)

@@ -147,7 +147,7 @@ impl Device {
                 "#,
                 search = super::search_sql(1, &["devices.name"], &["devices.uuid"]),
             ),
-            "devices.created",
+            "devices.created, devices.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

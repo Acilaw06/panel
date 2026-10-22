@@ -222,7 +222,7 @@ impl DatabaseAgentHost {
                     &["database_agent_hosts.uuid"]
                 ),
             ),
-            "database_agent_hosts.created",
+            "database_agent_hosts.created, database_agent_hosts.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

@@ -100,7 +100,7 @@ impl Nest {
                 "#,
                 search = super::search_sql(1, &["nests.name"], &["nests.uuid"]),
             ),
-            "nests.created",
+            "nests.created, nests.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

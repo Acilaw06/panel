@@ -134,7 +134,7 @@ impl LocationDatabaseAgentHost {
                 "#,
                 search = super::search_sql(2, &["database_agent_hosts.name"], &["database_agent_hosts.uuid"]),
             ),
-            "location_database_agent_hosts.created",
+            "location_database_agent_hosts.created, location_database_agent_hosts.location_uuid, location_database_agent_hosts.database_agent_host_uuid",
         )
         .bind(location_uuid)
         .bind(search)

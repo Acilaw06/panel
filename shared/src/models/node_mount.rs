@@ -108,7 +108,7 @@ impl NodeMount {
                 "#,
                 search = super::search_sql(2, &["mounts.name"], &["mounts.uuid"]),
             ),
-            "node_mounts.created",
+            "node_mounts.created, node_mounts.node_uuid, node_mounts.mount_uuid",
         )
         .bind(node_uuid)
         .bind(search)
@@ -133,7 +133,7 @@ impl NodeMount {
                 "#,
                 search = super::search_sql(2, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "node_mounts.created",
+            "node_mounts.created, node_mounts.node_uuid, node_mounts.mount_uuid",
         )
         .bind(mount_uuid)
         .bind(search)

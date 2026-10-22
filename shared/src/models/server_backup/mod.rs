@@ -482,7 +482,7 @@ impl ServerBackup {
                 AND ($4::server_backup_kind IS NULL OR server_backups.kind = $4)
                 AND ($5::uuid IS NULL OR server_backups.database_instance_uuid = $5)
                 AND ($6::database_agent_type IS NULL OR server_backups.database_type = $6)
-            ORDER BY server_backups.created {}
+            ORDER BY server_backups.created {1}, server_backups.uuid {1}
             LIMIT 1
             "#,
             Self::columns_sql(None),
@@ -540,7 +540,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(search)
@@ -574,7 +574,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(3, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(node_uuid)
@@ -609,7 +609,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(4, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(node_uuid)
@@ -646,7 +646,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(3, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(node_uuid)
@@ -706,7 +706,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(3, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(node_uuid)
@@ -734,7 +734,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(system_backup_policy_uuid)
         .bind(search)
@@ -786,7 +786,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(3, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(server_uuid)
         .bind(node_uuid)
@@ -814,7 +814,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(node_uuid)
         .bind(search)
@@ -842,7 +842,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(database_agent_host_uuid)
         .bind(search)
@@ -869,7 +869,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(backup_configuration_uuid)
         .bind(search)
@@ -897,7 +897,7 @@ impl ServerBackup {
                 "#,
                 search = super::search_sql(2, &["server_backups.name"], &["server_backups.uuid"]),
             ),
-            "server_backups.created",
+            "server_backups.created, server_backups.uuid",
         )
         .bind(node_uuid)
         .bind(search)

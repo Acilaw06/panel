@@ -134,7 +134,7 @@ impl NodeDatabaseAgentHost {
                 "#,
                 search = super::search_sql(2, &["database_agent_hosts.name"], &["database_agent_hosts.uuid"]),
             ),
-            "node_database_agent_hosts.created",
+            "node_database_agent_hosts.created, node_database_agent_hosts.node_uuid, node_database_agent_hosts.database_agent_host_uuid",
         )
         .bind(node_uuid)
         .bind(search)

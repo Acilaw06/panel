@@ -716,7 +716,7 @@ impl NestEgg {
             r#"
             SELECT {}
             FROM nest_eggs
-            ORDER BY nest_eggs.created
+            ORDER BY nest_eggs.created, nest_eggs.uuid
             "#,
             Self::columns_sql(None)
         )))
@@ -768,7 +768,7 @@ impl NestEgg {
                 "#,
                 search = super::search_sql(2, &["nest_eggs.name"], &["nest_eggs.uuid"]),
             ),
-            "nest_eggs.created",
+            "nest_eggs.created, nest_eggs.uuid",
         )
         .bind(nest_uuid)
         .bind(search)
@@ -801,7 +801,7 @@ impl NestEgg {
                 Self::columns_sql(None),
                 search = super::search_sql(3, &["nest_eggs.name"], &["nest_eggs.uuid"]),
             ),
-            "eggs.created",
+            "eggs.created, eggs.uuid",
         )
         .bind(permissions.user_uuid())
         .bind(permissions.has_admin_permission("servers.read").is_ok())

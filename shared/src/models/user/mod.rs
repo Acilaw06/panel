@@ -611,7 +611,7 @@ impl User {
                 "#,
                 search = super::search_sql(2, &["users.username", "users.email"], &["users.uuid"]),
             ),
-            "users.created",
+            "users.created, users.uuid",
         )
         .bind(role_uuid)
         .bind(search)
@@ -635,7 +635,7 @@ impl User {
                 "#,
                 search = super::search_sql(1, &["users.username", "users.email"], &["users.uuid"]),
             ),
-            "users.created",
+            "users.created, users.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

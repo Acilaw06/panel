@@ -424,7 +424,7 @@ impl EggConfiguration {
                     &["egg_configurations.uuid"]
                 ),
             ),
-            "egg_configurations.order_, egg_configurations.created",
+            "egg_configurations.order_, egg_configurations.created, egg_configurations.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -438,7 +438,7 @@ impl EggConfiguration {
             r#"
             SELECT {}
             FROM egg_configurations
-            ORDER BY egg_configurations.order_, egg_configurations.created
+            ORDER BY egg_configurations.order_, egg_configurations.created, egg_configurations.uuid
             "#,
             Self::columns_sql(None)
         )))

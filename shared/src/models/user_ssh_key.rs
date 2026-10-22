@@ -114,7 +114,7 @@ impl UserSshKey {
                 "#,
                 search = super::search_sql(2, &["user_ssh_keys.name"], &["user_ssh_keys.uuid"]),
             ),
-            "user_ssh_keys.created",
+            "user_ssh_keys.created, user_ssh_keys.uuid",
         )
         .bind(user_uuid)
         .bind(search)

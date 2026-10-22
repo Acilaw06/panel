@@ -196,7 +196,7 @@ impl SystemBackupPolicy {
                     &["system_backup_policies.uuid"]
                 ),
             ),
-            "system_backup_policies.created",
+            "system_backup_policies.created, system_backup_policies.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -211,7 +211,7 @@ impl SystemBackupPolicy {
             SELECT {}
             FROM system_backup_policies
             WHERE system_backup_policies.enabled OR system_backup_policies.triggered IS NOT NULL
-            ORDER BY system_backup_policies.created
+            ORDER BY system_backup_policies.created, system_backup_policies.uuid
             "#,
             Self::columns_sql(None)
         )))

@@ -218,7 +218,7 @@ impl DatabaseAgentTemplate {
             SELECT {}
             FROM database_agent_templates
             WHERE database_agent_templates.deployment_enabled
-            ORDER BY database_agent_templates.created
+            ORDER BY database_agent_templates.created, database_agent_templates.uuid
             "#,
             Self::columns_sql(None)
         )))
@@ -249,7 +249,7 @@ impl DatabaseAgentTemplate {
                     &["database_agent_templates.uuid"]
                 ),
             ),
-            "database_agent_templates.created",
+            "database_agent_templates.created, database_agent_templates.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

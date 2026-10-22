@@ -114,7 +114,7 @@ impl SystemBackupPolicyNode {
                 "#,
                 search = super::search_sql(2, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "system_backup_policy_nodes.created",
+            "system_backup_policy_nodes.created, system_backup_policy_nodes.system_backup_policy_uuid, system_backup_policy_nodes.node_uuid",
         )
         .bind(system_backup_policy_uuid)
         .bind(search)

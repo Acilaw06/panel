@@ -108,7 +108,7 @@ impl NestEggMount {
                 "#,
                 search = super::search_sql(2, &["mounts.name"], &["mounts.uuid"]),
             ),
-            "nest_egg_mounts.created",
+            "nest_egg_mounts.created, nest_egg_mounts.egg_uuid, nest_egg_mounts.mount_uuid",
         )
         .bind(egg_uuid)
         .bind(search)
@@ -133,7 +133,7 @@ impl NestEggMount {
                 "#,
                 search = super::search_sql(2, &["nest_eggs.name"], &["nest_eggs.uuid"]),
             ),
-            "nest_egg_mounts.created",
+            "nest_egg_mounts.created, nest_egg_mounts.egg_uuid, nest_egg_mounts.mount_uuid",
         )
         .bind(mount_uuid)
         .bind(search)

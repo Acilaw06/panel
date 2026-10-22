@@ -147,7 +147,7 @@ impl Role {
                 "#,
                 search = super::search_sql(1, &["roles.name"], &["roles.uuid"]),
             ),
-            "roles.created",
+            "roles.created, roles.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

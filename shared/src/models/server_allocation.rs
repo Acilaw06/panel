@@ -276,7 +276,7 @@ impl ServerAllocation {
                 "#,
                 search_uuid = super::uuid_search_sql(2, "server_allocations.uuid"),
             ),
-            "server_allocations.created",
+            "server_allocations.created, node_allocations.ip, node_allocations.port, server_allocations.uuid",
         )
         .bind(server_uuid)
         .bind(search)
@@ -294,7 +294,7 @@ impl ServerAllocation {
             FROM server_allocations
             JOIN node_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
             WHERE server_allocations.server_uuid = $1
-            ORDER BY server_allocations.created
+            ORDER BY server_allocations.created, node_allocations.ip, node_allocations.port, server_allocations.uuid
             "#,
             Self::columns_sql(None)
         )))

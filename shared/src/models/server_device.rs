@@ -137,7 +137,7 @@ impl ServerDevice {
                 "#,
                 search = super::search_sql(4, &["devices.name"], &["devices.uuid"]),
             ),
-            "devices.created",
+            "devices.created, devices.uuid",
         )
         .bind(server.node.uuid)
         .bind(server.egg.uuid)
@@ -166,7 +166,7 @@ impl ServerDevice {
                 "#,
                 search = super::search_sql(4, &["devices.name"], &["devices.uuid"]),
             ),
-            "devices.created",
+            "devices.created, devices.uuid",
         )
         .bind(server.node.uuid)
         .bind(server.egg.uuid)

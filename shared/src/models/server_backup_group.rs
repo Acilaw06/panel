@@ -140,7 +140,7 @@ impl ServerBackupGroup {
                     &["server_backup_groups.uuid"]
                 ),
             ),
-            "server_backup_groups.order_, server_backup_groups.created",
+            "server_backup_groups.order_, server_backup_groups.created, server_backup_groups.uuid",
         )
         .bind(server_uuid)
         .bind(search)
@@ -157,7 +157,7 @@ impl ServerBackupGroup {
             SELECT {}
             FROM server_backup_groups
             WHERE server_backup_groups.server_uuid = $1
-            ORDER BY server_backup_groups.order_, server_backup_groups.created
+            ORDER BY server_backup_groups.order_, server_backup_groups.created, server_backup_groups.uuid
             "#,
             Self::columns_sql(None)
         )))

@@ -215,7 +215,7 @@ impl ServerSubuser {
                 "#,
                 search = super::search_sql(2, &["users.username"], &["users.uuid"]),
             ),
-            "server_subusers.created",
+            "server_subusers.created, server_subusers.server_uuid, server_subusers.user_uuid",
         )
         .bind(server_uuid)
         .bind(search)

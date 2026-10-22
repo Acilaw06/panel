@@ -243,7 +243,7 @@ impl EggRepositoryEgg {
             FROM nest_eggs
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE nest_eggs.egg_repository_egg_uuid = ANY($1)
-            ORDER BY nest_eggs.created
+            ORDER BY nest_eggs.created, nest_eggs.uuid
             "#,
             super::nest::Nest::columns_sql(Some("nest_"))
         )))

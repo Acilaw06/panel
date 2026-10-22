@@ -151,7 +151,7 @@ impl UserSecurityKey {
                 "#,
                 search = super::search_sql(2, &["user_security_keys.name"], &["user_security_keys.uuid"]),
             ),
-            "user_security_keys.created",
+            "user_security_keys.created, user_security_keys.uuid",
         )
         .bind(user_uuid)
         .bind(search)

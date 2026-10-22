@@ -310,7 +310,7 @@ impl Node {
                 "#,
                 search = super::search_sql(2, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "nodes.created",
+            "nodes.created, nodes.uuid",
         )
         .bind(location_uuid)
         .bind(search)
@@ -335,7 +335,7 @@ impl Node {
                 "#,
                 search = super::search_sql(2, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "nodes.created",
+            "nodes.created, nodes.uuid",
         )
         .bind(backup_configuration_uuid)
         .bind(search)
@@ -359,7 +359,7 @@ impl Node {
                 "#,
                 search = super::search_sql(1, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "nodes.created",
+            "nodes.created, nodes.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

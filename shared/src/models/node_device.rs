@@ -108,7 +108,7 @@ impl NodeDevice {
                 "#,
                 search = super::search_sql(2, &["devices.name"], &["devices.uuid"]),
             ),
-            "node_devices.created",
+            "node_devices.created, node_devices.node_uuid, node_devices.device_uuid",
         )
         .bind(node_uuid)
         .bind(search)
@@ -133,7 +133,7 @@ impl NodeDevice {
                 "#,
                 search = super::search_sql(2, &["nodes.name"], &["nodes.uuid"]),
             ),
-            "node_devices.created",
+            "node_devices.created, node_devices.node_uuid, node_devices.device_uuid",
         )
         .bind(device_uuid)
         .bind(search)

@@ -244,7 +244,7 @@ impl Announcement {
                 "#,
                 search = super::search_sql(1, &["announcements.title"], &["announcements.uuid"]),
             ),
-            "announcements.created",
+            "announcements.created, announcements.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)
@@ -265,7 +265,7 @@ impl Announcement {
                 AND array_length(announcements.nodes, 1) IS NULL
                 AND array_length(announcements.backup_configurations, 1) IS NULL
                 AND array_length(announcements.eggs, 1) IS NULL
-            ORDER BY announcements.created
+            ORDER BY announcements.created, announcements.uuid
             "#,
             Self::columns_sql(None)
         )))
@@ -302,7 +302,7 @@ impl Announcement {
                     OR ($3 IS NOT NULL AND (announcements.backup_configurations IS NULL OR $3 = ANY(announcements.backup_configurations)))
                     OR (announcements.eggs IS NULL OR $4 = ANY(announcements.eggs))
                 )
-            ORDER BY announcements.created
+            ORDER BY announcements.created, announcements.uuid
             "#,
             Self::columns_sql(None)
         )))

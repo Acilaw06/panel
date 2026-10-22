@@ -146,7 +146,7 @@ impl Mount {
                 "#,
                 search = super::search_sql(1, &["mounts.name"], &["mounts.uuid"]),
             ),
-            "mounts.created",
+            "mounts.created, mounts.uuid",
         )
         .bind(search)
         .fetch(database, page, per_page)

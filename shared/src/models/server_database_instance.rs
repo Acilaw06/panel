@@ -368,7 +368,7 @@ impl ServerDatabaseInstance {
                 "#,
                 search = super::search_sql(2, &["server_database_instances.name"], &["server_database_instances.uuid"]),
             ),
-            "server_database_instances.created",
+            "server_database_instances.created, server_database_instances.uuid",
         )
         .bind(server_uuid)
         .bind(search)
@@ -393,7 +393,7 @@ impl ServerDatabaseInstance {
                 "#,
                 search = super::search_sql(2, &["server_database_instances.name"], &["server_database_instances.uuid"]),
             ),
-            "server_database_instances.created",
+            "server_database_instances.created, server_database_instances.uuid",
         )
         .bind(database_agent_host_uuid)
         .bind(search)
@@ -418,7 +418,7 @@ impl ServerDatabaseInstance {
                 "#,
                 search = super::search_sql(2, &["server_database_instances.name"], &["server_database_instances.uuid"]),
             ),
-            "server_database_instances.created",
+            "server_database_instances.created, server_database_instances.uuid",
         )
         .bind(database_agent_template_uuid)
         .bind(search)

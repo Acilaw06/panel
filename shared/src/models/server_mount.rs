@@ -137,7 +137,7 @@ impl ServerMount {
                 "#,
                 search = super::search_sql(4, &["mounts.name"], &["mounts.uuid"]),
             ),
-            "mounts.created",
+            "mounts.created, mounts.uuid",
         )
         .bind(server.node.uuid)
         .bind(server.egg.uuid)
@@ -166,7 +166,7 @@ impl ServerMount {
                 "#,
                 search = super::search_sql(4, &["mounts.name"], &["mounts.uuid"]),
             ),
-            "mounts.created",
+            "mounts.created, mounts.uuid",
         )
         .bind(server.node.uuid)
         .bind(server.egg.uuid)

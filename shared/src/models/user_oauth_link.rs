@@ -191,7 +191,7 @@ impl UserOAuthLink {
                     &["user_oauth_links.uuid"]
                 ),
             ),
-            "user_oauth_links.created",
+            "user_oauth_links.created, user_oauth_links.uuid",
         )
         .bind(user_uuid)
         .bind(search)
@@ -212,7 +212,7 @@ impl UserOAuthLink {
             INNER JOIN oauth_providers ON user_oauth_links.oauth_provider_uuid = oauth_providers.uuid
             WHERE user_oauth_links.user_uuid = $1 AND oauth_providers.link_viewable = true
             "#,
-            "user_oauth_links.created",
+            "user_oauth_links.created, user_oauth_links.uuid",
         )
         .bind(user_uuid)
         .fetch(database, page, per_page)
@@ -239,7 +239,7 @@ impl UserOAuthLink {
                     &["user_oauth_links.uuid"]
                 ),
             ),
-            "user_oauth_links.created",
+            "user_oauth_links.created, user_oauth_links.uuid",
         )
         .bind(oauth_provider_uuid)
         .bind(search)

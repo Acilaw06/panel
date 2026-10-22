@@ -261,7 +261,7 @@ impl UserSession {
                 search =
                     super::search_sql(2, &["user_sessions.user_agent"], &["user_sessions.uuid"]),
             ),
-            "user_sessions.created DESC",
+            "user_sessions.created DESC, user_sessions.uuid",
         )
         .bind(user_uuid)
         .bind(search)

@@ -157,7 +157,7 @@ impl UserEmailVerification {
             FROM user_email_verifications
             WHERE user_email_verifications.user_uuid = $1
             AND user_email_verifications.created > NOW() - make_interval(hours => $2)
-            ORDER BY user_email_verifications.created DESC
+            ORDER BY user_email_verifications.created DESC, user_email_verifications.uuid
             LIMIT 1
             "#,
         )

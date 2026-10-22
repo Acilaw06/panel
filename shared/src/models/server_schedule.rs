@@ -169,7 +169,7 @@ impl ServerSchedule {
                 search =
                     super::search_sql(2, &["server_schedules.name"], &["server_schedules.uuid"]),
             ),
-            "server_schedules.created",
+            "server_schedules.created, server_schedules.uuid",
         )
         .bind(server_uuid)
         .bind(search)

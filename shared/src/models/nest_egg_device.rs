@@ -108,7 +108,7 @@ impl NestEggDevice {
                 "#,
                 search = super::search_sql(2, &["devices.name"], &["devices.uuid"]),
             ),
-            "nest_egg_devices.created",
+            "nest_egg_devices.created, nest_egg_devices.egg_uuid, nest_egg_devices.device_uuid",
         )
         .bind(egg_uuid)
         .bind(search)
@@ -133,7 +133,7 @@ impl NestEggDevice {
                 "#,
                 search = super::search_sql(2, &["nest_eggs.name"], &["nest_eggs.uuid"]),
             ),
-            "nest_egg_devices.created",
+            "nest_egg_devices.created, nest_egg_devices.egg_uuid, nest_egg_devices.device_uuid",
         )
         .bind(device_uuid)
         .bind(search)
