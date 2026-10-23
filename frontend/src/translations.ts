@@ -57,6 +57,7 @@ const baseTranslations = defineTranslations({
         disableTwoFactor: 'Disable Two-Factor',
         verify: 'Verify',
         update: 'Update',
+        upgrade: 'Upgrade',
         close: 'Close',
         copy: 'Copy',
         cancel: 'Cancel',
@@ -472,6 +473,7 @@ const baseTranslations = defineTranslations({
         installed: 'Installed',
         updateAvailable: 'Update Available',
         systemBackup: 'System',
+        restarting: 'Restarting',
       },
       label: {
         noSubdirectories: 'No subdirectories',
@@ -2075,12 +2077,12 @@ const baseTranslations = defineTranslations({
                 extensionsOutdated: 'Some extensions are outdated or had errors when checking for updates.',
                 noChangelog: 'No changelog',
                 nodesUpToDate: 'Seems like all nodes are up to date. ({failed} failed to check)',
-                nodesOutdated:
-                  'Some nodes are outdated, the latest available version is `{latest}`. ({outdated} outdated, {failed} failed to check)',
+                nodesOutdatedSummary: 'Some nodes are outdated. ({outdated} outdated, {failed} failed to check)',
                 databaseAgentHostsUpToDate:
                   'Seems like all database agent hosts are up to date. ({failed} failed to check)',
-                databaseAgentHostsOutdated:
-                  'Some database agent hosts are outdated, the latest available version is `{latest}`. ({outdated} outdated, {failed} failed to check)',
+                databaseAgentHostsOutdatedSummary:
+                  'Some database agent hosts are outdated. ({outdated} outdated, {failed} failed to check)',
+                badge: { latestVersion: 'Latest {version}' },
                 table: {
                   version: 'Version',
                   installed: 'Installed',
@@ -2596,6 +2598,21 @@ const baseTranslations = defineTranslations({
                 },
               },
             },
+            updates: {
+              title: 'Updates',
+              page: {
+                title: 'Update Settings',
+                alert:
+                  'Release tokens are optional. They are only needed when nodes or database agent hosts upgrade from a private fork, or when the GitHub API rate limits unauthenticated downloads. Use a fine-grained token with read-only **Contents** access to the release repository and nothing else, and give it an expiry date. The token is sent to every node or database agent host you upgrade, and only when the admin starting the upgrade can also read the panel settings.',
+                form: {
+                  wingsReleaseToken: 'Wings Release Token',
+                  dbAgentReleaseToken: 'Database Agent Release Token',
+                },
+                toast: {
+                  updated: 'Release tokens updated.',
+                },
+              },
+            },
           },
         },
         announcements: {
@@ -3072,6 +3089,7 @@ const baseTranslations = defineTranslations({
                 },
                 badge: {
                   updateAvailable: 'Update Available',
+                  latestVersionUnknown: 'Latest Version Unknown',
                 },
               },
             },
@@ -3081,6 +3099,7 @@ const baseTranslations = defineTranslations({
                   allInOneNode: 'All-in-One Node',
                   errorWhileFetchingVersion: 'Error while fetching version',
                   updateAvailable: '{version} (Update Available)',
+                  latestVersionUnknown: '{version} (Latest Version Unknown)',
                   useWingsProxyUrl: 'Use Wings Proxy URL',
                 },
                 form: {
@@ -3627,6 +3646,20 @@ const baseTranslations = defineTranslations({
               },
               error: {
                 invalidYaml: 'Invalid YAML: {error}',
+              },
+            },
+            upgrade: {
+              title: 'Upgrade Wings - {name}',
+              content:
+                'Wings downloads the release from `{repository}` ({provider}), replaces its binary and restarts. The node is unreachable for a few seconds while it restarts.',
+              form: {
+                version: 'Version',
+                versionDescription: 'A release version such as 1.2.8, or latest for the newest stable release.',
+              },
+              toast: {
+                scheduled: 'Upgrade of {name} to {version} scheduled, the node is restarting.',
+                ignored:
+                  '{name} ignored the upgrade, its local configuration disables upgrades started from the panel.',
               },
             },
           },
@@ -4618,6 +4651,7 @@ const baseTranslations = defineTranslations({
                 tooltip: {
                   errorWhileFetchingVersion: 'Error while fetching version',
                   updateAvailable: '{version} (Update Available)',
+                  latestVersionUnknown: '{version} (Latest Version Unknown)',
                 },
                 form: {
                   typePublicHost: 'Public Host',
@@ -4771,6 +4805,7 @@ const baseTranslations = defineTranslations({
                 },
                 badge: {
                   updateAvailable: 'Update Available',
+                  latestVersionUnknown: 'Latest Version Unknown',
                 },
               },
             },
@@ -4814,6 +4849,20 @@ const baseTranslations = defineTranslations({
               },
               error: {
                 invalidYaml: 'Invalid YAML: {error}',
+              },
+            },
+            upgrade: {
+              title: 'Upgrade Database Agent - {name}',
+              content:
+                'The database agent downloads the release from `{repository}` ({provider}), replaces its binary and restarts. The host is unreachable for a few seconds while it restarts.',
+              form: {
+                version: 'Version',
+                versionDescription: 'A release version such as 1.2.3, or latest for the newest stable release.',
+              },
+              toast: {
+                scheduled: 'Upgrade of {name} to {version} scheduled, the host is restarting.',
+                ignored:
+                  '{name} ignored the upgrade, its local configuration disables upgrades started from the panel.',
               },
             },
           },

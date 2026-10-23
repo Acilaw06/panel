@@ -177,6 +177,10 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
     exemptIps: [],
     exemptApiKeys: [],
   },
+  updates: {
+    wingsReleaseToken: null,
+    dbAgentReleaseToken: null,
+  },
 
   updateInformation: null,
   updateInformationError: null,
@@ -193,6 +197,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
       webauthn: value.webauthn,
       activity: value.activity,
       ratelimits: value.ratelimits,
+      updates: value.updates,
     })),
   updateSettings: (value) =>
     set((state) => ({
@@ -206,6 +211,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
       ...(value.webauthn ? { webauthn: { ...state.webauthn, ...value.webauthn } } : {}),
       ...(value.activity ? { activity: { ...state.activity, ...value.activity } } : {}),
       ...(value.ratelimits ? { ratelimits: { ...state.ratelimits, ...value.ratelimits } } : {}),
+      ...(value.updates ? { updates: { ...state.updates, ...value.updates } } : {}),
     })),
   setUpdateInformation: (value) => set((state) => ({ ...state, updateInformation: value })),
   loadUpdateInformation: async () => {

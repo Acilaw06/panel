@@ -1,6 +1,7 @@
 import {
   faAt,
   faBan,
+  faCircleUp,
   faDatabase,
   faEnvelopesBulk,
   faLayerGroup,
@@ -31,6 +32,7 @@ import MetadataContainer from './metadata/MetadataContainer.tsx';
 import RatelimitsContainer from './ratelimits/RatelimitsContainer.tsx';
 import ServerContainer from './server/ServerContainer.tsx';
 import StorageContainer from './storage/StorageContainer.tsx';
+import UpdatesContainer from './updates/UpdatesContainer.tsx';
 import UserContainer from './user/UserContainer.tsx';
 import WebauthnContainer from './webauthn/WebauthnContainer.tsx';
 
@@ -124,6 +126,12 @@ export default function AdminSettings() {
               icon: faBan,
               path: '/ratelimits',
               element: <RatelimitsContainer />,
+            },
+            {
+              name: t('pages.admin.settings.tabs.updates.title', {}),
+              icon: faCircleUp,
+              path: '/updates',
+              element: <UpdatesContainer />,
             },
           ]}
         />

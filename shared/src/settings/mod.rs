@@ -28,6 +28,7 @@ pub mod app;
 pub mod metadata;
 pub mod ratelimits;
 pub mod server;
+pub mod updates;
 pub mod user;
 pub mod webauthn;
 
@@ -374,6 +375,8 @@ pub struct AppSettings {
     pub activity: activity::AppSettingsActivity,
     #[schema(inline)]
     pub ratelimits: ratelimits::AppSettingsRatelimits,
+    #[schema(inline)]
+    pub updates: updates::AppSettingsUpdates,
 
     #[serde(skip)]
     pub disabled_extensions: Vec<compact_str::CompactString>,
@@ -658,6 +661,8 @@ impl SettingsSerializeExt for AppSettings {
             .nest("activity", &self.activity)
             .await?
             .nest("ratelimits", &self.ratelimits)
+            .await?
+            .nest("updates", &self.updates)
             .await?;
 
         for (ext_identifier, ext_settings) in self.extensions.iter() {
@@ -935,6 +940,9 @@ impl SettingsDeserializeExt for AppSettingsDeserializer {
             ratelimits: deserializer
                 .nest("ratelimits", &ratelimits::AppSettingsRatelimitsDeserializer)
                 .await?,
+            updates: deserializer
+                .nest("updates", &updates::AppSettingsUpdatesDeserializer)
+                .await?,
             disabled_extensions: deserializer
                 .take_raw_setting("disabled_extensions")
                 .map(|s| parse_disabled_extensions(&s))
@@ -1115,6 +1123,7 @@ impl<'a> SettingsWriteGuard<'a> {
         json["mail_mode"] = serde_json::to_value(settings.mail_mode.clone().censored()).unwrap();
         json["captcha_provider"] =
             serde_json::to_value(settings.captcha_provider.clone().censored()).unwrap();
+        json["updates"] = serde_json::to_value(settings.updates.clone().censored()).unwrap();
 
         json
     }
