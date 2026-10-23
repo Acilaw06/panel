@@ -43,21 +43,50 @@ pub const OOBE_STEPS: &[&str] = &[
     "finished",
 ];
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum RouteOrderItem {
     Route {
+        #[garde(skip)]
         path: compact_str::CompactString,
+        #[garde(
+            length(chars, min = 1, max = 128),
+            inner(custom(crate::icons::validate_icon))
+        )]
+        #[schema(min_length = 1, max_length = 128)]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        icon: Option<compact_str::CompactString>,
     },
     Divider {
+        #[garde(skip)]
         name: Option<compact_str::CompactString>,
+        #[garde(skip)]
         name_translations: BTreeMap<compact_str::CompactString, compact_str::CompactString>,
     },
     Redirect {
+        #[garde(skip)]
         name: compact_str::CompactString,
+        #[garde(skip)]
         name_translations: BTreeMap<compact_str::CompactString, compact_str::CompactString>,
+        #[garde(skip)]
         destination: compact_str::CompactString,
+        #[garde(
+            length(chars, min = 1, max = 128),
+            inner(custom(crate::icons::validate_icon))
+        )]
+        #[schema(min_length = 1, max_length = 128)]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        icon: Option<compact_str::CompactString>,
     },
+}
+
+impl RouteOrderItem {
+    pub fn icon(&self) -> Option<&str> {
+        match self {
+            Self::Route { icon, .. } | Self::Redirect { icon, .. } => icon.as_deref(),
+            Self::Divider { .. } => None,
+        }
+    }
 }
 
 #[derive(ToSchema, Validate, Serialize, Deserialize, Clone, Copy)]
@@ -1092,6 +1121,12 @@ impl<'a> SettingsWriteGuard<'a> {
         self.parent
             .cached_index
             .store(buffer_index, Ordering::Release);
+
+        crate::models::invalidate_cache_keys(
+            &self.parent.database,
+            &[crate::icons::REFERENCED_ICONS_CACHE_KEY.into()],
+        )
+        .await;
 
         crate::models::node::Node::invalidate_permissions_everywhere(
             &self.parent.database,

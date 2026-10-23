@@ -361,6 +361,9 @@ const user = {
 };
 
 const global = {
+  iconManifest: {
+    all: () => ['global', 'iconManifest'] as const,
+  },
   timezones: {
     all: () => ['global', 'timezones'] as const,
   },

@@ -164,6 +164,15 @@ const baseTranslations = defineTranslations({
           },
           nextRun: 'Next run is {timestamp}.',
         },
+        iconInput: {
+          defaultIcon: 'Default icon',
+          searchPlaceholder: 'Search icons…',
+          noResults: 'No icons match your search.',
+          moreResults: 'Showing the first {count} matches, refine your search to see more.',
+          button: {
+            reset: 'Use Default Icon',
+          },
+        },
         trashRetention: {
           days: 'days',
         },
@@ -268,6 +277,7 @@ const baseTranslations = defineTranslations({
       form: {
         force: 'Do you want to execute this deletion forcefully?',
         name: 'Name',
+        icon: 'Icon',
         newName: 'New Name',
         description: 'Description',
         author: 'Author',

@@ -197,7 +197,7 @@ mod put {
         #[garde(skip)]
         allow_changing_avatar: Option<bool>,
 
-        #[garde(length(max = 100))]
+        #[garde(length(max = 100), dive)]
         #[schema(max_items = 100)]
         #[serde(default, with = "::serde_with::rust::double_option")]
         route_order: Option<Option<Vec<shared::settings::RouteOrderItem>>>,

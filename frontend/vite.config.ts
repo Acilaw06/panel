@@ -12,6 +12,7 @@ import { deprecatedPaths } from './vite-plugins/deprecated-paths.ts';
 import { extensionChunkGroups } from './vite-plugins/extension-chunks.ts';
 import { extensionOverrides } from './vite-plugins/extension-overrides.ts';
 import { fontAwesomeIcons } from './vite-plugins/fontawesome-icons.ts';
+import { iconManifest } from './vite-plugins/icon-manifest.ts';
 import { precompressAssets } from './vite-plugins/precompress.ts';
 import { translationsPlugin } from './vite-plugins/translations.ts';
 
@@ -50,6 +51,7 @@ export default defineConfig({
     translationsPlugin(),
     countryFlags(),
     fontAwesomeIcons(),
+    iconManifest(),
     bootSpinner(),
     viteStaticCopy({
       targets: [

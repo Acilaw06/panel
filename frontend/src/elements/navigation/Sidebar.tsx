@@ -30,6 +30,7 @@ import ContextMenu, { ContextMenuItem } from '@/elements/overlays/ContextMenu.ts
 import Drawer from '@/elements/overlays/Drawer.tsx';
 import { useLogoutConfirmation } from '@/elements/useLogoutConfirmation.tsx';
 import { isAdmin } from '@/lib/auth/permissions.ts';
+import { useCustomIcon } from '@/lib/icons.ts';
 import { openUrl } from '@/lib/network/url.ts';
 import { isNamedRoutePathAccessible } from '@/lib/routes.ts';
 import { resetAllDeviceOverrides, useDeviceOverrideCount } from '@/lib/userSettings.ts';
@@ -136,19 +137,21 @@ type LinkProps = {
   to: string;
   end?: boolean;
   icon?: IconDefinition;
+  customIcon?: string | null;
   name?: string;
   title?: string;
   className?: string;
   activeMatches?: string[];
 };
 
-function Link({ to, end, icon, name, title = name, className, activeMatches }: LinkProps) {
+function Link({ to, end, icon, customIcon, name, title = name, className, activeMatches }: LinkProps) {
   const { t } = useTranslations();
   const { addWindow } = useWindows();
   const closeMobileMenu = useContext(CloseMobileMenuContext);
   const { pathname } = useLocation();
   const pendingPathname = usePendingPathname();
   const isLight = useComputedColorScheme('dark') === 'light';
+  const resolvedIcon = useCustomIcon(customIcon, icon);
   const extraActive =
     activeMatches?.some((pattern) => matchPath({ path: pattern, end: false }, pendingPathname ?? pathname)) ?? false;
 
@@ -221,7 +224,7 @@ function Link({ to, end, icon, name, title = name, className, activeMatches }: L
                 fullWidth
                 styles={{ label: { width: '100%' } }}
               >
-                {icon && <FontAwesomeIcon icon={icon} className='mr-2' />} {name}
+                {resolvedIcon && <FontAwesomeIcon icon={resolvedIcon} className='mr-2' />} {name}
               </Button>
             );
           }}
