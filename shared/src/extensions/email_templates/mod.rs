@@ -194,7 +194,7 @@ impl Default for ExtensionEmailTemplateBuilder {
                 },
                 EmailTemplate {
                     identifier: "removed_from_server",
-                    available_variables: vec!["server"],
+                    available_variables: vec!["user", "server"],
                     default_subject: "{{ settings.app.name }} - {{ vars.subject }}",
                     default_content: include_str!("../../../mails/removed_from_server.html"),
                     default_enabled: true,

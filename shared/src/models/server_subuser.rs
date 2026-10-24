@@ -535,6 +535,8 @@ impl DeletableModel for ServerSubuser {
         state: &crate::State,
         options: Self::DeleteOptions,
     ) -> Result<(), anyhow::Error> {
+        let server = self.server.fetch_cached(&state.database).await?;
+
         let mut transaction = state.database.write().begin().await?;
 
         if let Err(err) = self
@@ -550,6 +552,19 @@ impl DeletableModel for ServerSubuser {
         super::invalidate_cache_keys(&state.database, &self.cache_invalidation_keys()).await;
 
         self.invalidate_wings_permissions(&state.database).await;
+
+        state
+            .mail
+            .send_template(
+                state,
+                "removed_from_server",
+                &self.user,
+                minijinja::context! {
+                    user => minijinja::value::Serde(&self.user),
+                    server => minijinja::value::Serde(&server),
+                },
+            )
+            .await;
 
         Ok(())
     }
@@ -576,18 +591,6 @@ impl DeletableModel for ServerSubuser {
 
         self.run_after_delete_handlers(&options, state, transaction)
             .await?;
-
-        state
-            .mail
-            .send_template(
-                state,
-                "removed_from_server",
-                &self.user,
-                minijinja::context! {
-                    user => minijinja::value::Serde(&self.user),
-                },
-            )
-            .await;
 
         Ok(())
     }
