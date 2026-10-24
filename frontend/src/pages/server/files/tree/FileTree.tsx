@@ -712,6 +712,15 @@ function FileTree({
     clearSelectedItems();
   };
 
+  const openAdvancedSearch = () => {
+    store.getState().setSearchModalQuery(searchQuery.trim());
+    store.getState().doOpenModal('search');
+  };
+
+  useEffect(() => {
+    if (modalSearchInfo) closeSearch();
+  }, [modalSearchInfo]);
+
   const changeSearchQuery = (query: string) => {
     setSearchQuery(query);
     clearSelectedItems();
@@ -1116,6 +1125,7 @@ function FileTree({
             onOpenSearch={() => setSearchOpen(true)}
             onCloseSearch={closeSearch}
             onSearchChange={changeSearchQuery}
+            onOpenAdvancedSearch={openAdvancedSearch}
             onOpenCreateMenu={openMenu}
             onUploadFiles={openFileUpload}
             onUploadDirectory={openFolderUpload}

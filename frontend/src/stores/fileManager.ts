@@ -116,6 +116,8 @@ export interface FileManagerStore {
   modalDirectoryEntries: z.infer<typeof serverDirectoryEntrySchema>[];
   setModalDirectoryEntries: (files: z.infer<typeof serverDirectoryEntrySchema>[]) => void;
   searchInfo: SearchInfo | null;
+  searchModalQuery: string | null;
+  setSearchModalQuery: (query: string | null) => void;
   collapsedSearchPreviews: Set<string>;
   toggleSearchPreview: (path: string) => void;
   setSearchInfo: (info: SearchInfo | null) => void;
@@ -410,6 +412,8 @@ export const createFileManagerStore = (
       modalDirectoryEntries: [],
       setModalDirectoryEntries: (files) => set({ modalDirectoryEntries: files }),
       searchInfo: null,
+      searchModalQuery: null,
+      setSearchModalQuery: (query) => set({ searchModalQuery: query }),
       collapsedSearchPreviews: new Set<string>(),
       toggleSearchPreview: (path) =>
         set((state) => {
