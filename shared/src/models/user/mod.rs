@@ -469,14 +469,19 @@ impl User {
             secret.decrypt(database).await?
         };
 
+        let secret = totp_rs::Secret::try_from_base32(base32)?;
+        if secret.is_empty() {
+            return Err(anyhow::anyhow!("totp secret is empty"));
+        }
+
         Ok(Some(
             totp_rs::Builder::new()
                 .with_algorithm(totp_rs::Algorithm::SHA1)
                 .with_digits(6)
                 .with_skew(1)
                 .with_step_duration(30)
-                .with_secret(totp_rs::Secret::try_from_base32(base32)?)
-                .build()?,
+                .with_secret(secret)
+                .build_noncompliant(),
         ))
     }
 
