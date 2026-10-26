@@ -5800,7 +5800,11 @@
             }
           },
           "diskUsage": {
-            "details": "{used} von {total} belegt ({percentage}%)"
+            "details": "{used} von {total} belegt ({percentage}%)",
+            "section": {
+              "files": "Dateien",
+              "trash": "Papierkorb"
+            }
           },
           "button": {
             "new": "Neu",

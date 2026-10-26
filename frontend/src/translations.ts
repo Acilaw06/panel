@@ -5882,6 +5882,10 @@ const baseTranslations = defineTranslations({
           },
           diskUsage: {
             details: '{used} of {total} used ({percentage}%)',
+            section: {
+              files: 'Files',
+              trash: 'Trash',
+            },
           },
           button: {
             new: 'New',

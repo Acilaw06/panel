@@ -410,6 +410,9 @@ nestify::nest! {
         #[schema(inline)]
         pub disk_bytes: u64,
         #[schema(inline)]
+        #[serde(default)]
+        pub trash_bytes: u64,
+        #[schema(inline)]
         pub state: ServerState,
         #[schema(inline)]
         pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ResourceUsageNetwork {

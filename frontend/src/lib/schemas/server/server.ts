@@ -99,6 +99,7 @@ export const serverResourceUsageSchema = z.object({
   memoryBytes: z.number(),
   memoryLimitBytes: z.number(),
   diskBytes: z.number(),
+  trashBytes: z.number().optional(),
   state: z.lazy(() => serverPowerState),
   network: z.object({
     rxBytes: z.number(),
