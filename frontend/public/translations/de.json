@@ -288,7 +288,8 @@
         "viewDocumentation": "Dokumentation ansehen",
         "undo": "Rückgängig",
         "clearUserFilter": "Benutzerfilter löschen",
-        "deleteFailedBackups": "{count} fehlgeschlagene löschen"
+        "deleteFailedBackups": "{count} fehlgeschlagene löschen",
+        "retryFailedDeletions": "{count} fehlgeschlagene Löschungen wiederholen"
       },
       "alert": {
         "error": "Fehler",
@@ -425,11 +426,16 @@
           "alert": {
             "forceWarning": "Das erzwungene Löschen entfernt diese Backups, auch wenn ihre Konfiguration fehlt oder der Remote-Speicher nicht erreichbar ist. Die Backup-Dateien selbst werden möglicherweise nicht vollständig entfernt, sodass verwaiste Daten zurückbleiben."
           }
+        },
+        "retryFailedDeletions": {
+          "title": "Wiederholen fehlgeschlagener Löschungen bestätigen",
+          "content": "Bist du sicher, dass du das Löschen von `{count}` Backups, deren Löschung fehlgeschlagen ist, erneut versuchen möchtest? Backups, deren Konfiguration sich im Wartungsmodus befindet, werden übersprungen. Die Löschung läuft im Hintergrund und kann eine Weile dauern."
         }
       },
       "toast": {
         "duplicated": "{resource} dupliziert.",
         "failedBackupDeletionStarted": "{count} fehlgeschlagene Backups werden im Hintergrund gelöscht.",
+        "failedDeletionRetryStarted": "{count} fehlgeschlagene Backup-Löschungen werden im Hintergrund wiederholt.",
         "requestBlockedByExtension": "Diese Anfrage wurde von einer Erweiterung blockiert."
       },
       "settingScope": {

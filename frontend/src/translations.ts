@@ -96,6 +96,7 @@ const baseTranslations = defineTranslations({
         undo: 'Undo',
         clearUserFilter: 'Clear User Filter',
         deleteFailedBackups: 'Delete {count} Failed',
+        retryFailedDeletions: 'Retry {count} Failed Deletions',
       },
       alert: {
         error: 'Error',
@@ -243,10 +244,16 @@ const baseTranslations = defineTranslations({
               'Force deletion removes these backups even if their configuration is missing or the remote storage cannot be reached. The backup files themselves may not be fully cleaned up, leaving orphaned data behind.',
           },
         },
+        retryFailedDeletions: {
+          title: 'Confirm Failed Deletion Retry',
+          content:
+            'Are you sure you want to retry deleting `{count}` backups whose deletion failed? Backups whose configuration is in maintenance are skipped. Deletion runs in the background and may take a while to finish.',
+        },
       },
       toast: {
         duplicated: '{resource} duplicated.',
         failedBackupDeletionStarted: 'Deleting {count} failed backups in the background.',
+        failedDeletionRetryStarted: 'Retrying {count} failed backup deletions in the background.',
         requestBlockedByExtension: 'This request was blocked by an extension.',
       },
       settingScope: {
