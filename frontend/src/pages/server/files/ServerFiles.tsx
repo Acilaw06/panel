@@ -373,8 +373,6 @@ function FileBrowser() {
 
   return (
     <div className='h-fit relative'>
-      <FileDiskUsageBar />
-
       <Card mb='sm'>
         <FileBreadcrumbs path={browsingDirectory} />
       </Card>
@@ -625,6 +623,7 @@ function ServerFilesComponent() {
       </Group>
 
       <IncompleteUploadsBanner />
+      <FileDiskUsageBar />
 
       {view === 'list' ? (
         <FileBrowser />
