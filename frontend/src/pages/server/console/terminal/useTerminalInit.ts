@@ -4,7 +4,7 @@ import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { ITerminalInitOnlyOptions, ITerminalOptions, Terminal as XTerm } from '@xterm/xterm';
 import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
-import { copyToClipboard, handleRawCopyToClipboard } from '@/lib/clipboard/copy.ts';
+import { applyClipboardCopyHandlers, handleRawCopyToClipboard } from '@/lib/clipboard/copy.ts';
 import { getCellHeight, getXtermTheme } from '@/lib/editor/xterm.ts';
 import { eventKeyMatches } from '@/lib/quickActions/shortcuts.ts';
 import type { AddToast } from '@/providers/contexts/toastContext.ts';
@@ -80,6 +80,20 @@ export function useTerminalInit({
     term.open(terminalRef.current);
     fitAddon.fit();
 
+    const terminalElement = terminalRef.current;
+    const onCopy = (e: ClipboardEvent) => {
+      if (!term.hasSelection() || !e.clipboardData) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const text = applyClipboardCopyHandlers(term.getSelection());
+      if (text !== null) e.clipboardData.setData('text/plain', text);
+
+      setTimeout(() => term.clearSelection());
+    };
+    terminalElement.addEventListener('copy', onCopy, { capture: true });
+
     for (const handler of window.extensionContext.extensionRegistry.pages.server.console.xterm.afterOpenHandlers) {
       handler(term, {});
     }
@@ -138,10 +152,10 @@ export function useTerminalInit({
     term.attachCustomKeyEventHandler((e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && eventKeyMatches(e, 'c')) {
         if (term.hasSelection()) {
-          copyToClipboard(term.getSelection())
-            .catch(() => undefined)
-            .finally(() => term.focus());
-          term.clearSelection();
+          if (term.textarea) {
+            term.textarea.value = term.getSelection();
+            term.textarea.select();
+          }
 
           return false;
         }
@@ -155,6 +169,7 @@ export function useTerminalInit({
     });
 
     return () => {
+      terminalElement.removeEventListener('copy', onCopy, { capture: true });
       resizeObserver.disconnect();
       if (fitFrame !== null) cancelAnimationFrame(fitFrame);
       term.dispose();
