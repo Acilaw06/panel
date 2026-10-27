@@ -1872,7 +1872,10 @@
             "deleteFiles": "Ausgewählte Dateien löschen",
             "closeEditorTab": "Aktiven Editor-Tab schließen",
             "nextEditorTab": "Nächster Editor-Tab",
-            "previousEditorTab": "Vorheriger Editor-Tab"
+            "previousEditorTab": "Vorheriger Editor-Tab",
+            "increaseEditorFontSize": "Schriftgröße im Editor vergrößern",
+            "decreaseEditorFontSize": "Schriftgröße im Editor verkleinern",
+            "resetEditorFontSize": "Schriftgröße im Editor zurücksetzen"
           },
           "table": {
             "title": "Tabellen-Navigation",
@@ -1887,7 +1890,10 @@
             "title": "Server Konsole",
             "searchContent": "Konsolenausgabe durchsuchen",
             "previousCommand": "Vorheriger Befehl im Verlauf",
-            "nextCommand": "Nächster Befehl im Verlauf"
+            "nextCommand": "Nächster Befehl im Verlauf",
+            "increaseFontSize": "Schriftgröße der Konsole vergrößern",
+            "decreaseFontSize": "Schriftgröße der Konsole verkleinern",
+            "resetFontSize": "Schriftgröße der Konsole zurücksetzen"
           },
           "serverList": {
             "selectServer": "Halte S und klicke, um Server auszuwählen/abzuwählen"

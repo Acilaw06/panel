@@ -1744,6 +1744,9 @@ const baseTranslations = defineTranslations({
             closeEditorTab: 'Close the active editor tab',
             nextEditorTab: 'Next editor tab',
             previousEditorTab: 'Previous editor tab',
+            increaseEditorFontSize: 'Increase the editor font size',
+            decreaseEditorFontSize: 'Decrease the editor font size',
+            resetEditorFontSize: 'Reset the editor font size',
           },
           table: {
             title: 'Table Navigation',
@@ -1759,6 +1762,9 @@ const baseTranslations = defineTranslations({
             searchContent: 'Search in console output',
             previousCommand: 'Previous command in history',
             nextCommand: 'Next command in history',
+            increaseFontSize: 'Increase the console font size',
+            decreaseFontSize: 'Decrease the console font size',
+            resetFontSize: 'Reset the console font size',
           },
           serverList: {
             selectServer: 'Hold S and click to select/deselect server',

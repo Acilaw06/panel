@@ -38,6 +38,7 @@ import { FileAudioPreview, FileImagePreview } from '@/pages/server/files/editor/
 import FileSqliteQuery from '@/pages/server/files/editor/FileSqliteQuery.tsx';
 import { findFileEditorAction } from '@/pages/server/files/editor/useFileEditorPresentation.ts';
 import useFileEditorQuickActions from '@/pages/server/files/editor/useFileEditorQuickActions.tsx';
+import useEditorFontSizeZoom from '@/pages/server/files/hooks/useEditorFontSizeZoom.ts';
 import useFileCollab from '@/pages/server/files/hooks/useFileCollab.ts';
 import useFileDraft from '@/pages/server/files/hooks/useFileDraft.ts';
 import useFileDraftPersistence from '@/pages/server/files/hooks/useFileDraftPersistence.ts';
@@ -147,6 +148,7 @@ export default function FileTreeEditorPane({
   const instanceId = useId();
   const initialDraftContentRef = useRef(draftContent);
   const pierreEditorRef = useRef<PierreEditorHandle | null>(null);
+  const zoomRef = useEditorFontSizeZoom();
   const saveRef = useRef<() => void>(() => undefined);
   const onMissingRef = useRef(onMissing);
   const collabActiveRef = useRef(false);
@@ -600,7 +602,7 @@ export default function FileTreeEditorPane({
         </Group>
       </div>
 
-      <div data-file-manager-editor-content className='flex min-h-0 w-full min-w-0 flex-1 flex-col'>
+      <div ref={zoomRef} data-file-manager-editor-content className='flex min-h-0 w-full min-w-0 flex-1 flex-col'>
         {collab.active && collab.conflict && (
           <Alert
             color='yellow'
