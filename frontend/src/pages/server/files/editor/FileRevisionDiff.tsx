@@ -133,6 +133,7 @@ function FileRevisionDiffComponent() {
     loading,
     getParent,
     layout: () => diffEditorRef.current?.layout(),
+    minHeightFraction: 0.6,
     deps: [loading, getParent],
   });
 

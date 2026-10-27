@@ -238,6 +238,7 @@ export default function FileTreeWorkspace({
     layout: () => undefined,
     cssVariable: '--file-manager-workspace-height',
     useVisualViewportInset: true,
+    minHeightFraction: 0.6,
     deps: [getParent],
   });
 
