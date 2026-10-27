@@ -5869,7 +5869,6 @@ const baseTranslations = defineTranslations({
             revealInTree: 'Reveal in Tree',
             revealNotFound: 'Could not find {path} in the file tree.',
             unsavedTab: '{name} has unsaved changes',
-            dropToSplit: 'Drop to open in a new editor pane',
             resizeEditorPanes: 'Resize editor panes',
             resizeFileTree: 'Resize file tree',
             selectPane: 'Select editor pane',

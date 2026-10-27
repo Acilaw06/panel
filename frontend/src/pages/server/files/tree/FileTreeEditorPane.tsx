@@ -51,7 +51,6 @@ import FileTreeRevisionComparison, {
 } from '@/pages/server/files/tree/FileTreeRevisionComparison.tsx';
 import {
   FileTreeEditorSelection,
-  FileTreeEditorTabDragData,
   FileTreeTabCloseAction,
   FileTreeTabPosition,
   getFileTreeEditorDraftPath,
@@ -79,7 +78,7 @@ interface FileTreeEditorPaneProps {
   onRestoreContent: (tabId: string) => void;
   onSelectTab: (tabId: string) => void;
   onCloseTab: (tabId: string, action?: FileTreeTabCloseAction) => void;
-  onMoveTab: (drag: FileTreeEditorTabDragData, position: FileTreeTabPosition) => void;
+  onDropOnTabs: (dataTransfer: DataTransfer, position: FileTreeTabPosition) => void;
   onRevealTab: (tabId: string) => void;
   onKeepTabOpen: (tabId: string) => void;
   onClose: () => void;
@@ -104,7 +103,7 @@ export default function FileTreeEditorPane({
   onRestoreContent,
   onSelectTab,
   onCloseTab,
-  onMoveTab,
+  onDropOnTabs,
   onRevealTab,
   onKeepTabOpen,
   onClose,
@@ -490,7 +489,7 @@ export default function FileTreeEditorPane({
       dirtyTabIds={dirtyTabIds}
       onSelect={onSelectTab}
       onClose={onCloseTab}
-      onMove={onMoveTab}
+      onDrop={onDropOnTabs}
       onReveal={onRevealTab}
       onKeepOpen={onKeepTabOpen}
     />
@@ -527,9 +526,9 @@ export default function FileTreeEditorPane({
 
       <div
         data-file-manager-editor-header
-        className='flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-(--mantine-color-default-border) px-3 py-2'
+        className='flex min-h-12 shrink-0 items-center justify-between gap-2 border-b border-(--mantine-color-default-border) px-3 py-2'
       >
-        <Group wrap='nowrap' gap='xs' className='min-w-0 flex-1 basis-32'>
+        <Group wrap='nowrap' gap='xs' className='min-w-0 flex-1'>
           <Title order={3} className='truncate! text-base!'>
             {title}
           </Title>
@@ -731,6 +730,7 @@ export default function FileTreeEditorPane({
                 scrollBeyondLastLine: false,
                 smoothScrolling: false,
                 fixedOverflowWidgets: true,
+                dropIntoEditor: { enabled: false },
               }}
               onChange={(value) => updateContent(value ?? '')}
               onMount={(editor, monaco) => {

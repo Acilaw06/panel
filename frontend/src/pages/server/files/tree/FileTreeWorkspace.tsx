@@ -19,10 +19,8 @@ import FileTreeEditorSplit from '@/pages/server/files/tree/FileTreeEditorSplit.t
 import FileTreeResizeHandle from '@/pages/server/files/tree/FileTreeResizeHandle.tsx';
 import { TreeDirectoryCapabilities, TreeSelectionItem } from '@/pages/server/files/tree/fileTreeData.ts';
 import {
-  FileTreeEditorDragItem,
   FileTreeEditorSelection,
   FileTreeTabCloseAction,
-  FileTreeTabPosition,
   getFileTreeEditorDraftPath,
   getFileTreeEditorDragData,
   getFileTreeEditorTabDragData,
@@ -30,9 +28,10 @@ import {
 } from '@/pages/server/files/tree/fileTreeEditor.ts';
 import {
   closeFileTreeWorkspaceTabs,
-  createFileTreePaneId,
   FileTreeEditorWorkspaceState,
+  FileTreePaneDropTarget,
   normalizeFileTreeWorkspace,
+  placeFileTreeTabs,
   renameFileTreeWorkspace,
   restoreFileTreeWorkspace,
   storeFileTreeWorkspace,
@@ -517,116 +516,24 @@ export default function FileTreeWorkspace({
     [requestOpenTab, resolveEditorSelection],
   );
 
-  const openFilesInSplit = useCallback(
-    (dragItems: FileTreeEditorDragItem[], targetPaneId: string) => {
-      const selections: FileTreeEditorSelection[] = [];
-      for (const { item, capabilities } of dragItems) {
-        resolveEditorSelection(item, capabilities, (selection) => selections.push(selection));
-      }
-      if (selections.length === 0) return;
-
-      setWorkspace((current) => {
-        let tabs = [...current.tabs];
-        let panes = current.panes.map((pane) => ({ ...pane, tabIds: [...pane.tabIds] }));
-        let insertIndex = Math.max(
-          0,
-          panes.findIndex((pane) => pane.id === targetPaneId),
-        );
-        let activePaneId = targetPaneId;
-
-        for (const selection of selections) {
-          const tabId = getFileTreeEditorTabId(selection);
-          const targetPane = panes.find((pane) => pane.id === targetPaneId);
-          if (targetPane?.activeTabId === tabId) continue;
-
-          tabs = tabs.some((tab) => getFileTreeEditorTabId(tab) === tabId)
-            ? tabs.map((tab) => (getFileTreeEditorTabId(tab) === tabId ? selection : tab))
-            : [...tabs, selection];
-
-          const sourcePane = panes.find((pane) => pane.tabIds.includes(tabId));
-          if (sourcePane) {
-            const sourceIndex = sourcePane.tabIds.indexOf(tabId);
-            sourcePane.tabIds = sourcePane.tabIds.filter((candidate) => candidate !== tabId);
-            if (sourcePane.activeTabId === tabId) {
-              sourcePane.activeTabId = sourcePane.tabIds[Math.min(sourceIndex, sourcePane.tabIds.length - 1)] ?? null;
-            }
-          }
-
-          if (targetPane && targetPane.tabIds.length === 0 && selections.length === 1) {
-            targetPane.tabIds = [tabId];
-            targetPane.activeTabId = tabId;
-            activePaneId = targetPane.id;
-          } else {
-            const paneId = createFileTreePaneId();
-            insertIndex += 1;
-            panes.splice(insertIndex, 0, { id: paneId, tabIds: [tabId], activeTabId: tabId, size: 1 });
-            activePaneId = paneId;
-          }
-
-          panes = panes.filter((pane) => pane.tabIds.length > 0 || panes.length === 1);
-        }
-
-        return normalizeFileTreeWorkspace({ tabs, panes, activePaneId });
-      });
-    },
-    [resolveEditorSelection],
-  );
-
-  const moveTabToPane = useCallback(
-    (tabId: string, sourcePaneId: string, targetPaneId: string, position?: FileTreeTabPosition) => {
-      setWorkspace((current) => {
-        const sourcePane = current.panes.find((pane) => pane.id === sourcePaneId);
-        const targetPane = current.panes.find((pane) => pane.id === targetPaneId);
-        if (!sourcePane || !targetPane || !sourcePane.tabIds.includes(tabId)) return current;
-        if (position && (!targetPane.tabIds.includes(position.tabId) || position.tabId === tabId)) return current;
-        const panes = current.panes.map((pane) => ({ ...pane, tabIds: [...pane.tabIds] }));
-        const source = panes.find((pane) => pane.id === sourcePaneId)!;
-        if (source.previewTabId === tabId) source.previewTabId = undefined;
-        const sourceIndex = source.tabIds.indexOf(tabId);
-        source.tabIds = source.tabIds.filter((candidate) => candidate !== tabId);
-        if (sourcePaneId === targetPaneId && position) {
-          source.tabIds.splice(source.tabIds.indexOf(position.tabId) + Number(position.after), 0, tabId);
-          return { ...current, panes };
-        }
-        if (source.activeTabId === tabId) {
-          source.activeTabId = source.tabIds[Math.min(sourceIndex, source.tabIds.length - 1)] ?? null;
-        }
-
-        let activePaneId = targetPaneId;
-        if (sourcePaneId === targetPaneId) {
-          if (source.tabIds.length === 0) return current;
-
-          const newPaneId = createFileTreePaneId();
-          const paneIndex = panes.findIndex((pane) => pane.id === sourcePaneId);
-          panes.splice(paneIndex + 1, 0, { id: newPaneId, tabIds: [tabId], activeTabId: tabId, size: 1 });
-          activePaneId = newPaneId;
-        } else {
-          const target = panes.find((pane) => pane.id === targetPaneId)!;
-          const insertIndex = position
-            ? target.tabIds.indexOf(position.tabId) + Number(position.after)
-            : target.tabIds.length;
-          target.tabIds.splice(insertIndex, 0, tabId);
-          target.activeTabId = tabId;
-        }
-
-        return normalizeFileTreeWorkspace({ tabs: current.tabs, panes, activePaneId });
-      });
-    },
-    [],
-  );
-
   const handleEditorDrop = useCallback(
-    (paneId: string, dataTransfer: DataTransfer) => {
+    (target: FileTreePaneDropTarget, dataTransfer: DataTransfer) => {
       const tabDrag = getFileTreeEditorTabDragData(dataTransfer);
       if (tabDrag) {
-        moveTabToPane(tabDrag.tabId, tabDrag.paneId, paneId);
+        setWorkspace((current) => {
+          const tab = current.tabs.find((entry) => getFileTreeEditorTabId(entry) === tabDrag.tabId);
+          return tab ? placeFileTreeTabs(current, [tab], target) : current;
+        });
         return;
       }
 
-      const fileDrag = getFileTreeEditorDragData(dataTransfer);
-      if (fileDrag.length > 0) openFilesInSplit(fileDrag, paneId);
+      const selections: FileTreeEditorSelection[] = [];
+      for (const { item, capabilities } of getFileTreeEditorDragData(dataTransfer)) {
+        resolveEditorSelection(item, capabilities, (selection) => selections.push(selection));
+      }
+      if (selections.length > 0) setWorkspace((current) => placeFileTreeTabs(current, selections, target));
     },
-    [moveTabToPane, openFilesInSplit],
+    [resolveEditorSelection],
   );
 
   const resizePanes = useCallback((leftPaneId: string, rightPaneId: string, leftSize: number, rightSize: number) => {
@@ -640,6 +547,10 @@ export default function FileTreeWorkspace({
             : pane,
       ),
     }));
+  }, []);
+
+  const equalizePanes = useCallback(() => {
+    setWorkspace((current) => ({ ...current, panes: current.panes.map((pane) => ({ ...pane, size: 1 })) }));
   }, []);
 
   const resizeTree = useCallback(
@@ -729,11 +640,11 @@ export default function FileTreeWorkspace({
             <FileTreeEditorSplit
               panes={workspace.panes}
               activePaneId={workspace.activePaneId}
-              dropLabel={t('pages.server.files.tree.dropToSplit', {})}
               resizeLabel={t('pages.server.files.tree.resizeEditorPanes', {})}
               onActivatePane={(paneId) => setWorkspace((current) => ({ ...current, activePaneId: paneId }))}
               onDrop={handleEditorDrop}
               onResize={resizePanes}
+              onEqualize={equalizePanes}
               renderPane={(pane, paneIndex) => {
                 const paneTabs = pane.tabIds.flatMap((tabId) => {
                   const tab = tabsById.get(tabId);
@@ -756,7 +667,9 @@ export default function FileTreeWorkspace({
                     draftContent={pane.activeTabId ? draftContentsRef.current.get(pane.activeTabId) : undefined}
                     onSelectTab={(tabId) => requestSelectTab(pane.id, tabId)}
                     onCloseTab={(tabId, action) => requestCloseTab(pane.id, tabId, action)}
-                    onMoveTab={(drag, position) => moveTabToPane(drag.tabId, drag.paneId, pane.id, position)}
+                    onDropOnTabs={(dataTransfer, position) =>
+                      handleEditorDrop({ paneId: pane.id, position }, dataTransfer)
+                    }
                     onRevealTab={revealTab}
                     onKeepTabOpen={keepTabOpen}
                     onClose={() => pane.activeTabId && requestCloseTab(pane.id, pane.activeTabId)}
