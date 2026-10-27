@@ -16,6 +16,7 @@ import { removeUserSetting, setUserSettingLocal, useUserSetting } from '@/lib/us
 import FileTree from '@/pages/server/files/tree/FileTree.tsx';
 import FileTreeEditorPane from '@/pages/server/files/tree/FileTreeEditorPane.tsx';
 import FileTreeEditorSplit from '@/pages/server/files/tree/FileTreeEditorSplit.tsx';
+import FileTreeEditorTabContent from '@/pages/server/files/tree/FileTreeEditorTabContent.tsx';
 import FileTreeResizeHandle from '@/pages/server/files/tree/FileTreeResizeHandle.tsx';
 import { TreeDirectoryCapabilities, TreeSelectionItem } from '@/pages/server/files/tree/fileTreeData.ts';
 import {
@@ -62,6 +63,8 @@ export interface FileTreeWorkspaceHandle {
 
 const FILE_TREE_WIDTH_KEY = 'file_manager::tree_width';
 const fileTreeWidthSchema = z.number().positive().nullable();
+// Every kept tab holds a collab session, and wings allows 8 per connection by default.
+const KEPT_TAB_LIMIT = 5;
 
 export default function FileTreeWorkspace({
   ref,
@@ -123,6 +126,20 @@ export default function FileTreeWorkspace({
   );
   const activePane = workspace.panes.find((pane) => pane.id === workspace.activePaneId) ?? workspace.panes[0];
   const activeSelection = (activePane?.activeTabId && tabsById.get(activePane.activeTabId)) || null;
+
+  const [keptTabIds, setKeptTabIds] = useState<string[]>([]);
+  const visibleTabIds = [activePane, ...workspace.panes].flatMap((pane) =>
+    pane?.activeTabId ? [pane.activeTabId] : [],
+  );
+  const nextKeptTabIds = [...new Set([...visibleTabIds, ...keptTabIds])]
+    .filter((tabId) => tabsById.has(tabId))
+    .slice(0, Math.max(KEPT_TAB_LIMIT, new Set(visibleTabIds).size));
+  if (
+    nextKeptTabIds.length !== keptTabIds.length ||
+    nextKeptTabIds.some((tabId, index) => tabId !== keptTabIds[index])
+  ) {
+    setKeptTabIds(nextKeptTabIds);
+  }
 
   useEffect(() => storeFileTreeWorkspace(server.uuid, workspace), [server.uuid, workspace]);
 
@@ -433,6 +450,8 @@ export default function FileTreeWorkspace({
     [server.uuid],
   );
 
+  const closeMissingTab = useCallback((tabId: string) => commitCloseTabs([tabId]), [commitCloseTabs]);
+
   const requestCloseTab = useCallback(
     (paneId: string, tabId: string, action?: FileTreeTabCloseAction) => {
       const current = workspaceStateRef.current;
@@ -650,21 +669,16 @@ export default function FileTreeWorkspace({
                   const tab = tabsById.get(tabId);
                   return tab ? [tab] : [];
                 });
-                const selection = (pane.activeTabId && tabsById.get(pane.activeTabId)) || null;
 
                 return (
                   <FileTreeEditorPane
-                    key={`${pane.id}:${pane.activeTabId ?? 'empty'}`}
+                    key={pane.id}
                     paneId={pane.id}
-                    paneIndex={paneIndex}
-                    paneCount={workspace.panes.length}
                     active={pane.id === workspace.activePaneId}
                     tabs={paneTabs}
                     activeTabId={pane.activeTabId}
                     previewTabId={pane.previewTabId}
                     dirtyTabIds={dirtyTabIds}
-                    selection={selection}
-                    draftContent={pane.activeTabId ? draftContentsRef.current.get(pane.activeTabId) : undefined}
                     onSelectTab={(tabId) => requestSelectTab(pane.id, tabId)}
                     onCloseTab={(tabId, action) => requestCloseTab(pane.id, tabId, action)}
                     onDropOnTabs={(dataTransfer, position) =>
@@ -672,16 +686,34 @@ export default function FileTreeWorkspace({
                     }
                     onRevealTab={revealTab}
                     onKeepTabOpen={keepTabOpen}
-                    onClose={() => pane.activeTabId && requestCloseTab(pane.id, pane.activeTabId)}
-                    onMissing={(tabId) => commitCloseTabs([tabId])}
-                    onDirtyChange={handleDirtyChange}
-                    restoreContent={pane.activeTabId ? renameDraftsRef.current.get(pane.activeTabId) : undefined}
-                    onRestoreContent={handleRenameDraftRestored}
-                    onDraftChange={handleDraftChange}
-                    onCreateFile={(name) =>
-                      pane.activeTabId ? saveNewFile(pane.activeTabId, name) : Promise.resolve()
-                    }
-                  />
+                  >
+                    {paneTabs.map((tab) => {
+                      const tabId = getFileTreeEditorTabId(tab);
+                      if (!keptTabIds.includes(tabId)) return null;
+                      const visible = tabId === pane.activeTabId;
+
+                      return (
+                        <FileTreeEditorTabContent
+                          key={tabId}
+                          tabId={tabId}
+                          paneId={pane.id}
+                          paneIndex={paneIndex}
+                          paneCount={workspace.panes.length}
+                          visible={visible}
+                          active={visible && pane.id === workspace.activePaneId}
+                          selection={tab}
+                          draftContent={draftContentsRef.current.get(tabId)}
+                          restoreContent={renameDraftsRef.current.get(tabId)}
+                          onRestoreContent={handleRenameDraftRestored}
+                          onClose={requestCloseTab}
+                          onMissing={closeMissingTab}
+                          onDirtyChange={handleDirtyChange}
+                          onDraftChange={handleDraftChange}
+                          onCreateFile={saveNewFile}
+                        />
+                      );
+                    })}
+                  </FileTreeEditorPane>
                 );
               }}
             />
