@@ -521,6 +521,27 @@ impl ServerBackup {
         row.try_map(|row| Self::map(None, &row))
     }
 
+    pub async fn by_node_uuid_uuid_or_shared(
+        database: &crate::database::Database,
+        node_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
+        let row = sqlx::query(sqlx::AssertSqlSafe(format!(
+            r#"
+            SELECT {}
+            FROM server_backups
+            WHERE (server_backups.node_uuid = $1 OR server_backups.shared = true) AND server_backups.uuid = $2
+            "#,
+            Self::columns_sql(None)
+        )))
+        .bind(node_uuid)
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        row.try_map(|row| Self::map(None, &row))
+    }
+
     pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
