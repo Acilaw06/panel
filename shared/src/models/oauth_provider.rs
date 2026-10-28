@@ -407,6 +407,22 @@ impl OAuthProvider {
         .await
     }
 
+    pub async fn exists_registrable(
+        database: &crate::database::Database,
+    ) -> Result<bool, sqlx::Error> {
+        sqlx::query_scalar!(
+            r#"
+            SELECT EXISTS (
+                SELECT 1
+                FROM oauth_providers
+                WHERE oauth_providers.enabled = true AND oauth_providers.login_only = false
+            ) AS "exists!"
+            "#
+        )
+        .fetch_one(database.read())
+        .await
+    }
+
     pub async fn all_by_usable(
         database: &crate::database::Database,
     ) -> Result<Vec<Self>, crate::database::DatabaseError> {

@@ -7564,7 +7564,9 @@
             "createSubuser": {
               "title": "Subuser erstellen",
               "toast": {
-                "created": "Subuser erstellt."
+                "created": "Subuser erstellt.",
+                "userMustSignIn": "Kein Konto verwendet diese E-Mail. Die Person muss sich zuerst einmal mit einem Konto mit genau dieser E-Mail im Panel anmelden, danach kannst du sie hinzufügen.",
+                "userMustBeCreatedByAdmin": "Kein Konto verwendet diese E-Mail. Bitte einen Administrator, zuerst ein Konto anzulegen, danach kannst du die Person hinzufügen."
               },
               "form": {
                 "emailPlaceholder": "Gib die E-Mail ein, unter der dieser Subuser gespeichert werden soll.",

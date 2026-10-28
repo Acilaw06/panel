@@ -7691,6 +7691,10 @@ const baseTranslations = defineTranslations({
               title: 'Create Subuser',
               toast: {
                 created: 'Subuser created.',
+                userMustSignIn:
+                  'No account uses this email. They need to sign in to the panel once first, using an account with this exact email, then you can add them.',
+                userMustBeCreatedByAdmin:
+                  'No account uses this email. Ask an administrator to create their account first, then you can add them.',
               },
               form: {
                 emailPlaceholder: 'Enter the email that this subuser should be saved as.',
