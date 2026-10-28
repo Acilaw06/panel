@@ -200,7 +200,7 @@ mod patch {
 
         if !permissions.is_unrestricted_admin() && data.changes_identity(&oauth_provider) {
             return ApiResponse::error(
-                "only administrators can change how an oauth provider identifies users or how they may sign in with it",
+                "only administrators can change how an oauth provider identifies users, how they may sign in with it or who may link accounts to it",
             )
             .with_status(StatusCode::FORBIDDEN)
             .ok();
@@ -242,6 +242,7 @@ mod patch {
                     "login_only": oauth_provider.login_only,
                     "login_bypass_two_factor": oauth_provider.login_bypass_two_factor,
                     "link_viewable": oauth_provider.link_viewable,
+                    "api_linkable": oauth_provider.api_linkable,
                     "user_manageable": oauth_provider.user_manageable,
                     "basic_auth": oauth_provider.basic_auth,
                     "pkce": oauth_provider.pkce,

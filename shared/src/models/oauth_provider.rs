@@ -43,6 +43,7 @@ pub struct OAuthProvider {
     pub login_only: bool,
     pub login_bypass_two_factor: bool,
     pub link_viewable: bool,
+    pub api_linkable: bool,
     pub user_manageable: bool,
     pub basic_auth: bool,
     pub pkce: bool,
@@ -160,6 +161,10 @@ impl BaseModel for OAuthProvider {
                 compact_str::format_compact!("{prefix}link_viewable"),
             ),
             (
+                "oauth_providers.api_linkable",
+                compact_str::format_compact!("{prefix}api_linkable"),
+            ),
+            (
                 "oauth_providers.user_manageable",
                 compact_str::format_compact!("{prefix}user_manageable"),
             ),
@@ -218,6 +223,8 @@ impl BaseModel for OAuthProvider {
             )?,
             link_viewable: row
                 .try_get(compact_str::format_compact!("{prefix}link_viewable").as_str())?,
+            api_linkable: row
+                .try_get(compact_str::format_compact!("{prefix}api_linkable").as_str())?,
             user_manageable: row
                 .try_get(compact_str::format_compact!("{prefix}user_manageable").as_str())?,
             basic_auth: row.try_get(compact_str::format_compact!("{prefix}basic_auth").as_str())?,
@@ -828,6 +835,7 @@ impl IntoAdminApiObject for OAuthProvider {
                 login_only: self.login_only,
                 login_bypass_two_factor: self.login_bypass_two_factor,
                 link_viewable: self.link_viewable,
+                api_linkable: self.api_linkable,
                 user_manageable: self.user_manageable,
                 basic_auth: self.basic_auth,
                 pkce: self.pkce,
@@ -975,6 +983,9 @@ pub struct CreateOAuthProviderOptions {
     #[garde(skip)]
     pub link_viewable: bool,
     #[garde(skip)]
+    #[serde(default)]
+    pub api_linkable: bool,
+    #[garde(skip)]
     pub user_manageable: bool,
     #[garde(skip)]
     pub basic_auth: bool,
@@ -1101,6 +1112,7 @@ impl CreatableModel for OAuthProvider {
             .set("login_only", options.login_only)
             .set("login_bypass_two_factor", options.login_bypass_two_factor)
             .set("link_viewable", options.link_viewable)
+            .set("api_linkable", options.api_linkable)
             .set("user_manageable", options.user_manageable)
             .set("basic_auth", options.basic_auth)
             .set("pkce", options.pkce);
@@ -1149,6 +1161,8 @@ pub struct UpdateOAuthProviderOptions {
     pub login_bypass_two_factor: Option<bool>,
     #[garde(skip)]
     pub link_viewable: Option<bool>,
+    #[garde(skip)]
+    pub api_linkable: Option<bool>,
     #[garde(skip)]
     pub user_manageable: Option<bool>,
     #[garde(skip)]
@@ -1249,8 +1263,8 @@ pub struct UpdateOAuthProviderOptions {
 }
 
 impl UpdateOAuthProviderOptions {
-    /// Whether this changes how the provider identifies users or how they may sign in with it,
-    /// which amounts to taking over every linked account.
+    /// Whether this changes how the provider identifies users, how they may sign in with it or
+    /// who may link accounts to it, which amounts to taking over every linked account.
     pub fn changes_identity(&self, oauth_provider: &OAuthProvider) -> bool {
         fn differs<T: PartialEq>(new: &Option<T>, current: &T) -> bool {
             new.as_ref().is_some_and(|new| new != current)
@@ -1269,6 +1283,7 @@ impl UpdateOAuthProviderOptions {
                 &oauth_provider.login_bypass_two_factor,
             )
             || differs(&self.user_manageable, &oauth_provider.user_manageable)
+            || differs(&self.api_linkable, &oauth_provider.api_linkable)
     }
 }
 
@@ -1346,6 +1361,7 @@ impl UpdatableModel for OAuthProvider {
             .set("login_only", options.login_only)
             .set("login_bypass_two_factor", options.login_bypass_two_factor)
             .set("link_viewable", options.link_viewable)
+            .set("api_linkable", options.api_linkable)
             .set("user_manageable", options.user_manageable)
             .set("basic_auth", options.basic_auth)
             .set("pkce", options.pkce)
@@ -1373,6 +1389,9 @@ impl UpdatableModel for OAuthProvider {
         }
         if let Some(link_viewable) = options.link_viewable {
             self.link_viewable = link_viewable;
+        }
+        if let Some(api_linkable) = options.api_linkable {
+            self.api_linkable = api_linkable;
         }
         if let Some(user_manageable) = options.user_manageable {
             self.user_manageable = user_manageable;
@@ -1522,6 +1541,7 @@ impl DuplicableModel for OAuthProvider {
             .set("login_only", self.login_only)
             .set("login_bypass_two_factor", self.login_bypass_two_factor)
             .set("link_viewable", self.link_viewable)
+            .set("api_linkable", self.api_linkable)
             .set("user_manageable", self.user_manageable)
             .set("basic_auth", self.basic_auth)
             .set("pkce", self.pkce);
@@ -1582,6 +1602,7 @@ pub struct AdminApiOAuthProvider {
     pub login_only: bool,
     pub login_bypass_two_factor: bool,
     pub link_viewable: bool,
+    pub api_linkable: bool,
     pub user_manageable: bool,
     pub basic_auth: bool,
     pub pkce: bool,

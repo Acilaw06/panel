@@ -25,6 +25,7 @@ export const adminOAuthProviderSchema = z.looseObject({
   loginOnly: z.boolean(),
   loginBypassTwoFactor: z.boolean(),
   linkViewable: z.boolean(),
+  apiLinkable: z.boolean().default(false),
   userManageable: z.boolean(),
   basicAuth: z.boolean(),
   pkce: z.boolean().default(false),

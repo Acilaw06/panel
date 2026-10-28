@@ -5072,6 +5072,8 @@
                   "loginBypassTwoFactorDescription": "Allows users logging in with this provider to bypass their panel 2FA.",
                   "linkViewable": "Link Viewable to User",
                   "linkViewableDescription": "Allows the user to see the connection and its identifier in the client UI.",
+                  "apiLinkable": "Linkable with API Keys",
+                  "apiLinkableDescription": "Allows API keys holding the users.oauth-links and users.impersonate permissions to link accounts they could impersonate to this provider, such as for billing integrations. Only enable this for providers whose identifiers you trust the integration to assign.",
                   "userManageable": "Link Manageable by User",
                   "userManageableDescription": "Allows the user to connect and disconnect with this provider."
                 },

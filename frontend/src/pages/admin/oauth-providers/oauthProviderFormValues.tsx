@@ -30,6 +30,7 @@ export const oauthProviderEmptyFormValues: OAuthFormValues = {
   loginOnly: false,
   loginBypassTwoFactor: false,
   linkViewable: true,
+  apiLinkable: false,
   userManageable: true,
   basicAuth: false,
   pkce: false,
@@ -59,6 +60,7 @@ export const oauthProviderToFormValues = (
   loginOnly: provider.loginOnly,
   loginBypassTwoFactor: provider.loginBypassTwoFactor,
   linkViewable: provider.linkViewable,
+  apiLinkable: provider.apiLinkable,
   userManageable: provider.userManageable,
   basicAuth: provider.basicAuth,
   pkce: provider.pkce,
@@ -210,6 +212,12 @@ export function useOAuthProviderFormFields(): {
       name: 'linkViewable',
       label: t('pages.admin.oAuthProviders.tabs.general.page.form.linkViewable', {}),
       description: t('pages.admin.oAuthProviders.tabs.general.page.form.linkViewableDescription', {}),
+    },
+    {
+      type: 'switch',
+      name: 'apiLinkable',
+      label: t('pages.admin.oAuthProviders.tabs.general.page.form.apiLinkable', {}),
+      description: t('pages.admin.oAuthProviders.tabs.general.page.form.apiLinkableDescription', {}),
     },
     {
       type: 'switch',

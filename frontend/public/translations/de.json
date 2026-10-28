@@ -5024,6 +5024,8 @@
                   "loginBypassTwoFactorDescription": "Erlaubt Benutzern, die sich mit diesem Anbieter anmelden, ihre Panel-2FA zu umgehen.",
                   "linkViewable": "Verknüpfung für Benutzer sichtbar",
                   "linkViewableDescription": "Erlaubt dem Benutzer, die Verbindung und deren Identifier in der Client-Oberfläche zu sehen.",
+                  "apiLinkable": "Mit API-Schlüsseln verknüpfbar",
+                  "apiLinkableDescription": "Erlaubt API-Schlüsseln mit den Berechtigungen users.oauth-links und users.impersonate, Konten, die sie impersonieren könnten, mit diesem Anbieter zu verknüpfen, etwa für Abrechnungsintegrationen. Aktiviere dies nur für Anbieter, deren Identifier du die Integration vergeben lässt.",
                   "userManageable": "Verknüpfung vom Benutzer verwaltbar",
                   "userManageableDescription": "Erlaubt dem Benutzer, sich mit diesem Anbieter zu verbinden und die Verbindung zu trennen."
                 },
