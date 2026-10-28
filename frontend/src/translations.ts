@@ -7040,6 +7040,8 @@ const baseTranslations = defineTranslations({
             },
             badge: {
               running: 'Running',
+              waits: 'Waits',
+              background: 'Background',
             },
             tooltip: {
               cannotRun: 'Cannot run a disabled schedule',
@@ -7074,7 +7076,9 @@ const baseTranslations = defineTranslations({
             rootPath: 'Root Path',
             outputInto: 'Output into',
             ignoreFailure: 'Ignore Failure',
-            runInForeground: 'Run in Foreground',
+            waitForCompletion: 'Wait for Completion',
+            waitForCompletionDescription:
+              'The schedule waits for this step to finish before continuing, and a failure counts as a failed step. When off, it runs in the background: the next step starts right away and failures are not reported.',
             sourceDatabaseInstance: 'Only Consider Backups From',
             sourceDatabaseInstanceDescription:
               'Only pick database backups that were taken from this managed database. Leave empty to consider backups from any managed database on this server.',
@@ -7201,7 +7205,8 @@ const baseTranslations = defineTranslations({
             noActionSelected: 'Select an action type to configure',
             noActionDetails: 'Action details not available',
             ignoreFailure: 'Ignore Failure: {value}',
-            foreground: 'Foreground: {value}',
+            waitsForCompletion: 'Waits for this step to finish before continuing',
+            runsInBackground: 'Runs in the background, the next step starts right away and failures are not reported',
             sourceDatabaseInstance: 'Only From Managed Database: {uuid}',
             sourceDatabaseInstanceAny: 'Only From Managed Database: Any',
             backupSelector: {

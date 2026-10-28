@@ -6922,7 +6922,9 @@
           },
           "view": {
             "badge": {
-              "running": "Läuft"
+              "running": "Läuft",
+              "waits": "Wartet",
+              "background": "Hintergrund"
             },
             "tooltip": {
               "cannotRun": "Ein deaktivierter Zeitplan kann nicht ausgeführt werden"
@@ -6964,7 +6966,8 @@
             "rootPath": "Root-Pfad",
             "outputInto": "Ausgabe in",
             "ignoreFailure": "Fehler ignorieren",
-            "runInForeground": "Im Vordergrund ausführen",
+            "waitForCompletion": "Auf Abschluss Warten",
+            "waitForCompletionDescription": "Der Zeitplan wartet, bis dieser Schritt fertig ist, bevor er fortfährt, und ein Fehler zählt als fehlgeschlagener Schritt. Wenn deaktiviert, läuft er im Hintergrund: der nächste Schritt startet sofort und Fehler werden nicht gemeldet.",
             "sourceDatabaseInstance": "Nur Backups berücksichtigen von",
             "sourceDatabaseInstanceDescription": "Es werden nur Datenbank-Backups ausgewählt, die aus dieser verwalteten Datenbank erstellt wurden. Leer lassen, um Backups jeder verwalteten Datenbank dieses Servers zu berücksichtigen.",
             "sourceDatabaseInstanceAny": "Beliebige verwaltete Datenbank"
@@ -7090,7 +7093,8 @@
             "noActionSelected": "Wähle einen Aktionstyp zur Konfiguration aus",
             "noActionDetails": "Aktionsdetails nicht verfügbar",
             "ignoreFailure": "Fehler ignorieren: {value}",
-            "foreground": "Vordergrund: {value}",
+            "waitsForCompletion": "Wartet, bis dieser Schritt fertig ist, bevor es weitergeht",
+            "runsInBackground": "Läuft im Hintergrund, der nächste Schritt startet sofort und Fehler werden nicht gemeldet",
             "sourceDatabaseInstance": "Nur aus verwalteter Datenbank: {uuid}",
             "sourceDatabaseInstanceAny": "Nur aus verwalteter Datenbank: Beliebig",
             "backupSelector": {

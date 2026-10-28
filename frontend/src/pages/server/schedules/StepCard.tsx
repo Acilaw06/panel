@@ -99,6 +99,27 @@ export function StepCardBody({
             <Group gap='xs' wrap='nowrap'>
               <Text fw={600}>{label}</Text>
               {isActive && <Badge>{t('pages.server.schedules.view.badge.running', {})}</Badge>}
+              {'foreground' in step.action && (
+                <Tooltip
+                  label={t(
+                    step.action.foreground
+                      ? 'pages.server.schedules.renderer.waitsForCompletion'
+                      : 'pages.server.schedules.renderer.runsInBackground',
+                    {},
+                  )}
+                  multiline
+                  maw={320}
+                >
+                  <Badge className='w-max! shrink-0 cursor-help' variant='light' color='gray'>
+                    {t(
+                      step.action.foreground
+                        ? 'pages.server.schedules.view.badge.waits'
+                        : 'pages.server.schedules.view.badge.background',
+                      {},
+                    )}
+                  </Badge>
+                </Tooltip>
+              )}
               {step.error && (
                 <Tooltip label={step.error}>
                   <ThemeIcon size='sm' color='red' className='cursor-help'>
